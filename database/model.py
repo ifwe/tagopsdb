@@ -519,6 +519,14 @@ class PackageLocations(Base):
         { 'mysql_engine' : 'InnoDB', 'mysql_charset' : 'utf8', },
     )
 
+    def __init__(self, pkg_type, pkg_name, app_name, path):
+        """ """
+
+        self.pkg_type = pkg_type
+        self.pkg_name = pkg_name
+        self.app_name = app_name
+        self.path = path
+
 
 class Ports(Base):
     __tablename__ = 'ports'
@@ -535,6 +543,16 @@ class Ports(Base):
                              ondelete='cascade'),
         { 'mysql_engine' : 'InnoDB', 'mysql_charset' : 'utf8', },
     )
+
+    def __init__(self, NetworkID=None, portNumber=None, description=None,
+                 speed=None, duplex=None):
+        """ """
+
+        self.NetworkID = NetworkID
+        self.portNumber = portNumber
+        self.description = description
+        self.speed = speed
+        self.duplex = duplex
 
 
 class ProcessorInfo(Base):
