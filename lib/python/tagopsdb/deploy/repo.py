@@ -5,10 +5,16 @@ from tagopsdb.database.model import PackageLocations
 from tagopsdb.exceptions import RepoException
 
 
-def add_app_location(pkg_type, pkg_name, app_name, path):
+def add_app_location(pkg_type, pkg_name, app_name, path, environment):
     """Add the location of a given application"""
 
-    app = PackageLocations(pkg_type, pkg_name, app_name, path)
+    # Ensure the environment parameter is boolean
+    if environment:
+        environment = True
+    else:
+        environment = False
+
+    app = PackageLocations(pkg_type, pkg_name, app_name, path, environment)
     Session.add(app)
 
 

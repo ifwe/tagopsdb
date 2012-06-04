@@ -1,5 +1,5 @@
 from sqlalchemy import *
-from sqlalchemy.dialects.mysql import INTEGER, SMALLINT, TINYINT
+from sqlalchemy.dialects.mysql import INTEGER, SMALLINT, TINYINT, BOOLEAN
 from sqlalchemy.orm import relation
 from sqlalchemy.sql.expression import func
 
@@ -514,18 +514,20 @@ class PackageLocations(Base):
     app_name = Column(u'app_name', VARCHAR(length=255), nullable=False,
                       unique=True)
     path = Column(u'path', VARCHAR(length=255), nullable=False, unique=True)
+    environment = Column(u'environment', BOOLEAN(), nullable=False)
 
     __table_args__ = (
         { 'mysql_engine' : 'InnoDB', 'mysql_charset' : 'utf8', },
     )
 
-    def __init__(self, pkg_type, pkg_name, app_name, path):
+    def __init__(self, pkg_type, pkg_name, app_name, path, environment=False):
         """ """
 
         self.pkg_type = pkg_type
         self.pkg_name = pkg_name
         self.app_name = app_name
         self.path = path
+        self.environment = environment
 
 
 class Ports(Base):
