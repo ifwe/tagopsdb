@@ -130,6 +130,7 @@ class Environments(Base):
                          nullable=False)
     domain = Column(u'domain', VARCHAR(length=32), nullable=False,
                     unique=True)
+    domain = Column(u'prefix', VARCHAR(length=1), nullable=False)
 
     __table_args__ = (
         { 'mysql_engine' : 'InnoDB', 'mysql_charset' : 'utf8', },
