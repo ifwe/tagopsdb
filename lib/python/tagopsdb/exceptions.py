@@ -6,6 +6,13 @@
 """Custom exceptions for TagOpsDB library"""
 
 
+# General exceptions
+class NotImplementedException(Exception):
+    """Exception for an unimplemented method"""
+
+    pass
+
+
 # Repository exceptions
 class RepoException(Exception):
     """Base exception for repository handling, use specific handlers below"""
@@ -27,6 +34,15 @@ class JenkinsException(RepoException):
 
 class TagConfigException(RepoException):
     """Exception for tagconfig repository"""
+
+    pass
+
+
+# Package exceptions
+class PackageException(exception):
+    """Base exception for package handling, use more specific handlers when
+    available
+    """
 
     pass
 

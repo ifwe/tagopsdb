@@ -317,6 +317,22 @@ class Iloms(Base):
     )
 
 
+class JmxAttributes(Base):
+    __tablename__ = 'jmx_attributes'
+
+    groupName = Column(u'groupName', VARCHAR(length=25), default='misc')
+    obj = Column(u'obj', VARCHAR(length=100))
+    attr = Column(u'attr', VARCHAR(length=300))
+    appID = Column(u'appID', SMALLINT(display_width=2))
+    GangliaID = Column(u'GangliaID', INTEGER())
+
+    __table_args__ = (
+        ForeignKeyConstraint(['AppID', ['app_definitions.AppID']),
+        ForeignKeyConstraint(['GangliaID'], ['ganglia.GangliaID']),
+        { 'mysql_engine' : 'InnoDB', 'mysql_charset' : 'latin1', },
+    )
+
+
 class Modules(Base):
     __tablename__ = 'modules'
 
