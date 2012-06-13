@@ -39,7 +39,7 @@ class TagConfigException(RepoException):
 
 
 # Package exceptions
-class PackageException(exception):
+class PackageException(Exception):
     """Base exception for package handling, use more specific handlers when
     available
     """
