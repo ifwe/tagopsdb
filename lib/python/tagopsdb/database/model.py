@@ -6,6 +6,17 @@ from sqlalchemy.sql.expression import func
 from meta import Base
 
 
+jmx_attributes = Table(u'jmx_attributes', Base.metadata,
+    Column(u'groupName', VARCHAR(length=25), default='misc'),
+    Column(u'obj', VARCHAR(length=100)),
+    Column(u'attr', VARCHAR(length=300)),
+    Column(u'appID', SMALLINT(display_width=2)),
+    Column(u'GangliaID', INTEGER()),
+    ForeignKeyConstraint(['appID'], ['app_definitions.AppID']),
+    ForeignKeyConstraint(['GangliaID'], ['ganglia.GangliaID']),
+    mysql_engine='InnoDB', mysql_charset='latin1',
+    )
+
 ns_service_binds = Table(u'ns_service_binds', Base.metadata,
     Column(u'serviceID', INTEGER(unsigned=True), nullable=False),
     Column(u'monitorID', INTEGER(unsigned=True), nullable=False),
@@ -314,22 +325,6 @@ class Iloms(Base):
         ForeignKeyConstraint(['PortID'], ['ports.PortID'],
                              ondelete='cascade'),
         { 'mysql_engine' : 'InnoDB', 'mysql_charset' : 'utf8', },
-    )
-
-
-class JmxAttributes(Base):
-    __tablename__ = 'jmx_attributes'
-
-    groupName = Column(u'groupName', VARCHAR(length=25), default='misc')
-    obj = Column(u'obj', VARCHAR(length=100))
-    attr = Column(u'attr', VARCHAR(length=300))
-    appID = Column(u'appID', SMALLINT(display_width=2))
-    GangliaID = Column(u'GangliaID', INTEGER())
-
-    __table_args__ = (
-        ForeignKeyConstraint(['AppID', ['app_definitions.AppID']),
-        ForeignKeyConstraint(['GangliaID'], ['ganglia.GangliaID']),
-        { 'mysql_engine' : 'InnoDB', 'mysql_charset' : 'latin1', },
     )
 
 
