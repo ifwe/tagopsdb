@@ -41,4 +41,6 @@ def list_app_location(app_name):
 def list_all_app_locations():
     """ """
 
-    return (Session.query(PackageLocations).all())
+    return (Session.query(PackageLocations)
+                   .order_by(PackageLocations.app_name)
+                   .all())
