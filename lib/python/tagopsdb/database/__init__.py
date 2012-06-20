@@ -1,10 +1,13 @@
 import ConfigParser
 
+import sqlalchemy.exc
+
 from sqlalchemy import create_engine
 
 from tagopsdb.database.meta import Base, Session
 #from tagopsdb.database.test_db import Testing
 from tagopsdb.database.model import *
+from tagopsdb.exceptions import PermissionsException
 
 
 def create_dbconn_string(db_user, db_password):
@@ -26,6 +29,12 @@ def init_session(db_user, db_password):
     debug = True
     dbconn_string = create_dbconn_string(db_user, db_password)
     engine = create_engine(dbconn_string, echo=debug)
+
+    # Ensure connection information is valid
+    try:
+        engine.execute('select 1').scalar()
+    except sqlalchemy.exc.DBAPIError, e:
+        raise PermissionsException(e)
 
     Session.configure(bind=engine)
 
