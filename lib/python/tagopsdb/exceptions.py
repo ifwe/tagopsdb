@@ -7,6 +7,12 @@
 
 
 # General exceptions
+class PermissionsException(Exception):
+    """Exception for handling permission errors"""
+
+    pass
+
+
 class NotImplementedException(Exception):
     """Exception for an unimplemented method"""
 
