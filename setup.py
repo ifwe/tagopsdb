@@ -5,13 +5,13 @@ from setuptools import setup, find_packages
 
 setup_args = dict(
     name = 'TagOpsDB Library',
-    version = '1.0.0',
+    version = '0.1.0',
     description = 'Python library to interface with TagOps database',
     # long_description = long_description,
     author = 'Kenneth Lareau',
     author_email = 'klareau@tagged.com',
     license = 'MIT',
-    packages = ['tagopsdb'],
+    packages = ['tagopsdb', 'tagopsdb.database', 'tagopsdb.deploy'],
     package_dir = {'' : 'lib/python'},
     scripts = [],
 )
