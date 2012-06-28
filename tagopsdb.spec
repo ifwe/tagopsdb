@@ -20,7 +20,7 @@
 %global tagbase TAGpython26
 %endif
 
-%{!?python_sitelib: %global python_sitelib %(%{__python} -c "from %distutils.sysconfig import get_python_lib; print get_python_lib(1)")}
+%{!?python_sitelib: %global python_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")}
 
 Name:           %{tagbase}-tagopsdb
 Version:        %(%{__python} setup.py --version)
@@ -35,8 +35,8 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildArch:      noarch
 BuildRequires:  %{pybase}-devel
 
-#Requires: %{tagbase}-oursql
-#Requires: %{tagbase}-sqlalchemy
+Requires: %{tagbase}-oursql
+Requires: %{tagbase}-sqlalchemy
 
 
 %description
@@ -45,6 +45,7 @@ in the TagOpsDB library.
 
 
 %build
+echo "Sitelib is %{python_sitelib}"
 %{__python} setup.py build
 
 
