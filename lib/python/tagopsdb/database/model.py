@@ -588,6 +588,7 @@ class ServiceEvent(Base):
                        nullable=False)
     HostID = Column(u'HostID', INTEGER())
     NetworkID = Column(u'NetworkID', INTEGER())
+    user = Column(u'user', VARCHAR(length=20))
     serviceStatus = Column(u'serviceStatus', VARCHAR(length=100))
     powerStatus = Column(u'powerStatus', VARCHAR(length=10))
     vendorTicket = Column(u'vendorTicket', VARCHAR(length=20))
