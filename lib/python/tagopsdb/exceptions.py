@@ -54,3 +54,9 @@ class PackageException(Exception):
 
 
 # Deployment exceptions
+class DeployException(Exception):
+    """Base exception for deployment handling, use more specific handlers
+    when available
+    """
+
+    pass
