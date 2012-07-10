@@ -504,7 +504,7 @@ class Packages(Base):
     revision = Column(u'revision', VARCHAR(length=63), nullable=False)
     created = Column(u'created', DATETIME(), nullable=False)
     creator = Column(u'creator', VARCHAR(length=255), nullable=False)
-    builder = Column(u'builder', Enum(u'hudson', u'developer', u'tagconfig'),
+    builder = Column(u'builder', Enum(u'developer', u'jenkins', u'tagconfig'),
                      nullable=False, default='developer',
                      server_default='developer')
 
