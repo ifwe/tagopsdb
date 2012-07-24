@@ -98,7 +98,7 @@ class Cname(Base):
     __tablename__ = 'cname'
 
     CnameID = Column(u'CnameID', INTEGER(), primary_key=True, nullable=False)
-    name = Column(u'name', VARCHAR(length=40), unique=True)
+    name = Column(u'name', VARCHAR(length=40))
     IpID = Column(u'IpID', INTEGER())
     ZoneID = Column(u'ZoneID', INTEGER())
 
@@ -107,6 +107,7 @@ class Cname(Base):
                              ondelete='cascade'),
         ForeignKeyConstraint(['ZoneID'], ['zones.ZoneID'], onupdate='cascade',
                              ondelete='cascade'),
+        UniqueConstraint('name', 'ZoneID', name='name_ZoneID'),
         { 'mysql_engine' : 'InnoDB', 'mysql_charset' : 'utf8', },
     )
 
