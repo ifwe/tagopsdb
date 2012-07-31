@@ -505,8 +505,8 @@ class Packages(Base):
     revision = Column(u'revision', VARCHAR(length=63), nullable=False)
     created = Column(u'created', DATETIME(), nullable=False)
     creator = Column(u'creator', VARCHAR(length=255), nullable=False)
-    builder = Column(u'builder', Enum(u'developer', u'jenkins', u'tagconfig'),
-                     nullable=False, default='developer',
+    builder = Column(u'builder', Enum(u'developer', u'hudson', u'jenkins',
+                     u'tagconfig'), nullable=False, default='developer',
                      server_default='developer')
 
     __table_args__ = (
@@ -514,6 +514,17 @@ class Packages(Base):
                          name='unique_package'),
         { 'mysql_engine' : 'InnoDB', },
     )
+
+    def __init__(self, pkg_name, version, revision, created, creator,
+                 builder):
+        """ """
+
+        self.pkg_name = pkg_name
+        self.version = version
+        self.revision = revision
+        self.created = created
+        self.creator = creator
+        self.builder = builder
 
 
 class PackageLocations(Base):
