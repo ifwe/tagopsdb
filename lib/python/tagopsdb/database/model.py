@@ -63,6 +63,64 @@ class AppDefinitions(Base):
     )
 
 
+class AppDeployments(Base):
+    __tablename__ = 'app_deployments'
+
+    AppDeploymentID = Column('AppDeploymentID', INTEGER(), primary_key=True,
+                             nullable=False)
+    DeploymentID = Column('DeploymentID', INTEGER(), nullable=False)
+    AppID = Column('AppID', SMALLINT(display_width=2), nullable=False)
+    user = Column('user', VARCHAR(length=32), nullable=False)
+    status = Column('status', Enum('incomplete', 'validated'), nullable=False)
+    environment = Column('environment', VARCHAR(length=15), nullable=False)
+    realized = Column('realized', TIMESTAMP(), nullable=False,
+                      default=func.current_timestamp(),
+                      server_default=func.current_timestamp())
+
+    __table_args__ = (
+        ForeignKeyConstraint(['DeploymentID'], ['deployments.DeploymentID'],
+                             ondelete='cascade'),
+        ForeignKeyConstraint(['AppID'], ['app_definitions.AppID'],
+                             ondelete='cascade'),
+        { 'mysql_engine' : 'InnoDB', 'mysql_charset' : 'utf8', },
+    )
+
+    def __init__(self, DeploymentID, AppID, user, status, environment,
+                 realized):
+        """ """
+
+        self.DeploymentID = DeploymentID
+        self.AppID = AppID
+        self.user = user
+        self.status = status
+        self.environment = environment
+        self.realized = realized
+
+
+class AppPackages(Base):
+    __tablename__ = 'app_packages'
+
+    pkgLocationID = Column('pkgLocationID', INTEGER(), nullable=False)
+    AppID = Column('AppID', SMALLINT(display_width=2), nullable=False)
+
+    __table_args__ = (
+        PrimaryKeyConstraint('pkgLocationID', 'AppID'),
+        ForeignKeyConstraint(['pkgLocationID'],
+                             ['package_locations.pkgLocationID'],
+                             ondelete='cascade'),
+        ForeignKeyConstraint(['AppID'], ['app_definitions.AppID'],
+                             ondelete='cascade'),
+        { 'mysql_engine' : 'InnoDB', 'mysql_charset' : 'utf8', },
+    )
+
+
+    def __init__(self, pkgLocationID, AppID):
+        """ """
+
+        self.pkgLocationID = pkgLocationID
+        self.AppID = AppID
+
+
 class Asset(Base):
     __tablename__ = 'asset'
 
@@ -117,21 +175,17 @@ class Deployments(Base):
 
     DeploymentID = Column(u'DeploymentID', INTEGER(), primary_key=True,
                           nullable=False)
-    declarer = Column(u'declarer', VARCHAR(length=255), nullable=False)
-    declared = Column(u'declared', DATETIME(), nullable=False)
-    PackageID = Column(u'PackageID', INTEGER(), nullable=False, index=True)
-    AppID = Column(u'AppID', SMALLINT(display_width=2), nullable=False,
-                   index=True)
-    declaration = Column(u'declaration', Enum(u'deploy', u'validate',
-                         u'invalidate'), nullable=False)
-    environment = Column(u'environment', VARCHAR(length=15), nullable=False)
+    PackageID = Column(u'PackageID', INTEGER(), nullable=False)
+    user = Column(u'user', VARCHAR(length=32), nullable=False)
+    dep_type = Column(u'dep_type', Enum('deploy', 'rollback'), nullable=False)
+    declared = Column(u'declared', TIMESTAMP(), nullable=False,
+                      default=func.current_timestamp(),
+                      server_default=func.current_timestamp())
 
     __table_args__ = (
-        ForeignKeyConstraint(['PackageID'], ['packages.PackageID']),
-        ForeignKeyConstraint(['AppID'], ['app_definitions.AppID']),
-        UniqueConstraint('PackageID', 'AppID', 'declaration', 'environment',
-                         name='unique_deployments'),
-        { 'mysql_engine' : 'InnoDB', },
+        ForeignKeyConstraint(['PackageID'], ['packages.PackageID'],
+                             ondelete='cascade'),
+        { 'mysql_engine' : 'InnoDB', 'mysql_charset' : 'utf8', },
     )
 
 
@@ -212,22 +266,37 @@ class Hosts(Base):
         { 'mysql_engine' : 'InnoDB', 'mysql_charset' : 'utf8', },
     )
 
+
 class HostDeployments(Base):
     __tablename__ = 'host_deployments'
 
-    HostDeploymentID = Column(u'HostDeploymentID', INTEGER(),
-                              primary_key=True, nullable=False)
-    realizer = Column(u'realizer', VARCHAR(length=255), nullable=False)
-    realized = Column(u'realized', DATETIME(), nullable=False)
-    DeploymentID = Column(u'DeploymentID', INTEGER(), nullable=False,
-                          index=True)
-    HostID = Column(u'HostID', INTEGER(), nullable=False, index=True)
+    HostDeploymentID = Column('HostDeploymentID', INTEGER(), primary_key=True,
+                              nullable=False)
+    DeploymentID = Column('DeploymentID', INTEGER(), nullable=False)
+    HostID = Column('HostID', INTEGER(), nullable=False)
+    user = Column('user', VARCHAR(length=32), nullable=False)
+    status = Column('status', Enum('incomplete', 'ok', 'failed'),
+                    nullable=False)
+    realized = Column('realized', TIMESTAMP(), nullable=False,
+                      default=func.current_timestamp(),
+                      server_default=func.current_timestamp())
 
     __table_args__ = (
-        ForeignKeyConstraint(['DeploymentID'], ['deployments.DeploymentID']),
-        ForeignKeyConstraint(['HostID'], ['hosts.HostID']),
-        { 'mysql_engine' : 'InnoDB', },
+        ForeignKeyConstraint(['DeploymentID'], ['deployments.DeploymentID'],
+                             ondelete='cascade'),
+        ForeignKeyConstraint(['HostID'], ['hosts.HostID'],
+                             ondelete='cascade'),
+        { 'mysql_engine' : 'InnoDB', 'mysql_charset' : 'utf8', },
     )
+
+    def __init__(self, DeploymentID, HostID, user, status, realized):
+        """ """
+
+        self.DeploymentID = DeploymentID
+        self.HostID = HostID
+        self.user = user
+        self.status = status
+        self.realized = realized
 
 
 class HostInterfaces(Base):
@@ -285,21 +354,6 @@ class HostSpecs(Base):
     diskSize = Column(u'diskSize', VARCHAR(length=6), nullable=False)
     vendor = Column(u'vendor', VARCHAR(length=20))
     expansions = Column(u'expansions', TEXT())
-
-    __table_args__ = (
-        { 'mysql_engine' : 'InnoDB', },
-    )
-
-
-class HudsonLocations(Base):
-    __tablename__ = 'hudsonLocations'
-
-    hudLocID = Column(u'hudLocID', INTEGER(), primary_key=True,
-                      nullable=False)
-    name = Column(u'name', VARCHAR(length=255), nullable=False, unique=True)
-    path = Column(u'path', VARCHAR(length=255), nullable=False, unique=True)
-    pkg_name = Column(u'pkg_name', VARCHAR(length=255), nullable=False,
-                      unique=True)
 
     __table_args__ = (
         { 'mysql_engine' : 'InnoDB', },
@@ -503,7 +557,9 @@ class Packages(Base):
     pkg_name = Column(u'pkg_name', VARCHAR(length=255), nullable=False)
     version = Column(u'version', VARCHAR(length=63), nullable=False)
     revision = Column(u'revision', VARCHAR(length=63), nullable=False)
-    created = Column(u'created', DATETIME(), nullable=False)
+    created = Column(u'created', TIMESTAMP(), nullable=False,
+                     default=func.current_timestamp(),
+                     server_default=func.current_timestamp())
     creator = Column(u'creator', VARCHAR(length=255), nullable=False)
     builder = Column(u'builder', Enum(u'developer', u'hudson', u'jenkins',
                      u'tagconfig'), nullable=False, default='developer',

@@ -3,7 +3,9 @@ import sqlalchemy.orm.exc
 from sqlalchemy.sql.expression import func
 
 from tagopsdb.database.meta import Session
-from tagopsdb.database.model import AppDefinitions, Deployments, Packages
+from tagopsdb.database.model import AppDefinitions, AppDeployments, \
+                                    Deployments, HostDeployments, Hosts, \
+                                    Packages
 from tagopsdb.exceptions import DeployException, NotImplementedException
 
 
@@ -52,17 +54,33 @@ def invalidate_deployment(deployment, declarer):
     Session.add(dep)
 
 
-def list_deployment_info(project, version, revision=None):
+def list_deployment_info(project, version, revision):
     """ """
 
-    return (Session.query(Deployments, Packages, AppDefinitions.appType)
-                   .join(Packages)
-                   .join(AppDefinitions)
-                   .filter(Packages.pkg_name==project)
-                   .filter(Packages.version==version)
-                   .order_by(AppDefinitions.appType,
-                             Deployments.declared.desc())
-                   .all())
+    app_dep = (Session.query(Deployments, AppDeployments,
+                             AppDefinitions.appType)
+                      .join(Packages)
+                      .join(AppDeployments)
+                      .join(AppDefinitions)
+                      .filter(Packages.pkg_name==project)
+                      .filter(Packages.version==version)
+                      .filter(Packages.revision==revision)
+                      .order_by(AppDefinitions.appType,
+                                AppDeployments.realized.asc())
+                      .all())
+
+    host_dep = (Session.query(Deployments, HostDeployments, Hosts.hostname)
+                       .join(Packages)
+                       .join(HostDeployments)
+                       .join(Hosts)
+                       .filter(Packages.pkg_name==project)
+                       .filter(Packages.version==version)
+                       .filter(Packages.revision==revision)
+                       .order_by(Hosts.hostname,
+                                 HostDeployments.realized.asc())
+                       .all())
+
+    return (app_dep, host_dep)
 
 
 def validate_deployment(deployment, declarer):

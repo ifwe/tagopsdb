@@ -24,11 +24,10 @@ def create_dbconn_string(db_user, db_password):
                                            db_host, db_name)
 
 
-def init_session(db_user, db_password):
+def init_session(db_user, db_password, echo=False):
     #engine = create_engine('sqlite:///testing.db', echo=True)
-    debug = True
     dbconn_string = create_dbconn_string(db_user, db_password)
-    engine = create_engine(dbconn_string, echo=debug)
+    engine = create_engine(dbconn_string, echo=echo)
 
     # Ensure connection information is valid
     try:
