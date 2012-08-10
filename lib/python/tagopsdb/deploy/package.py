@@ -12,13 +12,9 @@ from tagopsdb.exceptions import NotImplementedException, PackageException
 def add_package(app_name, version, revision, user):
     """Add the requested version for the package of a given application"""
 
-    try:
-        app = repo.list_app_location(app_name)
-    except sqlalchemy.orm.exc.NoResultFound:
-        raise PackageException('Application "%s" not found in '
-                               'PackageLocations table' % app_name)
+    app = find_app_by_name(app_name)
 
-    if find_package(app.pkg_name, version, revision, app.pkg_type):
+    if find_package(app.pkg_name, version, revision):
         raise PackageException('Current version of application "%s" '
                                'already found in Packages table' % app_name)
 
@@ -33,20 +29,35 @@ def delete_package(app_name, version, revision):
     raise NotImplementedException('This command is not implemented yet')
 
 
-def find_package(pkg_name, version, revision, pkg_type):
-    """Check for a specific package version"""
+def find_app_by_name(app_name):
+    """ """
 
     try:
-        (Session.query(Packages)
-                .filter_by(pkg_name=pkg_name)
-                .filter_by(version=version)
-                .filter_by(revision=revision)
-                .filter_by(builder=pkg_type)
-                .one())
+        app = repo.list_app_location(app_name)
     except sqlalchemy.orm.exc.NoResultFound:
-        return False
-    else:
-        return True
+        raise PackageException('Application "%s" not found in '
+                               'PackageLocations table' % app_name)
+
+    return app
+
+
+def find_package(app_name, version, revision):
+    """Check for a specific package version"""
+
+    # NOTE: Originally this method also used 'pkg_type' (the 'builder'
+    # column in the 'packages' table) to filter; this may need to be
+    # re-added at some point.
+
+    app = find_app_by_name(app_name)
+
+    try:
+        return (Session.query(Packages)
+                       .filter_by(pkg_name=app.pkg_name)
+                       .filter_by(version=version)
+                       .filter_by(revision=revision)
+                       .one())
+    except sqlalchemy.orm.exc.NoResultFound:
+        return None
 
 
 def list_packages():

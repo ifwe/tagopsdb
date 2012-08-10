@@ -1,7 +1,8 @@
 import sqlalchemy.orm.exc
 
 from tagopsdb.database.meta import Session
-from tagopsdb.database.model import PackageLocations
+from tagopsdb.database.model import AppDefinitions, AppPackages, \
+                                    PackageLocations
 from tagopsdb.exceptions import RepoException
 
 
@@ -18,6 +19,25 @@ def add_app_location(pkg_type, pkg_name, app_name, path, build_host,
     app = PackageLocations(pkg_type, pkg_name, app_name, path, build_host,
                            environment)
     Session.add(app)
+    Session.flush()   # Needed to get pkgLocationID generated
+
+    return app.pkgLocationID
+
+
+def add_app_packages_mapping(pkg_location_id, app_types):
+    """Add the mappings of the app types for each package"""
+
+    for app_type in app_types:
+        try:
+            app_def = (Session.query(AppDefinitions)
+                              .filter_by(appType=app_type)
+                              .one())
+        except sqlalchemy.orm.exc.NoResultFound:
+            raise RepoException('App type "%s" is not found in the '
+                                'AppDefinitions table' % app_type)
+
+        app_pkg = AppPackages(pkg_location_id, app_def.AppID)
+        Session.add(app_pkg)
 
 
 def delete_app_location(app_name):
@@ -30,6 +50,22 @@ def delete_app_location(app_name):
                             'PackageLocations table' % app_name)
 
     Session.delete(app)
+
+
+def find_app_packages_mapping(app_name):
+    """Find all app types related to a given package"""
+
+    app_defs = (Session.query(AppDefinitions)
+                       .join(AppPackages)
+                       .join(PackageLocations)
+                       .filter(PackageLocations.app_name==app_name)
+                       .all())
+
+    if not app_defs:
+        raise RepoException('No entries found for pkgLocationID "%s" '
+                            'in AppPackages table' % pkg_location_id)
+
+    return app_defs
 
 
 def list_app_location(app_name):
