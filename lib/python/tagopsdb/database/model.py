@@ -71,7 +71,8 @@ class AppDeployments(Base):
     DeploymentID = Column('DeploymentID', INTEGER(), nullable=False)
     AppID = Column('AppID', SMALLINT(display_width=2), nullable=False)
     user = Column('user', VARCHAR(length=32), nullable=False)
-    status = Column('status', Enum('incomplete', 'validated'), nullable=False)
+    status = Column('status', Enum('incomplete', 'invalidated', 'validated'),
+                    nullable=False)
     environment = Column('environment', VARCHAR(length=15), nullable=False)
     realized = Column('realized', TIMESTAMP(), nullable=False,
                       default=func.current_timestamp(),
@@ -187,6 +188,14 @@ class Deployments(Base):
                              ondelete='cascade'),
         { 'mysql_engine' : 'InnoDB', 'mysql_charset' : 'utf8', },
     )
+
+    def __init__(self, PackageID, user, dep_type, declared):
+        """ """
+
+        self.PackageID = PackageID
+        self.user = user
+        self.dep_type = dep_type
+        self.declared = declared
 
 
 class Environments(Base):
