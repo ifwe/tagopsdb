@@ -137,6 +137,20 @@ def find_host_deployment_by_depid(dep_id, dep_host):
         return None
 
 
+def find_host_deployments_by_pkgid(pkg_id, dep_hosts):
+    """Find host deployments for a given package ID and a given
+       set of hosts
+    """
+
+    return (Session.query(HostDeployments, Hosts.hostname, Hosts.AppID,
+                          Deployments.dep_type)
+                   .join(Hosts)
+                   .join(Deployments)
+                   .join(Packages)
+                   .filter(Hosts.hostname.in_(dep_hosts))
+                   .all())
+
+
 def find_host_deployments_not_ok(pkg_id, app_id, environment):
     """Find host deployments that are not in 'ok' state for a given
        package ID, app ID and environment (may return none)
