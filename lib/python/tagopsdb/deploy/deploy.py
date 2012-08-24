@@ -147,6 +147,22 @@ def find_host_deployments_by_pkgid(pkg_id, dep_hosts):
                    .join(Hosts)
                    .join(Deployments)
                    .join(Packages)
+                   .filter(Packages.PackageID==pkg_id)
+                   .filter(Hosts.hostname.in_(dep_hosts))
+                   .all())
+
+
+def find_host_deployments_by_project(project, dep_hosts):
+    """Find host deployments for a given project and a given
+       set of hosts
+    """
+
+    return (Session.query(HostDeployments, Hosts.hostname, Hosts.AppID,
+                          Packages.version)
+                   .join(Hosts)
+                   .join(Deployments)
+                   .join(Packages)
+                   .filter(Packages.pkg_name==project)
                    .filter(Hosts.hostname.in_(dep_hosts))
                    .all())
 
@@ -182,6 +198,48 @@ def find_hosts_for_app(app_id, environment):
     return hosts
 
 
+def find_latest_deployed_version(project, apptier=False):
+    """Find the most recent deployed version for a given project;
+       search for full tier or host only deployment specifically
+    """
+
+    if apptier:
+        version = (Session.query(Packages.version)
+                          .join(Deployments)
+                          .join(AppDeployments)
+                          .filter(Packages.pkg_name==project)
+                          .filter(AppDeployments.status=='validated')
+                          .order_by(Packages.version.desc())
+                          .first())
+    else:
+        version = (Session.query(Packages.version)
+                          .join(Deployments)
+                          .join(HostDeployments)
+                          .filter(Packages.pkg_name==project)
+                          .order_by(Packages.version.desc())
+                          .first())
+
+    if version is not None:
+        version = version[0]
+
+    return version
+
+
+def find_latest_validated_deployment(project, app_id):
+    """Find the most recent deployment that was validated for a given
+       project and application type
+    """
+
+    return (Session.query(AppDeployments, Package.PackageID)
+                   .join(Deployments)
+                   .join(Packages)
+                   .filter(Package.pkg_name==project)
+                   .filter(AppDeployments.AppID==app_id)
+                   .filter(AppDeployments.status=='validated')
+                   .order_by(AppDeployments.realized.desc())
+                   .first())
+
+
 def invalidate_deployment(deployment, declarer):
     """ """
 
@@ -201,33 +259,41 @@ def invalidate_deployment(deployment, declarer):
     #Session.add(dep)
 
 
-def list_deployment_info(project, version, revision):
-    """ """
+def list_app_deployment_info(project, version, revision):
+    """Give all deployment information for a given project and version
+       deployed to the application tiers
+    """
 
-    app_dep = (Session.query(Deployments, AppDeployments,
-                             AppDefinitions.appType)
-                      .join(Packages)
-                      .join(AppDeployments)
-                      .join(AppDefinitions)
-                      .filter(Packages.pkg_name==project)
-                      .filter(Packages.version==version)
-                      .filter(Packages.revision==revision)
-                      .order_by(AppDefinitions.appType,
-                                AppDeployments.realized.asc())
-                      .all())
+    print "project: '%s', version: '%s', revision: '%s'" \
+          % (repr(project), repr(version), repr(revision))
+    return (Session.query(Deployments, AppDeployments,
+                          AppDefinitions.appType)
+                   .join(Packages)
+                   .join(AppDeployments)
+                   .join(AppDefinitions)
+                   .filter(Packages.pkg_name==project)
+                   .filter(Packages.version==version)
+                   .filter(Packages.revision==revision)
+                   .order_by(AppDefinitions.appType,
+                             AppDeployments.realized.asc())
+                   .all())
 
-    host_dep = (Session.query(Deployments, HostDeployments, Hosts.hostname)
-                       .join(Packages)
-                       .join(HostDeployments)
-                       .join(Hosts)
-                       .filter(Packages.pkg_name==project)
-                       .filter(Packages.version==version)
-                       .filter(Packages.revision==revision)
-                       .order_by(Hosts.hostname,
-                                 HostDeployments.realized.asc())
-                       .all())
 
-    return (app_dep, host_dep)
+def list_host_deployment_info(project, version, revision):
+    """Give all deployment information for a given project and version
+       deployed to hosts
+    """
+
+    return (Session.query(Deployments, HostDeployments, Hosts.hostname)
+                   .join(Packages)
+                   .join(HostDeployments)
+                   .join(Hosts)
+                   .filter(Packages.pkg_name==project)
+                   .filter(Packages.version==version)
+                   .filter(Packages.revision==revision)
+                   .order_by(Hosts.hostname,
+                             HostDeployments.realized.asc())
+                   .all())
 
 
 def validate_deployment():
