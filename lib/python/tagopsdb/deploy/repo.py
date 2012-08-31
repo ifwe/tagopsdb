@@ -62,8 +62,8 @@ def find_app_packages_mapping(app_name):
                        .all())
 
     if not app_defs:
-        raise RepoException('No entries found for pkgLocationID "%s" '
-                            'in AppPackages table' % pkg_location_id)
+        raise RepoException('No entries found for project "%s" in '
+                            'in AppPackages table' % app_name)
 
     return app_defs
 
