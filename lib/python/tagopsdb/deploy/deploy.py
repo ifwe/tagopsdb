@@ -221,7 +221,7 @@ def find_latest_deployed_version(project, apptier=False):
                           .join(Deployments)
                           .join(AppDeployments)
                           .filter(Packages.pkg_name==project)
-                          .filter(AppDeployments.status=='validated')
+                          .filter(AppDeployments.status!='invalidated')
                           .order_by(Packages.version.desc())
                           .first())
     else:
