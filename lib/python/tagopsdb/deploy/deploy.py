@@ -70,8 +70,10 @@ def find_app_deployment(pkg_id, app_ids, environment):
                    .subquery(name='t_ordered'))
 
     return (Session.query(AppDeployments, AppDefinitions.appType,
-                          Deployments.dep_type)
+                          Deployments.dep_type, Packages)
                    .join(AppDefinitions)
+                   .join(Deployments)
+                   .join(Packages)
                    .join(subq, AppDeployments.AppDeploymentID ==
                                subq.c.AppDeploymentID)
                    .group_by(subq.c.AppID)
