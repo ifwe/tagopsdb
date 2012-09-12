@@ -243,10 +243,10 @@ def find_latest_validated_deployment(project, app_id):
        project and application type
     """
 
-    return (Session.query(AppDeployments, Package.PackageID)
+    return (Session.query(AppDeployments, Packages.PackageID)
                    .join(Deployments)
                    .join(Packages)
-                   .filter(Package.pkg_name==project)
+                   .filter(Packages.pkg_name==project)
                    .filter(AppDeployments.AppID==app_id)
                    .filter(AppDeployments.status=='validated')
                    .order_by(AppDeployments.realized.desc())
