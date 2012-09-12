@@ -292,18 +292,22 @@ def list_app_deployment_info(project, version, revision):
                    .all())
 
 
-def list_host_deployment_info(project, version, revision):
-    """Give all deployment information for a given project and version
+def list_host_deployment_info(project, version = None, revision = None):
+    """Give all deployment information for a given project
        deployed to hosts
     """
 
-    return (Session.query(Deployments, HostDeployments, Hosts.hostname)
+    tmp = (Session.query(Deployments, HostDeployments, Hosts.hostname,
+                        Packages)
                    .join(Packages)
                    .join(HostDeployments)
-                   .join(Hosts)
-                   .filter(Packages.pkg_name==project)
-                   .filter(Packages.version==version)
-                   .filter(Packages.revision==revision)
+                   .join(Hosts))
+    if version is not None:
+        tmp = tmp.filter(Packages.version == version)
+    if revision is not None:
+        tmp = tmp.filter(Packages.revision == revision)
+
+    return (tmp.filter(Packages.pkg_name==project)
                    .order_by(Hosts.hostname,
                              HostDeployments.realized.asc())
                    .all())
