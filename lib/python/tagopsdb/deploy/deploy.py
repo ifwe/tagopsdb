@@ -39,6 +39,19 @@ def add_host_deployment(dep_id, host_id, user, status):
     return host_dep
 
 
+def delete_host_deployment(hostname):
+    """ """
+
+    host_deps = (Session.query(HostDeployments)
+                        .join(Hosts)
+                        .filter(Hosts.hostname==hostname)
+                        .all())
+
+    # allow this to silently do nothing if there are no matching rows
+    for host_dep in host_deps:
+        Session.delete(host_dep)
+
+
 def delete_host_deployments(app_id, environment):
     """ """
 
