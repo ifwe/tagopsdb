@@ -253,9 +253,9 @@ def find_latest_deployed_version(project, apptier=False):
     return version
 
 
-def find_latest_validated_deployment(project, app_id):
+def find_latest_validated_deployment(project, app_id, env):
     """Find the most recent deployment that was validated for a given
-       project and application type
+       project, application type, and environment.
     """
 
     return (Session.query(AppDeployments, Packages.PackageID)
@@ -263,6 +263,7 @@ def find_latest_validated_deployment(project, app_id):
                    .join(Packages)
                    .filter(Packages.pkg_name==project)
                    .filter(AppDeployments.AppID==app_id)
+                   .filter(AppDeployments.environment==env)
                    .filter(AppDeployments.status=='validated')
                    .order_by(AppDeployments.realized.desc())
                    .first())
