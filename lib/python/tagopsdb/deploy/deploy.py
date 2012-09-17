@@ -47,7 +47,7 @@ def delete_host_deployment(hostname):
                         .filter(Hosts.hostname==hostname)
                         .all())
 
-    # allow this to silently do nothing if there are no matching rows
+    # Allow this to silently do nothing if there are no matching rows
     for host_dep in host_deps:
         Session.delete(host_dep)
 
@@ -255,7 +255,7 @@ def find_latest_deployed_version(project, apptier=False):
 
 def find_latest_validated_deployment(project, app_id, env):
     """Find the most recent deployment that was validated for a given
-       project, application type, and environment.
+       project, application type and environment.
     """
 
     return (Session.query(AppDeployments, Packages.PackageID)
@@ -308,25 +308,27 @@ def list_app_deployment_info(project, version, revision):
                    .all())
 
 
-def list_host_deployment_info(project, version = None, revision = None):
+def list_host_deployment_info(project, version=None, revision=None):
     """Give all deployment information for a given project
        deployed to hosts
     """
 
-    tmp = (Session.query(Deployments, HostDeployments, Hosts.hostname,
-                        Packages)
-                   .join(Packages)
-                   .join(HostDeployments)
-                   .join(Hosts))
-    if version is not None:
-        tmp = tmp.filter(Packages.version == version)
-    if revision is not None:
-        tmp = tmp.filter(Packages.revision == revision)
+    dep_info = (Session.query(Deployments, HostDeployments, Hosts.hostname,
+                              Packages)
+                       .join(Packages)
+                       .join(HostDeployments)
+                       .join(Hosts))
 
-    return (tmp.filter(Packages.pkg_name==project)
-                   .order_by(Hosts.hostname,
-                             HostDeployments.realized.asc())
-                   .all())
+    if version is not None:
+        dep_info = dep_info.filter(Packages.version==version)
+
+    if revision is not None:
+        dep_info = dep_info.filter(Packages.revision==revision)
+
+    return (dep_info.filter(Packages.pkg_name==project)
+                    .order_by(Hosts.hostname,
+                              HostDeployments.realized.asc())
+                    .all())
 
 
 def validate_deployment():
