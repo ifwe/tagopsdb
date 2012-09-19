@@ -338,8 +338,6 @@ class HostIps(Base):
                          index=True)
     SubnetID = Column(u'SubnetID', INTEGER(), nullable=False, unique=True,
                       index=True)
-    virtualIP = Column(u'virtualIP', VARCHAR(length=20))
-    nsVIP = Column(u'nsVIP', VARCHAR(length=30))
     ARecord = Column(u'ARecord', VARCHAR(length=200))
     comments = Column(u'comments', VARCHAR(length=200))
 
