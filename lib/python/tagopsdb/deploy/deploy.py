@@ -13,7 +13,13 @@ def add_deployment(pkg_id, user, dep_type):
     """Add deployment for a given package ID"""
 
     dep = Deployments(pkg_id, user, dep_type, func.current_timestamp())
+
+    # Commit to DB immediately
+    Session.begin_nested()
     Session.add(dep)
+    Session.commit()
+
+    # Following line may not longer be needed?
     Session.flush()   # Needed to get DeploymentID generated
 
     return dep
@@ -24,7 +30,11 @@ def add_app_deployment(dep_id, app_id, user, status, environment):
 
     app_dep = AppDeployments(dep_id, app_id, user, status, environment,
                              func.current_timestamp())
+
+    # Commit to DB immediately
+    Session.begin_nested()
     Session.add(app_dep)
+    Session.commit()
 
     return app_dep
 
@@ -34,7 +44,11 @@ def add_host_deployment(dep_id, host_id, user, status):
 
     host_dep = HostDeployments(dep_id, host_id, user, status,
                                func.current_timestamp())
+
+    # Commit to DB immediately
+    Session.begin_nested()
     Session.add(host_dep)
+    Session.commit()
 
     return host_dep
 
@@ -49,7 +63,10 @@ def delete_host_deployment(hostname):
 
     # Allow this to silently do nothing if there are no matching rows
     for host_dep in host_deps:
+        # Commit to DB immediately
+        Session.begin_nested()
         Session.delete(host_dep)
+        Session.commit()
 
 
 def delete_host_deployments(app_id, environment):
@@ -62,7 +79,10 @@ def delete_host_deployments(app_id, environment):
                         .all())
 
     for host_dep in host_deps:
+        # Commit to DB immediately
+        Session.begin_nested()
         Session.delete(host_dep)
+        Session.commit()
 
 
 def find_app_deployment(pkg_id, app_ids, environment):
