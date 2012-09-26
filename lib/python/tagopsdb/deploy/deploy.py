@@ -246,9 +246,10 @@ def find_hosts_for_app(app_id, environment):
     return hosts
 
 
-def find_latest_deployed_version(project, apptier=False):
-    """Find the most recent deployed version for a given project;
-       search for full tier or host only deployment specifically
+def find_latest_deployed_version(project, env, apptier=False):
+    """Find the most recent deployed version for a given project
+       in a given environment; search for full tier or host only
+       deployment specifically
     """
 
     if apptier:
@@ -256,6 +257,7 @@ def find_latest_deployed_version(project, apptier=False):
                           .join(Deployments)
                           .join(AppDeployments)
                           .filter(Packages.pkg_name==project)
+                          .filter(AppDeployments.environment==env)
                           .filter(AppDeployments.status!='invalidated')
                           .order_by(Packages.version.desc())
                           .first())
