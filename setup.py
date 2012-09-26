@@ -5,7 +5,7 @@ from setuptools import setup, find_packages
 
 setup_args = dict(
     name = 'TagOpsDB Library',
-    version = '0.3.2',
+    version = '0.3.3',
     description = 'Python library to interface with TagOps database',
     # long_description = long_description,
     author = 'Kenneth Lareau',
