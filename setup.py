@@ -3,9 +3,12 @@ from setuptools import setup, find_packages
 # Let's add this later
 # long_description = open('README.txt').read()
 
+# Get version of project
+execfile('version.py')
+
 setup_args = dict(
     name = 'TagOpsDB Library',
-    version = '0.3.3',
+    version = __version__,
     description = 'Python library to interface with TagOps database',
     # long_description = long_description,
     author = 'Kenneth Lareau',
