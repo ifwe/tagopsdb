@@ -296,10 +296,8 @@ def list_app_deployment_info(project, version, revision):
        deployed to the application tiers
     """
 
-    print "project: '%s', version: '%s', revision: '%s'" \
-          % (repr(project), repr(version), repr(revision))
     return (Session.query(Deployments, AppDeployments,
-                          AppDefinitions.appType)
+                          AppDefinitions.appType, Packages)
                    .join(Packages)
                    .join(AppDeployments)
                    .join(AppDefinitions)
