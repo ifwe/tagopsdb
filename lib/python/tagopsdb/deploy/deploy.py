@@ -291,25 +291,6 @@ def find_latest_validated_deployment(project, app_id, env):
                    .first())
 
 
-def invalidate_deployment(deployment, declarer):
-    """ """
-
-    pass
-
-    #if find_deployment(deployment.PackageID, deployment.AppID, 'invalidate',
-    #                   deployment.environment):
-    #    raise DeployException('Given deployment already invalidated '
-    #                          'in database')
-
-    #dep = Deployments(declarer = declarer,
-    #                  declared = func.current_timestamp(),
-    #                  PackageID = deployment.PackageID,
-    #                  AppID = deployment.AppID,
-    #                  declaration = 'invalidate',
-    #                  environment = deployment.environment)
-    #Session.add(dep)
-
-
 def list_app_deployment_info(project, version, revision):
     """Give all deployment information for a given project and version
        deployed to the application tiers
@@ -351,22 +332,3 @@ def list_host_deployment_info(project, version=None, revision=None):
                     .order_by(Hosts.hostname,
                               HostDeployments.realized.asc())
                     .all())
-
-
-def validate_deployment():
-    """ """
-
-    pass
-
-    #if find_deployment(deployment.PackageID, deployment.AppID, 'validate',
-    #                   deployment.environment):
-    #    raise DeployException('Given deployment already validated '
-    #                          'in database')
-
-    #dep = Deployments(declarer = declarer,
-    #                  declared = func.current_timestamp(),
-    #                  PackageID = deployment.PackageID,
-    #                  AppID = deployment.AppID,
-    #                  declaration = 'validate',
-    #                  environment = deployment.environment)
-    #Session.add(dep)
