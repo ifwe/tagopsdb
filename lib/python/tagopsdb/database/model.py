@@ -41,12 +41,7 @@ class AppDefinitions(Base):
     distribution = Column(u'distribution', Enum(u'co54', u'rh53', u'co60',
                           u'co62'), default='co54', server_default='co54')
     appType = Column(u'appType', VARCHAR(length=100), nullable=False)
-    warName = Column(u'warName', VARCHAR(length=100))
-    jarName = Column(u'jarName', VARCHAR(length=100))
-    contextPath = Column(u'contextPath', VARCHAR(length=100))
     hostBase = Column(u'hostBase', VARCHAR(length=100))
-    svnRevision = Column(u'svnRevision', VARCHAR(length=100))
-    hudsonRevision = Column(u'hudsonRevision', VARCHAR(length=100))
     puppetClass = Column(u'puppetClass', VARCHAR(length=100), nullable=False,
                          default='baseclass', server_default='baseclass')
     specID = Column(u'specID', INTEGER(), nullable=False)
