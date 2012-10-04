@@ -248,31 +248,40 @@ def find_hosts_for_app(app_id, environment):
 
 def find_latest_deployed_version(project, env, apptier=False):
     """Find the most recent deployed version for a given project
-       in a given environment; search for full tier or host only
-       deployment specifically
+       in a given environment for all related app types; search
+       for full tier or host only deployment specifically
     """
 
     if apptier:
-        version = (Session.query(Packages.version)
-                          .join(Deployments)
-                          .join(AppDeployments)
-                          .filter(Packages.pkg_name==project)
-                          .filter(AppDeployments.environment==env)
-                          .filter(AppDeployments.status!='invalidated')
-                          .order_by(Packages.version.desc())
-                          .first())
+        subq = (Session.query(Packages.pkg_name,
+                              Packages.version,
+                              Packages.revision,
+                              AppDefinitions.appType,
+                              AppDeployments.environment)
+                       .join(Deployments)
+                       .join(AppDeployments)
+                       .join(AppDefinitions)
+                       .filter(Packages.pkg_name==project)
+                       .filter(AppDeployments.environment==env)
+                       .filter(AppDeployments.status!='invalidated')
+                       .order_by(AppDeployments.realized.desc())
+                       .subquery(name='t_ordered'))
+
+        versions = (Session.query(subq.c.appType,
+                                  subq.c.version,
+                                  subq.c.revision)
+                           .group_by(subq.c.appType, subq.c.environment)
+                           .all())
     else:
-        version = (Session.query(Packages.version)
-                          .join(Deployments)
-                          .join(HostDeployments)
-                          .filter(Packages.pkg_name==project)
-                          .order_by(Packages.version.desc())
-                          .first())
+        versions = (Session.query(Hosts.hostname, Packages.version,
+                                  Packages.revision)
+                           .join(HostDeployments)
+                           .join(Deployments)
+                           .join(Packages)
+                           .filter(Packages.pkg_name==project)
+                           .all())
 
-    if version is not None:
-        version = version[0]
-
-    return version
+    return versions
 
 
 def find_latest_validated_deployment(project, app_id, env):
