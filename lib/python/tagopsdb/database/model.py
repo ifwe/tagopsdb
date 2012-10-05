@@ -213,28 +213,8 @@ class Ganglia(Base):
     GangliaID = Column(u'GangliaID', INTEGER(), primary_key=True,
                        nullable=False)
     cluster_name = Column(u'cluster_name', VARCHAR(length=50))
-    production_ip = Column(u'production_ip', VARCHAR(length=15),
-                           default='10.15.50.57',
-                           server_default='10.15.50.57')
-    production_ip2 = Column(u'production_ip2', VARCHAR(length=15),
-                            default='10.15.50.54',
-                            server_default='10.15.50.54')
-    production_port = Column(u'production_port', INTEGER(display_width=5),
-                             default=8649, server_default='8649')
-    staging_ip = Column(u'staging_ip', VARCHAR(length=15),
-                        default='10.99.20.54', server_default='10.99.20.54')
-    staging_ip2 = Column(u'staging_ip2', VARCHAR(length=15),
-                        default='10.99.20.30', server_default='10.99.20.30')
-    staging_port = Column(u'staging_port', INTEGER(display_width=5),
-                          default=8649, server_default='8649')
-    development_ip = Column(u'development_ip', VARCHAR(length=15),
-                            default='239.2.30.70',
-                            server_default='239.2.30.70')
-    development_ip = Column(u'development_ip2', VARCHAR(length=15),
-                            default='239.2.30.70',
-                            server_default='239.2.30.70')
-    development_port = Column(u'development_port', INTEGER(display_width=5),
-                              default=8649, server_default='8649')
+    port = Column(u'port', INTEGER(display_width=5), nullable=False,
+                  default='8649', server_default='8649')
 
     __table_args__ = (
         { 'mysql_engine' : 'InnoDB', 'mysql_charset' : 'utf8', },
