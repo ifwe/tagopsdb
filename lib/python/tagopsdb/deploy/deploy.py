@@ -246,6 +246,52 @@ def find_hosts_for_app(app_id, environment):
     return hosts
 
 
+def find_deployed_version(project, env, version=None, revision=None,
+                          apptier=False):
+    """Find a given deployed version for a given project in a given
+       environment for all related app types; search for full tier
+       or host only deployment specifically
+    """
+
+    if apptier:
+        subq = (Session.query(Packages.pkg_name,
+                              Packages.version,
+                              Packages.revision,
+                              AppDefinitions.appType,
+                              AppDeployments.environment)
+                       .join(Deployments)
+                       .join(AppDeployments)
+                       .join(AppDefinitions)
+                       .filter(Packages.pkg_name==project)
+                       .filter(AppDeployments.environment==env)
+                       .filter(AppDeployments.status!='invalidated'))
+
+        if version is not None:
+            subq = subq.filter(Packages.version==version)
+
+        if revision is not None:
+            subq = subq.filter(Packages.revision==revision)
+
+        subq = (subq.order_by(AppDeployments.realized.desc())
+                    .subquery(name='t_ordered'))
+
+        versions = (Session.query(subq.c.appType,
+                                  subq.c.version,
+                                  subq.c.revision)
+                           .group_by(subq.c.appType, subq.c.environment)
+                           .all())
+    else:
+        versions = (Session.query(Hosts.hostname, Packages.version,
+                                  Packages.revision)
+                           .join(HostDeployments)
+                           .join(Deployments)
+                           .join(Packages)
+                           .filter(Packages.pkg_name==project)
+                           .all())
+
+    return versions
+
+
 def find_latest_deployed_version(project, env, apptier=False):
     """Find the most recent deployed version for a given project
        in a given environment for all related app types; search
@@ -300,22 +346,21 @@ def find_latest_validated_deployment(project, app_id, env):
                    .first())
 
 
-def list_app_deployment_info(project, version, revision):
+def list_app_deployment_info(project, app_type, version, revision):
     """Give all deployment information for a given project and version
-       deployed to the application tiers
+       deployed to a given application tier
     """
 
-    return (Session.query(Deployments, AppDeployments,
-                          AppDefinitions.appType, Packages)
+    return (Session.query(Deployments, AppDeployments, Packages)
                    .join(Packages)
                    .join(AppDeployments)
                    .join(AppDefinitions)
                    .filter(Packages.pkg_name==project)
                    .filter(Packages.version==version)
                    .filter(Packages.revision==revision)
-                   .order_by(AppDefinitions.appType,
-                             AppDeployments.realized.asc())
-                   .all())
+                   .filter(AppDefinitions.appType==app_type)
+                   .order_by(AppDeployments.realized.desc())
+                   .first())
 
 
 def list_host_deployment_info(project, version=None, revision=None):
