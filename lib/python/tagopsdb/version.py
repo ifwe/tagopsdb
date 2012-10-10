@@ -1,2 +1,2 @@
 # Update this file for version changes
-__version__ = '0.3.5'
+__version__ = '0.3.6'
