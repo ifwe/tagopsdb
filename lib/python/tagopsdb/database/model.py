@@ -557,7 +557,7 @@ class Packages(Base):
     )
 
     def __init__(self, pkg_name, version, revision, created, creator,
-                 builder):
+                 builder, project_type):
         """ """
 
         self.pkg_name = pkg_name
@@ -566,6 +566,7 @@ class Packages(Base):
         self.created = created
         self.creator = creator
         self.builder = builder
+        self.project_type = project_type
 
 
 class PackageLocations(Base):
@@ -589,10 +590,11 @@ class PackageLocations(Base):
         { 'mysql_engine' : 'InnoDB', 'mysql_charset' : 'utf8', },
     )
 
-    def __init__(self, pkg_type, pkg_name, app_name, path, build_host,
-                 environment=False):
+    def __init__(self, project_type, pkg_type, pkg_name, app_name, path,
+                 build_host, environment=False):
         """ """
 
+        self.project_type = project_type
         self.pkg_type = pkg_type
         self.pkg_name = pkg_name
         self.app_name = app_name
