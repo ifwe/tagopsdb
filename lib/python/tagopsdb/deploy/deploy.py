@@ -287,6 +287,7 @@ def find_deployed_version(project, env, version=None, revision=None,
                            .join(Deployments)
                            .join(Packages)
                            .filter(Packages.pkg_name==project)
+                           .filter(Hosts.environment==env)
                            .all())
 
     return versions
@@ -325,6 +326,7 @@ def find_latest_deployed_version(project, env, apptier=False):
                            .join(Deployments)
                            .join(Packages)
                            .filter(Packages.pkg_name==project)
+                           .filter(Hosts.environment==env)
                            .all())
 
     return versions
@@ -346,9 +348,9 @@ def find_latest_validated_deployment(project, app_id, env):
                    .first())
 
 
-def list_app_deployment_info(project, app_type, version, revision):
+def list_app_deployment_info(project, env, app_type, version, revision):
     """Give all deployment information for a given project and version
-       deployed to a given application tier
+       deployed to a given application tier and environment
     """
 
     return (Session.query(Deployments, AppDeployments, Packages)
@@ -359,13 +361,14 @@ def list_app_deployment_info(project, app_type, version, revision):
                    .filter(Packages.version==version)
                    .filter(Packages.revision==revision)
                    .filter(AppDefinitions.appType==app_type)
+                   .filter(AppDeployments.environment==env)
                    .order_by(AppDeployments.realized.desc())
                    .first())
 
 
-def list_host_deployment_info(project, version=None, revision=None):
+def list_host_deployment_info(project, env, version=None, revision=None):
     """Give all deployment information for a given project
-       deployed to hosts
+       deployed to hosts in given environment
     """
 
     dep_info = (Session.query(Deployments, HostDeployments, Hosts.hostname,
@@ -381,6 +384,7 @@ def list_host_deployment_info(project, version=None, revision=None):
         dep_info = dep_info.filter(Packages.revision==revision)
 
     return (dep_info.filter(Packages.pkg_name==project)
+                    .filter(Hosts.environment==env)
                     .order_by(Hosts.hostname,
                               HostDeployments.realized.asc())
                     .all())
