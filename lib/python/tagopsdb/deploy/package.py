@@ -19,7 +19,7 @@ def add_package(app_name, version, revision, user):
                                'already found in Packages table' % app_name)
 
     pkg = Packages(app.pkg_name, version, revision, func.current_timestamp(),
-                   user, app.pkg_type)
+                   user, app.pkg_type, app.project_type)
     Session.add(pkg)
 
 
@@ -30,7 +30,7 @@ def delete_package(app_name, version, revision):
 
 
 def find_app_by_name(app_name):
-    """ """
+    """Return information for a given application"""
 
     try:
         app = repo.list_app_location(app_name)
@@ -61,7 +61,7 @@ def find_package(app_name, version, revision):
 
 
 def list_packages():
-    """ """
+    """Return all available packages in the repository"""
 
     return (Session.query(Packages)
                    .order_by(Packages.pkg_name, Packages.version,
