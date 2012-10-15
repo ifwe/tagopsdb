@@ -17,6 +17,7 @@ jmx_attributes = Table(u'jmx_attributes', Base.metadata,
     mysql_engine='InnoDB', mysql_charset='latin1',
     )
 
+
 ns_service_binds = Table(u'ns_service_binds', Base.metadata,
     Column(u'serviceID', INTEGER(unsigned=True), nullable=False),
     Column(u'monitorID', INTEGER(unsigned=True), nullable=False),
@@ -58,6 +59,34 @@ class AppDefinitions(Base):
     )
 
 
+    def __init__(self, Production_VlanID, Development_VlanID, Staging_VlanID,
+                 distribution, appType, hostBase, puppetClass, specID,
+                 GangliaID, description):
+        """ """
+
+        self.Production_VlanID = Production_VlanID
+        self.Development_VlanID = Development_VlanID
+        self.Staging_VlanID = Staging_VlanID
+        self.distribution = distribution
+        self.appType = appType
+        self.hostBase = hostBase
+        self.puppetClass = puppetClass
+        self.specID = specID
+        self.GangliaID = GangliaID
+        self.description = description
+
+
+    def __repr__(self):
+        """ """
+
+        return '<AppDefinitions("%s", "%s", "%s", "%s", "%s", "%s", "%s", ' \
+               '"%s", "%s", "%s")>' \
+               % (self.Production_VlanID, self.Development_VlanID,
+                  self.Staging_VlanID, self.distribution, self.appType,
+                  self.hostBase, self.puppetClass, self.specID,
+                  self.GangliaID, self.description)
+
+
 class AppDeployments(Base):
     __tablename__ = 'app_deployments'
 
@@ -81,6 +110,7 @@ class AppDeployments(Base):
         { 'mysql_engine' : 'InnoDB', 'mysql_charset' : 'utf8', },
     )
 
+
     def __init__(self, DeploymentID, AppID, user, status, environment,
                  realized):
         """ """
@@ -91,6 +121,14 @@ class AppDeployments(Base):
         self.status = status
         self.environment = environment
         self.realized = realized
+
+
+    def __repr__(self):
+        """ """
+
+        return '<AppDeployments("%s", "%s", "%s", "%s", "%s", "%s")>' \
+               % (self.DeploymentID, self.AppID, self.user, self.status,
+                  self.environment, self.realized)
 
 
 class AppPackages(Base):
@@ -115,6 +153,12 @@ class AppPackages(Base):
 
         self.pkgLocationID = pkgLocationID
         self.AppID = AppID
+
+
+    def __repr__(self):
+        """ """
+
+        return '<AppPackages("%s", "%s")>' % (self.pkgLocationID, self.AppID)
 
 
 class Asset(Base):
@@ -184,6 +228,7 @@ class Deployments(Base):
         { 'mysql_engine' : 'InnoDB', 'mysql_charset' : 'utf8', },
     )
 
+
     def __init__(self, PackageID, user, dep_type, declared):
         """ """
 
@@ -191,6 +236,13 @@ class Deployments(Base):
         self.user = user
         self.dep_type = dep_type
         self.declared = declared
+
+
+    def __repr__(self):
+        """ """
+
+        return '<Deployments("%s", "%s", "%s", "%s")>' \
+               % (self.PackageID, self.user, self.dep_type, self.declared)
 
 
 class Environments(Base):
@@ -251,6 +303,41 @@ class Hosts(Base):
     )
 
 
+    def __init__(self, SpecID, state, hostname, arch, kernelVersion,
+                 distribution, timezone, AppID, cageLocation, cabLocation,
+                 rackLocation, consolePort, powerPort, powerCircuit,
+                 environment):
+        """ """
+
+        self.SpecID = SpecID
+        self.state = state
+        self.hostname = hostname
+        self.arch = arch
+        self.kernelVersion = kernelVersion
+        self.distribution = distribution
+        self.timezone = timezone
+        self.AppID = AppID
+        self.cageLocation = cageLocation
+        self.cabLocation = cabLocation
+        self.rackLocation = rackLocation
+        self.consolePort = consolePort
+        self.powerPort = powerPort
+        self.powerCircuit = powerCircuit
+        self.environment = environment
+
+
+    def __repr__(self):
+        """ """
+
+        print '<Hosts("%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", ' \
+              '"%s", "%s", "%s", "%s", "%s", "%s", "%s")>' \
+              % (self.SpecID, self.state, self.hostname, self.arch,
+                 self.kernelVersion, self.distribution, self.timezone,
+                 self.AppID, self.cageLocation, self.cabLocation,
+                 self.rackLocation, self.consolePort, self.powerPort,
+                 self.powerCircuit, self.environment)
+
+
 class HostDeployments(Base):
     __tablename__ = 'host_deployments'
 
@@ -273,6 +360,7 @@ class HostDeployments(Base):
         { 'mysql_engine' : 'InnoDB', 'mysql_charset' : 'utf8', },
     )
 
+
     def __init__(self, DeploymentID, HostID, user, status, realized):
         """ """
 
@@ -281,6 +369,14 @@ class HostDeployments(Base):
         self.user = user
         self.status = status
         self.realized = realized
+
+
+    def __repr__(self):
+        """ """
+
+        return '<HostDeployments("%s", "%s", "%s", "%s", "%s")>' \
+               % (self.DeploymentID, self.HostID, self.user, self.status,
+                  self.realized)
 
 
 class HostInterfaces(Base):
@@ -556,6 +652,7 @@ class Packages(Base):
         { 'mysql_engine' : 'InnoDB', },
     )
 
+
     def __init__(self, pkg_name, version, revision, created, creator,
                  builder, project_type):
         """ """
@@ -567,6 +664,14 @@ class Packages(Base):
         self.creator = creator
         self.builder = builder
         self.project_type = project_type
+
+
+    def __repr__(self):
+        """ """
+
+        return '<Packages("%s", "%s", "%s", "%s", "%s", "%s", "%s")>' \
+               % (self.pkg_name, self.version, self.revision, self.created,
+                  self.creator, self.builder, self.project_type)
 
 
 class PackageLocations(Base):
@@ -590,6 +695,7 @@ class PackageLocations(Base):
         { 'mysql_engine' : 'InnoDB', 'mysql_charset' : 'utf8', },
     )
 
+
     def __init__(self, project_type, pkg_type, pkg_name, app_name, path,
                  build_host, environment=False):
         """ """
@@ -601,6 +707,15 @@ class PackageLocations(Base):
         self.path = path
         self.build_host = build_host
         self.environment = environment
+
+
+    def __repr__(self):
+        """ """
+
+        return '<PackageLocations("%s", "%s", "%s", "%s", "%s", "%s", ' \
+               '"%s")>' % (self.project_type, self.pkg_type, self.pkg_name,
+                           self.app_name, self.path, self.build_host,
+                           self.environment)
 
 
 class Ports(Base):
