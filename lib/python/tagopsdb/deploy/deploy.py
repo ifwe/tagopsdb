@@ -142,9 +142,10 @@ def find_apptype_by_appid(app_id):
     """Find the app type for a given ID"""
 
     try:
-        return (Session.query(AppDefinitions.appType)
-                       .filter_by(AppID=app_id)
-                       .one())
+        app_def = (Session.query(AppDefinitions)
+                          .filter_by(AppID=app_id)
+                          .one())
+        return app_def.appType
     except sqlalchemy.orm.exc.NoResultFound:
         raise DeployException('No app type with AppID "%s" was found '
                               'in the app_definitions table' % app_id)
