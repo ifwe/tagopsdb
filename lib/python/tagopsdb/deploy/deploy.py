@@ -294,8 +294,8 @@ def find_deployed_version(project, env, version=None, revision=None,
                            .group_by(subq.c.appType, subq.c.environment)
                            .all())
     else:
-        versions = (Session.query(Hosts.hostname, Packages.version,
-                                  Packages.revision)
+        versions = (Session.query(Hosts.hostname, Hosts.AppID,
+                                  Packages.version, Packages.revision)
                            .join(HostDeployments)
                            .join(Deployments)
                            .join(Packages)
@@ -333,8 +333,8 @@ def find_latest_deployed_version(project, env, apptier=False):
                            .group_by(subq.c.appType, subq.c.environment)
                            .all())
     else:
-        versions = (Session.query(Hosts.hostname, Packages.version,
-                                  Packages.revision)
+        versions = (Session.query(Hosts.hostname, Hosts.AppID,
+                                  Packages.version, Packages.revision)
                            .join(HostDeployments)
                            .join(Deployments)
                            .join(Packages)
