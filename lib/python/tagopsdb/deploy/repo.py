@@ -25,7 +25,7 @@ def add_app_location(project_type, pkg_type, pkg_name, app_name, path,
 
 
 def add_app_packages_mapping(pkg_location_id, app_types):
-    """Add the mappings of the app types for each package"""
+    """Add the mappings of the app types for a given package"""
 
     for app_type in app_types:
         try:
@@ -52,6 +52,36 @@ def delete_app_location(app_name):
     Session.delete(app)
 
 
+def delete_app_packages_mapping(pkg_location_id, app_types):
+    """Delete the mappings of the app types for a given package"""
+
+    for app_type in app_types:
+        try:
+            app_def = (Session.query(AppDefinitions)
+                              .filter_by(appType=app_type)
+                              .one())
+        except sqlalchemy.orm.exc.NoResultFound:
+            raise RepoException('App type "%s" is not found in the '
+                                'AppDefinitions table' % app_type)
+
+        app_pkg = find_app_package(pkg_location_id, app_def.AppID)
+        Session.delete(app_pkg)
+
+
+def find_app_package(pkg_location_id, app_id):
+    """Find a specific mapping in AppPackages"""
+
+    try:
+        return (Session.query(AppPackages)
+                       .filter_by(pkgLocationID=pkg_location_id)
+                       .filter_by(AppID=app_id)
+                       .one())
+    except sqlalchemy.orm.exc.NoResultFound:
+        raise RepoException('No entry with pkgLocationID "%s" and '
+                            'AppID "%s" found in AppPakcages table'
+                            % (pkg_location_id, app_id))
+
+
 def find_app_packages_mapping(app_name):
     """Find all app types related to a given package"""
 
@@ -63,17 +93,33 @@ def find_app_packages_mapping(app_name):
 
     if not app_defs:
         raise RepoException('No entries found for project "%s" in '
-                            'in AppPackages table' % app_name)
+                            'the AppPackages table' % app_name)
 
     return app_defs
+
+
+def find_project_type(project):
+    """Determine the project type for a given project"""
+
+    try:
+        return (Session.query(PackageLocations.project_type)
+                       .filter_by(pkg_name=project)
+                       .one())
+    except sqlalchemy.orm.exc.NoResultFound:
+        raise RepoException('No project "%s" found in the '
+                            'package_locations table' % project)
 
 
 def list_app_location(app_name):
     """ """
 
-    return (Session.query(PackageLocations)
-                   .filter_by(app_name=app_name)
-                   .one())
+    try:
+        return (Session.query(PackageLocations)
+                       .filter_by(app_name=app_name)
+                       .one())
+    except sqlalchemy.orm.exc.NoResultFound:
+        raise RepoException('No entry found for project "%s" in '
+                            'the PackageLocations table' % app_name)
 
 
 def list_all_app_locations():
