@@ -53,11 +53,14 @@ def add_host_deployment(dep_id, host_id, user, status):
     return host_dep
 
 
-def delete_host_deployment(hostname):
+def delete_host_deployment(hostname, project):
     """ """
 
     host_deps = (Session.query(HostDeployments)
                         .join(Hosts)
+                        .join(Deployments)
+                        .join(Packages)
+                        .filter(Packages.pkg_name==project)
                         .filter(Hosts.hostname==hostname)
                         .all())
 
@@ -69,11 +72,14 @@ def delete_host_deployment(hostname):
         Session.commit()
 
 
-def delete_host_deployments(app_id, environment):
+def delete_host_deployments(project, app_id, environment):
     """ """
 
     host_deps = (Session.query(HostDeployments)
                         .join(Hosts)
+                        .join(Deployments)
+                        .join(Packages)
+                        .filter(Packages.pkg_name==project)
                         .filter(Hosts.AppID==app_id)
                         .filter(Hosts.environment==environment)
                         .all())
