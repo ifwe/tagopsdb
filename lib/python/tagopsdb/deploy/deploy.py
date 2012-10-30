@@ -266,7 +266,7 @@ def find_hosts_for_app(app_id, environment):
 
 
 def find_deployed_version(project, env, version=None, revision=None,
-                          apptier=False):
+                          apptypes=None, apptier=False):
     """Find a given deployed version for a given project in a given
        environment for all related app types; search for full tier
        or host only deployment specifically
@@ -285,6 +285,9 @@ def find_deployed_version(project, env, version=None, revision=None,
                        .filter(AppDeployments.environment==env)
                        .filter(AppDeployments.status!='invalidated'))
 
+        if apptypes is not None:
+            subq = subq.filter(AppDefinitions.appType.in_(apptypes))
+
         if version is not None:
             subq = subq.filter(Packages.version==version)
 
@@ -300,55 +303,31 @@ def find_deployed_version(project, env, version=None, revision=None,
                            .group_by(subq.c.appType, subq.c.environment)
                            .all())
     else:
-        versions = (Session.query(Hosts.hostname, Hosts.AppID,
-                                  Packages.version, Packages.revision)
-                           .join(HostDeployments)
-                           .join(Deployments)
-                           .join(Packages)
-                           .filter(Packages.pkg_name==project)
-                           .filter(Hosts.environment==env)
-                           .all())
+        hostsq = (Session.query(Hosts.hostname, Hosts.AppID,
+                                Packages.version, Packages.revision)
+                         .join(AppDefinitions)
+                         .join(HostDeployments)
+                         .join(Deployments)
+                         .join(Packages)
+                         .filter(Packages.pkg_name==project)
+                         .filter(Hosts.environment==env))
+
+        if apptypes is not None:
+            hostsq = hostsq.filter(AppDefinitions.appType.in_(apptypes))
+
+        versions = (hostsq.all())
 
     return versions
 
 
-def find_latest_deployed_version(project, env, apptier=False):
+def find_latest_deployed_version(project, env, apptypes=None, apptier=False):
     """Find the most recent deployed version for a given project
        in a given environment for all related app types; search
        for full tier or host only deployment specifically
     """
 
-    if apptier:
-        subq = (Session.query(Packages.pkg_name,
-                              Packages.version,
-                              Packages.revision,
-                              AppDefinitions.appType,
-                              AppDeployments.environment)
-                       .join(Deployments)
-                       .join(AppDeployments)
-                       .join(AppDefinitions)
-                       .filter(Packages.pkg_name==project)
-                       .filter(AppDeployments.environment==env)
-                       .filter(AppDeployments.status!='invalidated')
-                       .order_by(AppDeployments.realized.desc())
-                       .subquery(name='t_ordered'))
-
-        versions = (Session.query(subq.c.appType,
-                                  subq.c.version,
-                                  subq.c.revision)
-                           .group_by(subq.c.appType, subq.c.environment)
-                           .all())
-    else:
-        versions = (Session.query(Hosts.hostname, Hosts.AppID,
-                                  Packages.version, Packages.revision)
-                           .join(HostDeployments)
-                           .join(Deployments)
-                           .join(Packages)
-                           .filter(Packages.pkg_name==project)
-                           .filter(Hosts.environment==env)
-                           .all())
-
-    return versions
+    return find_deployed_version(project, env, apptypes=apptypes,
+                                 apptier=apptier)
 
 
 def find_latest_validated_deployment(project, app_id, env):
