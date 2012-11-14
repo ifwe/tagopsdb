@@ -44,7 +44,7 @@ def delete_app_location(app_name):
     """Delete the location of a given application"""
 
     try:
-        app = list_app_location(app_name)
+        app = find_app_location(app_name)
     except sqlalchemy.orm.exc.NoResultFound:
         raise RepoException('No application "%s" to remove from '
                             'PackageLocations table' % app_name)
@@ -66,6 +66,18 @@ def delete_app_packages_mapping(pkg_location_id, app_types):
 
         app_pkg = find_app_package(pkg_location_id, app_def.AppID)
         Session.delete(app_pkg)
+
+
+def find_app_location(app_name):
+    """ """
+
+    try:
+        return (Session.query(PackageLocations)
+                       .filter_by(app_name=app_name)
+                       .one())
+    except sqlalchemy.orm.exc.NoResultFound:
+        raise RepoException('No entry found for project "%s" in '
+                            'the PackageLocations table' % app_name)
 
 
 def find_app_package(pkg_location_id, app_id):
@@ -110,21 +122,13 @@ def find_project_type(project):
                             'package_locations table' % project)
 
 
-def list_app_location(app_name):
+def list_app_locations(app_names):
     """ """
 
-    try:
-        return (Session.query(PackageLocations)
-                       .filter_by(app_name=app_name)
-                       .one())
-    except sqlalchemy.orm.exc.NoResultFound:
-        raise RepoException('No entry found for project "%s" in '
-                            'the PackageLocations table' % app_name)
+    list_query = Session.query(PackageLocations)
 
+    if app_names is not None:
+        list_query = \
+            list_query.filter(PackageLocations.app_name.in_(app_names))
 
-def list_all_app_locations():
-    """ """
-
-    return (Session.query(PackageLocations)
-                   .order_by(PackageLocations.app_name)
-                   .all())
+    return list_query.order_by(PackageLocations.app_name).all()
