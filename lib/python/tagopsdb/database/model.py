@@ -131,6 +131,35 @@ class AppDeployments(Base):
                   self.environment, self.realized)
 
 
+class AppHipchatRooms(Base):
+    __tablename__ = 'app_hipchat_rooms'
+
+    AppID = Column(u'AppID', SMALLINT(display_width=2), nullable=False)
+    roomID = Column(u'roomID', INTEGER(), nullable=False)
+
+    __table_args__ = (
+        PrimaryKeyConstraint('AppID', 'roomID'),
+        ForeignKeyConstraint(['AppID'], ['app_definitions.AppID'],
+                             ondelete='cascade'),
+        ForeignKeyConstraint(['roomID'], ['hipchat.roomID'],
+                             ondelete='cascade'),
+        { 'mysql_engine' : 'InnoDB', 'mysql_charset' : 'utf8', },
+    )
+
+
+    def __init__(self, AppID, roomID):
+        """ """
+
+        self.AppID = AppID
+        self.roomID = roomID
+
+
+    def __repr__(self):
+        """ """
+
+        return '<AppHipchatRooms("%s", "%s")>' % (self.AppID, self.roomID)
+
+
 class AppPackages(Base):
     __tablename__ = 'app_packages'
 
@@ -271,6 +300,29 @@ class Ganglia(Base):
     __table_args__ = (
         { 'mysql_engine' : 'InnoDB', 'mysql_charset' : 'utf8', },
     )
+
+
+class Hipchat(Base):
+    __tablename__ = 'hipchat'
+
+    roomID = Column(u'roomID', INTEGER(), primary_key=True, nullable=False)
+    room_name = Column(u'room_name', VARCHAR(length=50), unique=True)
+
+    __table_args__ = (
+        { 'mysql_engine' : 'InnoDB', 'mysql_charset' : 'utf8', },
+    )
+
+
+    def __init__(self, room_name):
+        """ """
+
+        self.room_name = room_name
+
+
+    def __repr__(self):
+        """ """
+
+        return '<Hipchat("%s", "%s")>' % (self.roomID, self.room_name)
 
 
 class Hosts(Base):
