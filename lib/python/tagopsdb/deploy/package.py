@@ -33,7 +33,7 @@ def find_app_by_name(app_name):
     """Return information for a given application"""
 
     try:
-        app = repo.list_app_location(app_name)
+        app = repo.find_app_location(app_name)
     except sqlalchemy.orm.exc.NoResultFound:
         raise PackageException('Application "%s" not found in '
                                'PackageLocations table' % app_name)
