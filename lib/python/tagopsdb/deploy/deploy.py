@@ -2,9 +2,12 @@ import sqlalchemy.orm.exc
 
 from sqlalchemy.sql.expression import func
 
+import tagopsdb.deploy.repo as repo
+
 from tagopsdb.database.meta import Session
 from tagopsdb.database.model import AppDefinitions, AppDeployments, \
-                                    Deployments, HostDeployments, Hosts, \
+                                    AppHipchatRooms, Deployments, \
+                                    Hipchat, HostDeployments, Hosts, \
                                     Packages
 from tagopsdb.exceptions import DeployException, NotImplementedException
 
@@ -263,6 +266,30 @@ def find_hosts_for_app(app_id, environment):
                               % (app_id, environment))
 
     return hosts
+
+
+def find_hipchat_rooms_for_app(project, apptypes=None):
+    """Find the relevent HipChat rooms (if any) for a given project"""
+
+    if apptypes is None:
+        proj_type = repo.find_project_type(project)[0]
+
+        # If project isn't an application, don't add any rooms
+        # (since it will add _all_ rooms the config project is
+        # valid for, which would be wrong)
+        if proj_type != 'application':
+            return []
+
+        app_defs = repo.find_app_packages_mapping(project)
+        apptypes = [ x.appType for x in app_defs ]
+
+    rooms_query = (Session.query(Hipchat.room_name)
+                          .join(AppHipchatRooms)
+                          .join(AppDefinitions)
+                          .filter(AppDefinitions.appType.in_(apptypes))
+                          .all())
+
+    return [ x[0] for x in rooms_query ]
 
 
 def find_deployed_version(project, env, version=None, revision=None,
