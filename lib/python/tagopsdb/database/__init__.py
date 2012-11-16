@@ -1,5 +1,3 @@
-import ConfigParser
-
 import sqlalchemy.exc
 import yaml
 
