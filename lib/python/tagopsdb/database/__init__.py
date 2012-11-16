@@ -1,6 +1,7 @@
 import ConfigParser
 
 import sqlalchemy.exc
+import yaml
 
 from sqlalchemy import create_engine
 
@@ -13,12 +14,14 @@ from tagopsdb.exceptions import PermissionsException
 def create_dbconn_string(db_user, db_password):
     """Create the connection string for the database"""
 
-    with open('/etc/tagops/tagopsdb.conf') as conf_file:
-        config = ConfigParser.SafeConfigParser()
-        config.readfp(conf_file)
+    with open('/etc/tagops/tagopsdb.yml') as conf_file:
+        try:
+            data = yaml.load(conf_file.read())
+        except yaml.parser.ParserError, e:
+            raise RuntimeError('YAML parse error: %s' % e)
 
-    db_host = config.get('db', 'hostname')
-    db_name = config.get('db', 'db_name')
+    db_host = data['db']['hostname']
+    db_name = data['db']['db_name']
 
     return 'mysql+oursql://%s:%s@%s/%s' % (db_user, db_password,
                                            db_host, db_name)
