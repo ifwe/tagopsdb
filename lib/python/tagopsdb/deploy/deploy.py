@@ -160,6 +160,61 @@ def find_apptype_by_appid(app_id):
                               'in the app_definitions table' % app_id)
 
 
+def find_deployed_version(project, env, version=None, revision=None,
+                          apptypes=None, apptier=False):
+    """Find a given deployed version for a given project in a given
+       environment for all related app types; search for full tier
+       or host only deployment specifically
+    """
+
+    if apptier:
+        subq = (Session.query(Packages.pkg_name,
+                              Packages.version,
+                              Packages.revision,
+                              AppDefinitions.appType,
+                              AppDeployments.environment)
+                       .join(Deployments)
+                       .join(AppDeployments)
+                       .join(AppDefinitions)
+                       .filter(Packages.pkg_name==project)
+                       .filter(AppDeployments.environment==env)
+                       .filter(AppDeployments.status!='invalidated'))
+
+        if apptypes is not None:
+            subq = subq.filter(AppDefinitions.appType.in_(apptypes))
+
+        if version is not None:
+            subq = subq.filter(Packages.version==version)
+
+        if revision is not None:
+            subq = subq.filter(Packages.revision==revision)
+
+        subq = (subq.order_by(AppDeployments.realized.desc())
+                    .subquery(name='t_ordered'))
+
+        versions = (Session.query(subq.c.appType,
+                                  subq.c.version,
+                                  subq.c.revision)
+                           .group_by(subq.c.appType, subq.c.environment)
+                           .all())
+    else:
+        hostsq = (Session.query(Hosts.hostname, Hosts.AppID,
+                                Packages.version, Packages.revision)
+                         .join(AppDefinitions)
+                         .join(HostDeployments)
+                         .join(Deployments)
+                         .join(Packages)
+                         .filter(Packages.pkg_name==project)
+                         .filter(Hosts.environment==env))
+
+        if apptypes is not None:
+            hostsq = hostsq.filter(AppDefinitions.appType.in_(apptypes))
+
+        versions = (hostsq.all())
+
+    return versions
+
+
 def find_deployment_by_id(dep_id):
     """Find deployment for a given ID"""
 
@@ -292,61 +347,6 @@ def find_hipchat_rooms_for_app(project, apptypes=None):
     return [ x[0] for x in rooms_query ]
 
 
-def find_deployed_version(project, env, version=None, revision=None,
-                          apptypes=None, apptier=False):
-    """Find a given deployed version for a given project in a given
-       environment for all related app types; search for full tier
-       or host only deployment specifically
-    """
-
-    if apptier:
-        subq = (Session.query(Packages.pkg_name,
-                              Packages.version,
-                              Packages.revision,
-                              AppDefinitions.appType,
-                              AppDeployments.environment)
-                       .join(Deployments)
-                       .join(AppDeployments)
-                       .join(AppDefinitions)
-                       .filter(Packages.pkg_name==project)
-                       .filter(AppDeployments.environment==env)
-                       .filter(AppDeployments.status!='invalidated'))
-
-        if apptypes is not None:
-            subq = subq.filter(AppDefinitions.appType.in_(apptypes))
-
-        if version is not None:
-            subq = subq.filter(Packages.version==version)
-
-        if revision is not None:
-            subq = subq.filter(Packages.revision==revision)
-
-        subq = (subq.order_by(AppDeployments.realized.desc())
-                    .subquery(name='t_ordered'))
-
-        versions = (Session.query(subq.c.appType,
-                                  subq.c.version,
-                                  subq.c.revision)
-                           .group_by(subq.c.appType, subq.c.environment)
-                           .all())
-    else:
-        hostsq = (Session.query(Hosts.hostname, Hosts.AppID,
-                                Packages.version, Packages.revision)
-                         .join(AppDefinitions)
-                         .join(HostDeployments)
-                         .join(Deployments)
-                         .join(Packages)
-                         .filter(Packages.pkg_name==project)
-                         .filter(Hosts.environment==env))
-
-        if apptypes is not None:
-            hostsq = hostsq.filter(AppDefinitions.appType.in_(apptypes))
-
-        versions = (hostsq.all())
-
-    return versions
-
-
 def find_latest_deployed_version(project, env, apptypes=None, apptier=False):
     """Find the most recent deployed version for a given project
        in a given environment for all related app types; search
@@ -371,6 +371,33 @@ def find_latest_validated_deployment(project, app_id, env):
                    .filter(AppDeployments.status=='validated')
                    .order_by(AppDeployments.realized.desc())
                    .first())
+
+
+def find_unvalidated_versions(time_delta, environment):
+    """Find the latest deployments that are not validated in a given
+       environment for a given amount of time
+    """
+
+    subq = (Session.query(Packages.pkg_name, Packages.version,
+                          Packages.revision, AppDefinitions.appType,
+                          AppDeployments.environment, AppDeployments.realized,
+                          AppDeployments.user, AppDeployments.status)
+                   .join(Deployments)
+                   .join(AppDeployments)
+                   .join(AppDefinitions)
+                   .filter(AppDeployments.status!='invalidated')
+                   .filter(AppDeployments.environment==environment)
+                   .order_by(AppDeployments.realized.desc())
+                   .subquery(name='t_ordered'))
+
+    return (Session.query(subq.c.pkg_name, subq.c.version, subq.c.revision,
+                          subq.c.appType, subq.c.environment, subq.c.realized,
+                          subq.c.user, subq.c.status)
+                   .group_by(subq.c.appType, subq.c.environment)
+                   .having(and_(subq.c.status=='incomplete',
+                                func.unix_timestamp(subq.c.realized) <
+                                func.unix_timestamp(func.now()) - time_delta))
+                   .all())
 
 
 def list_app_deployment_info(project, env, app_type, version, revision):
