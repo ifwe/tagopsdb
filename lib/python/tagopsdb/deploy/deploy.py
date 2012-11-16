@@ -1,6 +1,7 @@
 import sqlalchemy.orm.exc
 
-from sqlalchemy.sql.expression import func
+from sqlalchemy import func
+from sqlalchemy.sql import and_, or_, not_
 
 import tagopsdb.deploy.repo as repo
 
