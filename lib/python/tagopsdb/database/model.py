@@ -25,6 +25,7 @@ ns_service_binds = Table(u'ns_service_binds', Base.metadata,
                          ondelete='cascade'),
     ForeignKeyConstraint(['monitorID'], ['ns_monitor.monitorID'],
                          ondelete='cascade'),
+    UniqueConstraint('serviceID', 'monitorID', name='serviceID_monitorID'),
     mysql_engine='InnoDB', mysql_charset='utf8',
 )
 
@@ -656,6 +657,8 @@ class NsVipBinds(Base):
         ForeignKeyConstraint(['vipID'], ['ns_vip.vipID'], ondelete='cascade'),
         ForeignKeyConstraint(['serviceID'], ['ns_service.serviceID'],
                              ondelete='cascade'),
+        UniqueConstraint('appID', 'environment', 'vipID', 'serviceID',
+                         name='nsVipBindsID'),
         { 'mysql_engine' : 'InnoDB', 'mysql_charset' : 'utf8', },
     )
 
