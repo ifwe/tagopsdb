@@ -96,8 +96,8 @@ class AppDeployments(Base):
     DeploymentID = Column('DeploymentID', INTEGER(), nullable=False)
     AppID = Column('AppID', SMALLINT(display_width=2), nullable=False)
     user = Column('user', VARCHAR(length=32), nullable=False)
-    status = Column('status', Enum('incomplete', 'invalidated', 'validated'),
-                    nullable=False)
+    status = Column('status', Enum('complete', 'incomplete', 'inprogress',
+                    'invalidated', 'validated'), nullable=False)
     environment = Column('environment', VARCHAR(length=15), nullable=False)
     realized = Column('realized', TIMESTAMP(), nullable=False,
                       default=func.current_timestamp(),
