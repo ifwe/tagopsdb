@@ -5,7 +5,7 @@ from sqlalchemy.sql.expression import func
 import tagopsdb.deploy.repo as repo
 
 from tagopsdb.database.meta import Session
-from tagopsdb.database.model import Packages
+from tagopsdb.database.model import PackageLocations, Packages
 from tagopsdb.exceptions import NotImplementedException, PackageException
 
 
