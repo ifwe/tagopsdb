@@ -60,10 +60,16 @@ def find_package(app_name, version, revision):
         return None
 
 
-def list_packages():
+def list_packages(app_names):
     """Return all available packages in the repository"""
 
-    return (Session.query(Packages)
-                   .order_by(Packages.pkg_name, Packages.version,
-                             Packages.revision)
-                   .all())
+    list_query = Session.query(Packages)
+
+    if app_names is not None:
+        list_query = \
+            list_query.join(PackageLocations)
+                      .filter(PackageLocations.app_name.in_(app_names))
+
+    return (list_query.order_by(Packages.pkg_name, Packages.version,
+                                Packages.revision)
+                      .all())
