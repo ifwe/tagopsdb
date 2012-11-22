@@ -399,7 +399,7 @@ class HostDeployments(Base):
     DeploymentID = Column('DeploymentID', INTEGER(), nullable=False)
     HostID = Column('HostID', INTEGER(), nullable=False)
     user = Column('user', VARCHAR(length=32), nullable=False)
-    status = Column('status', Enum('incomplete', 'ok', 'failed'),
+    status = Column('status', Enum('inprogress', 'ok', 'failed'),
                     nullable=False)
     realized = Column('realized', TIMESTAMP(), nullable=False,
                       default=func.current_timestamp(),
