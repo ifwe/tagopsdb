@@ -374,6 +374,38 @@ def find_latest_validated_deployment(project, app_id, env):
                    .first())
 
 
+def find_running_deployment(app_id, env, hosts=None):
+    """Find a currently running tier or host deployment (or deployments)
+       for a given application type and environment
+    """
+
+    tier = (Session.query(AppDeployments.user, AppDeployments.realized,
+                          AppDeployments.environment, AppDefinitions.appType)
+                   .join(AppDefinitions)
+                   .filter(AppDeployments.AppID==app_id)
+                   .filter(AppDeployments.environment==env)
+                   .filter(AppDeployments.status=='inprogress')
+                   .order_by(AppDeployments.realized.desc())
+                   .first())
+
+    if tier:
+        return ('tier', tier)
+
+    host = (Session.query(HostDeployments.user, HostDeployments.realized,
+                          Hosts.hostname, Hosts.environment)
+                   .join(Hosts)
+                   .filter(Hosts.environment==env)
+                   .filter(Hosts.AppID==app_id)
+                   .filter(HostDeployments.status=='inprogress')
+                   .all())
+
+    if host:
+        return ('host', host)
+
+    # Get here then nothing to return
+    return None
+
+
 def find_unvalidated_versions(time_delta, environment):
     """Find the latest deployments that are not validated in a given
        environment for a given amount of time
