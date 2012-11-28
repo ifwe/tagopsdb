@@ -426,8 +426,9 @@ def find_unvalidated_versions(time_delta, environment):
     return (Session.query(subq.c.pkg_name, subq.c.version, subq.c.revision,
                           subq.c.appType, subq.c.environment, subq.c.realized,
                           subq.c.user, subq.c.status)
-                   .group_by(subq.c.appType, subq.c.environment)
-                   .having(and_(subq.c.status=='incomplete',
+                   .group_by(subq.c.appType, subq.c.environment,
+                             subq.c.pkg_name)
+                   .having(and_(subq.c.status.like('%complete'),
                                 func.unix_timestamp(subq.c.realized) <
                                 func.unix_timestamp(func.now()) - time_delta))
                    .all())
