@@ -7,8 +7,8 @@ from meta import Base
 
 
 jmx_attributes = Table(u'jmx_attributes', Base.metadata,
-    Column(u'groupName', VARCHAR(length=25), default='misc'),
-    Column(u'obj', VARCHAR(length=100)),
+    Column(u'groupName', VARCHAR(length=25)),
+    Column(u'obj', VARCHAR(length=300)),
     Column(u'attr', VARCHAR(length=300)),
     Column(u'appID', SMALLINT(display_width=2)),
     Column(u'GangliaID', INTEGER()),
