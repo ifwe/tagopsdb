@@ -1,4 +1,6 @@
+import logging
 import sqlalchemy.exc
+import sys
 import yaml
 
 from sqlalchemy import create_engine
@@ -25,10 +27,21 @@ def create_dbconn_string(db_user, db_password):
                                            db_host, db_name)
 
 
-def init_session(db_user, db_password, echo=False):
+def init_session(db_user, db_password, log=None, level=None):
     #engine = create_engine('sqlite:///testing.db', echo=True)
     dbconn_string = create_dbconn_string(db_user, db_password)
-    engine = create_engine(dbconn_string, echo=echo)
+    engine = create_engine(dbconn_string)
+
+    if log is not None:
+        logging.getLogger('sqlalchemy.engine').setLevel(1)
+
+        if level is None:
+            level = logging.WARNING
+
+        # Facility is hardcoded, find better way!
+        log.add_syslog('sql_syslog', facility=20, priority=1)
+        log.add_stream('sql_stdout', stream=sys.stdout, level=level,
+                       nostderr=True)
 
     # Ensure connection information is valid
     try:
