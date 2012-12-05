@@ -1,6 +1,4 @@
-import logging
 import sqlalchemy.exc
-import sys
 import yaml
 
 from sqlalchemy import create_engine
