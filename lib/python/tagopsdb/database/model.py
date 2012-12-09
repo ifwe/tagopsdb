@@ -382,13 +382,13 @@ class Hosts(Base):
     def __repr__(self):
         """ """
 
-        print '<Hosts(%r, %r, %r, %r, %r, %r, %r, %r, %r, %r, %r, %r, ' \
-              '%r, %r, %r)>' \
-              % (self.SpecID, self.state, self.hostname, self.arch,
-                 self.kernelVersion, self.distribution, self.timezone,
-                 self.AppID, self.cageLocation, self.cabLocation,
-                 self.rackLocation, self.consolePort, self.powerPort,
-                 self.powerCircuit, self.environment)
+        return '<Hosts(%r, %r, %r, %r, %r, %r, %r, %r, %r, %r, %r, %r, ' \
+               '%r, %r, %r)>' \
+               % (self.SpecID, self.state, self.hostname, self.arch,
+                  self.kernelVersion, self.distribution, self.timezone,
+                  self.AppID, self.cageLocation, self.cabLocation,
+                  self.rackLocation, self.consolePort, self.powerPort,
+                  self.powerCircuit, self.environment)
 
 
 class HostDeployments(Base):
