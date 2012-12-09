@@ -452,22 +452,28 @@ def list_app_deployment_info(project, env, app_type, version, revision):
                    .first())
 
 
-def list_host_deployment_info(project, env, version=None, revision=None):
+def list_host_deployment_info(project, env, version=None, revision=None,
+                              apptypes=None):
     """Give all deployment information for a given project
-       deployed to hosts in given environment
+       deployed to hosts for given (or all) application types
+       and in given environment
     """
 
     dep_info = (Session.query(Deployments, HostDeployments, Hosts.hostname,
                               Packages)
                        .join(Packages)
                        .join(HostDeployments)
-                       .join(Hosts))
+                       .join(Hosts)
+                       .join(AppDefinitions))
 
     if version is not None:
         dep_info = dep_info.filter(Packages.version==version)
 
     if revision is not None:
         dep_info = dep_info.filter(Packages.revision==revision)
+
+    if apptypes is not None:
+        dep_info = dep_info.filter(AppDefinitions.appType.in_(apptypes))
 
     return (dep_info.filter(Packages.pkg_name==project)
                     .filter(Hosts.environment==env)
