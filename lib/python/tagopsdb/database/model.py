@@ -462,6 +462,8 @@ class HostIps(Base):
                          index=True)
     SubnetID = Column(u'SubnetID', INTEGER(), nullable=False, unique=True,
                       index=True)
+    priority = Column(u'priority', INTEGER(unsigned=True), nullable=False,
+                      default=1, server_default='1')
     ARecord = Column(u'ARecord', VARCHAR(length=200))
     comments = Column(u'comments', VARCHAR(length=200))
 
