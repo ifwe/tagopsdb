@@ -19,7 +19,6 @@ def add_deployment(pkg_id, user, dep_type):
     dep = Deployments(pkg_id, user, dep_type, func.current_timestamp())
 
     # Commit to DB immediately
-    Session.begin_nested()
     Session.add(dep)
     Session.commit()
 
@@ -36,7 +35,6 @@ def add_app_deployment(dep_id, app_id, user, status, environment):
                              func.current_timestamp())
 
     # Commit to DB immediately
-    Session.begin_nested()
     Session.add(app_dep)
     Session.commit()
 
@@ -50,7 +48,6 @@ def add_host_deployment(dep_id, host_id, user, status):
                                func.current_timestamp())
 
     # Commit to DB immediately
-    Session.begin_nested()
     Session.add(host_dep)
     Session.commit()
 
@@ -71,7 +68,6 @@ def delete_host_deployment(hostname, project):
     # Allow this to silently do nothing if there are no matching rows
     for host_dep in host_deps:
         # Commit to DB immediately
-        Session.begin_nested()
         Session.delete(host_dep)
         Session.commit()
 
@@ -90,7 +86,6 @@ def delete_host_deployments(project, app_id, environment):
 
     for host_dep in host_deps:
         # Commit to DB immediately
-        Session.begin_nested()
         Session.delete(host_dep)
         Session.commit()
 
@@ -299,6 +294,7 @@ def find_host_deployments_not_ok(pkg_id, app_id, environment):
     """
 
     return (Session.query(HostDeployments, Hosts.hostname)
+                   .join(Hosts)
                    .join(Deployments)
                    .filter(Deployments.PackageID==pkg_id)
                    .filter(Hosts.AppID==app_id)
