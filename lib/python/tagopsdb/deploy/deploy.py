@@ -5,7 +5,7 @@ from sqlalchemy.sql import and_, or_, not_
 
 import tagopsdb.deploy.repo as repo
 
-from tagopsdb.database.meta import Session
+from tagopsdb.database.meta import Session, isolated_transaction
 from tagopsdb.database.model import AppDefinitions, AppDeployments, \
                                     AppHipchatRooms, Deployments, \
                                     Hipchat, HostDeployments, Hosts, \
@@ -18,11 +18,10 @@ def add_deployment(pkg_id, user, dep_type):
 
     dep = Deployments(pkg_id, user, dep_type, func.current_timestamp())
 
-    # Commit to DB immediately
-    Session.add(dep)
-    Session.commit()
+    with isolated_transaction():
+        Session.add(dep)
+        Session.commit()
 
-    # Following line may not longer be needed?
     Session.flush()   # Needed to get DeploymentID generated
 
     return dep
@@ -34,9 +33,9 @@ def add_app_deployment(dep_id, app_id, user, status, environment):
     app_dep = AppDeployments(dep_id, app_id, user, status, environment,
                              func.current_timestamp())
 
-    # Commit to DB immediately
-    Session.add(app_dep)
-    Session.commit()
+    with isolated_transaction():
+        Session.add(app_dep)
+        Session.commit()
 
     return app_dep
 
@@ -47,9 +46,9 @@ def add_host_deployment(dep_id, host_id, user, status):
     host_dep = HostDeployments(dep_id, host_id, user, status,
                                func.current_timestamp())
 
-    # Commit to DB immediately
-    Session.add(host_dep)
-    Session.commit()
+    with isolated_transaction():
+        Session.add(host_dep)
+        Session.commit()
 
     return host_dep
 
@@ -66,9 +65,10 @@ def delete_host_deployment(hostname, project):
                         .all())
 
     # Allow this to silently do nothing if there are no matching rows
-    for host_dep in host_deps:
-        # Commit to DB immediately
-        Session.delete(host_dep)
+    with isolated_transaction():
+        for host_dep in host_deps:
+            Session.delete(host_dep)
+
         Session.commit()
 
 
@@ -84,9 +84,10 @@ def delete_host_deployments(project, app_id, environment):
                         .filter(Hosts.environment==environment)
                         .all())
 
-    for host_dep in host_deps:
-        # Commit to DB immediately
-        Session.delete(host_dep)
+    with isolated_transaction():
+        for host_dep in host_deps:
+            Session.delete(host_dep)
+
         Session.commit()
 
 
