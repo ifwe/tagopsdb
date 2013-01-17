@@ -6,7 +6,7 @@ from tagopsdb.database.model import AppDefinitions, AppPackages, \
 from tagopsdb.exceptions import RepoException
 
 
-def add_app_location(project_type, pkg_type, pkg_name, app_name, path,
+def add_app_location(project_type, pkg_type, pkg_name, app_name, path, arch,
                      build_host, environment):
     """Add the location of a given application"""
 
@@ -17,7 +17,7 @@ def add_app_location(project_type, pkg_type, pkg_name, app_name, path,
         environment = False
 
     app = PackageLocations(project_type, pkg_type, pkg_name, app_name, path,
-                           build_host, environment)
+                           arch, build_host, environment)
     Session.add(app)
     Session.flush()   # Needed to get pkgLocationID generated
 
