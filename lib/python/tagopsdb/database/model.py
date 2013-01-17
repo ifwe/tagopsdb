@@ -745,6 +745,8 @@ class PackageLocations(Base):
     app_name = Column(u'app_name', VARCHAR(length=255), nullable=False,
                       unique=True)
     path = Column(u'path', VARCHAR(length=255), nullable=False, unique=True)
+    arch = Column(u'arch', Enum(u'i386', u'x86_64', u'noarch'),
+                  nullable=False, default='noarch', server_default='noarch')
     build_host = Column(u'build_host', VARCHAR(length=30), nullable=False)
     environment = Column(u'environment', BOOLEAN(), nullable=False)
 
@@ -753,7 +755,7 @@ class PackageLocations(Base):
     )
 
 
-    def __init__(self, project_type, pkg_type, pkg_name, app_name, path,
+    def __init__(self, project_type, pkg_type, pkg_name, app_name, path, arch,
                  build_host, environment=False):
         """ """
 
@@ -762,6 +764,7 @@ class PackageLocations(Base):
         self.pkg_name = pkg_name
         self.app_name = app_name
         self.path = path
+        self.arch = arch
         self.build_host = build_host
         self.environment = environment
 
@@ -770,9 +773,9 @@ class PackageLocations(Base):
         """ """
 
         return '<PackageLocations("%s", "%s", "%s", "%s", "%s", "%s", ' \
-               '"%s")>' % (self.project_type, self.pkg_type, self.pkg_name,
-                           self.app_name, self.path, self.build_host,
-                           self.environment)
+               '"%s", "%s")>' % (self.project_type, self.pkg_type,
+                                 self.pkg_name, self.app_name, self.path,
+                                 self.arch, self.build_host, self.environment)
 
 
 class Ports(Base):
