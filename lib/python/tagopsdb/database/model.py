@@ -481,11 +481,13 @@ class HostSpecs(Base):
 
     specID = Column(u'specID', INTEGER(), primary_key=True, nullable=False)
     gen = Column(u'gen', VARCHAR(length=4))
-    memorySize = Column(u'memorySize', VARCHAR(length=5), nullable=False)
+    memorySize = Column(u'memorySize', INTEGER(display_width=4),
+                        nullable=False)
     cores = Column(u'cores', SMALLINT(display_width=2), nullable=False)
-    cpuSpeed = Column(u'cpuSpeed', VARCHAR(length=10), nullable=False)
-    diskSize = Column(u'diskSize', VARCHAR(length=6), nullable=False)
+    cpuSpeed = Column(u'cpuSpeed', INTEGER(display_width=6), nullable=False)
+    diskSize = Column(u'diskSize', INTEGER(display_width=6), nullable=False)
     vendor = Column(u'vendor', VARCHAR(length=20))
+    model = Column(u'model', VARCHAR(length=20))
     expansions = Column(u'expansions', TEXT())
 
     __table_args__ = (
