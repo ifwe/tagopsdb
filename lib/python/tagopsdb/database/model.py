@@ -488,6 +488,7 @@ class HostSpecs(Base):
     diskSize = Column(u'diskSize', INTEGER(display_width=6), nullable=False)
     vendor = Column(u'vendor', VARCHAR(length=20))
     model = Column(u'model', VARCHAR(length=20))
+    control = Column(u'control', Enum(u'digi', u'ipmi', u'vmcontrol'))
     expansions = Column(u'expansions', TEXT())
 
     __table_args__ = (
