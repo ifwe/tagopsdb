@@ -256,8 +256,7 @@ class DefaultSpecs(Base):
                              onupdate='cascade', ondelete='cascade'),
         ForeignKeyConstraint(['environment'], ['environments.environment'],
                              onupdate='cascade', ondelete='cascade'),
-        PrimaryKeyConstraint('specID', 'AppID', 'environment',
-                         name='default_spec_key'),
+        PrimaryKeyConstraint('specID', 'AppID', 'environment'),
         { 'mysql_engine' : 'InnoDB', 'mysql_charset' : 'utf8', },
     )
 
@@ -511,8 +510,8 @@ class HostSpecs(Base):
     vendor = Column(u'vendor', VARCHAR(length=20))
     model = Column(u'model', VARCHAR(length=20))
     control = Column(u'control', Enum(u'digi', u'ipmi', u'vmware'))
-    virtual = Column(u'virtual', BOOLEAN(), nullable=False, default=False,
-                     server_default=False)
+    virtual = Column(u'virtual', BOOLEAN(), nullable=False, default=0,
+                     server_default='0')
     expansions = Column(u'expansions', TEXT())
 
     __table_args__ = (
