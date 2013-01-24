@@ -247,7 +247,7 @@ class DefaultSpecs(Base):
     AppID = Column(u'AppID', SMALLINT(display_width=2), nullable=False)
     environment = Column(u'environment', VARCHAR(length=15), nullable=False)
     priority = Column(u'priority', INTEGER(display_width=4), nullable=False,
-                      default=10, server_default=10)
+                      default='10', server_default='10')
 
     __table_args__ = (
         ForeignKeyConstraint(['specID'], ['host_specs.specID'],
