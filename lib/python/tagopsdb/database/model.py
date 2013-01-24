@@ -256,7 +256,7 @@ class DefaultSpecs(Base):
                              onupdate='cascade', ondelete='cascade'),
         ForeignKeyConstraint(['environment'], ['environments.environment'],
                              onupdate='cascade', ondelete='cascade'),
-        UniqueConstraint('specID', 'AppID', 'environment',
+        PrimaryKeyConstraint('specID', 'AppID', 'environment',
                          name='default_spec_key'),
         { 'mysql_engine' : 'InnoDB', 'mysql_charset' : 'utf8', },
     )
