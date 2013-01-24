@@ -240,6 +240,28 @@ class Cname(Base):
     )
 
 
+class DefaultSpecs(Base):
+    __tablename__ = 'default_specs'
+
+    specID = Column(u'specID', INTEGER(), nullable=False)
+    AppID = Column(u'AppID', SMALLINT(display_width=2), nullable=False)
+    environment = Column(u'environment', VARCHAR(length=15), nullable=False)
+    priority = Column(u'priority', INTEGER(display_width=4), nullable=False,
+                      default=10, server_default=10)
+
+    __table_args__ = (
+        ForeignKeyConstraint(['specID'], ['host_specs.specID'],
+                             onupdate='cascade', ondelete='cascade'),
+        ForeignKeyConstraint(['AppID'], ['app_definitions.AppID'],
+                             onupdate='cascade', ondelete='cascade'),
+        ForeignKeyConstraint(['environment'], ['environments.environment'],
+                             onupdate='cascade', ondelete='cascade'),
+        UniqueConstraint('specID', 'AppID', 'environment',
+                         name='default_spec_key'),
+        { 'mysql_engine' : 'InnoDB', 'mysql_charset' : 'utf8', },
+    )
+
+
 class Deployments(Base):
     __tablename__ = 'deployments'
 
@@ -488,7 +510,9 @@ class HostSpecs(Base):
     diskSize = Column(u'diskSize', INTEGER(display_width=6), nullable=False)
     vendor = Column(u'vendor', VARCHAR(length=20))
     model = Column(u'model', VARCHAR(length=20))
-    control = Column(u'control', Enum(u'digi', u'ipmi', u'vmcontrol'))
+    control = Column(u'control', Enum(u'digi', u'ipmi', u'vmware'))
+    virtual = Column(u'virtual', BOOLEAN(), nullable=False, default=False,
+                     server_default=False)
     expansions = Column(u'expansions', TEXT())
 
     __table_args__ = (
