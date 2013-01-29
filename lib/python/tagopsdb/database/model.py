@@ -601,7 +601,7 @@ class NsService(Base):
 
     serviceID = Column(u'serviceID', INTEGER(unsigned=True), primary_key=True,
                        nullable=False)
-    serviceName = Column(u'serviceName', VARCHAR(length=32), nullable=False,
+    serviceName = Column(u'serviceName', VARCHAR(length=64), nullable=False,
                          unique=True)
     proto = Column(u'proto', VARCHAR(length=16), nullable=False)
     port = Column(u'port', SMALLINT(display_width=5, unsigned=True),
