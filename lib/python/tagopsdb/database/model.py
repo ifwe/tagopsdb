@@ -46,7 +46,6 @@ class AppDefinitions(Base):
     hostBase = Column(u'hostBase', VARCHAR(length=100))
     puppetClass = Column(u'puppetClass', VARCHAR(length=100), nullable=False,
                          default='baseclass', server_default='baseclass')
-    specID = Column(u'specID', INTEGER(), nullable=False)
     GangliaID = Column(u'GangliaID', INTEGER(), default=1, server_default='1')
     description = Column(u'description', VARCHAR(length=100))
 
@@ -54,15 +53,14 @@ class AppDefinitions(Base):
         ForeignKeyConstraint(['Production_VlanID'], ['vlans.VlanID']),
         ForeignKeyConstraint(['Development_VlanID'], ['vlans.VlanID']),
         ForeignKeyConstraint(['Staging_VlanID'], ['vlans.VlanID']),
-        ForeignKeyConstraint(['specID'], ['host_specs.specID']),
         ForeignKeyConstraint(['GangliaID'], ['ganglia.GangliaID']),
         { 'mysql_engine' : 'InnoDB', },
     )
 
 
     def __init__(self, Production_VlanID, Development_VlanID, Staging_VlanID,
-                 distribution, appType, hostBase, puppetClass, specID,
-                 GangliaID, description):
+                 distribution, appType, hostBase, puppetClass, GangliaID,
+                 description):
         """ """
 
         self.Production_VlanID = Production_VlanID
@@ -72,7 +70,6 @@ class AppDefinitions(Base):
         self.appType = appType
         self.hostBase = hostBase
         self.puppetClass = puppetClass
-        self.specID = specID
         self.GangliaID = GangliaID
         self.description = description
 
@@ -81,11 +78,11 @@ class AppDefinitions(Base):
         """ """
 
         return '<AppDefinitions("%s", "%s", "%s", "%s", "%s", "%s", "%s", ' \
-               '"%s", "%s", "%s")>' \
+               '"%s", "%s")>' \
                % (self.Production_VlanID, self.Development_VlanID,
                   self.Staging_VlanID, self.distribution, self.appType,
-                  self.hostBase, self.puppetClass, self.specID,
-                  self.GangliaID, self.description)
+                  self.hostBase, self.puppetClass, self.GangliaID,
+                  self.description)
 
 
 class AppDeployments(Base):
