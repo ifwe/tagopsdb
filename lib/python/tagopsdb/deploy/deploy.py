@@ -364,9 +364,40 @@ def find_latest_validated_deployment(project, app_id, env):
                    .join(Deployments)
                    .join(Packages)
                    .filter(Packages.pkg_name==project)
+                   .filter(AppDeployments.environment==env)
+                   .filter(AppDeployments.status=='validated')
+                   .order_by(AppDeployments.realized.desc())
+                   .first())
+
+
+def find_next_latest_validated_deployment(project, app_id, env):
+    """Find the previously validated deployment (based on the current
+       validated deployment) for a given project, application type
+       and environment.
+    """
+
+    subq1 = (Session.query(Packages.pkg_name, Deployments.DeploymentID)
+                    .join(Deployments)
+                    .join(AppDeployments)
+                    .filter(Packages.pkg_name==project)
+                    .filter(AppDeployments.AppID==app_id)
+                    .filter(AppDeployments.environment==env)
+                    .filter(AppDeployments.status=='validated')
+                    .order_by(AppDeployments.realized.desc())
+                    .subquery(name='t_ordered'))
+
+    subq2 = (Session.query(subq1.c.DeploymentID)
+                    .group_by(subq1.c.pkg_name)
+                    .subquery(name='t_ordered2'))
+
+    return (Session.query(AppDeployments, Packages.PackageID)
+                   .join(Deployments)
+                   .join(Packages)
+                   .filter(Packages.pkg_name==project)
                    .filter(AppDeployments.AppID==app_id)
                    .filter(AppDeployments.environment==env)
                    .filter(AppDeployments.status=='validated')
+                   .filter(~Deployments.DeploymentID.in_(subq2))
                    .order_by(AppDeployments.realized.desc())
                    .first())
 
