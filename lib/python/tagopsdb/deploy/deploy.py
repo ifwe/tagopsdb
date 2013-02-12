@@ -89,6 +89,21 @@ def delete_host_deployments(project, app_id, environment):
         Session.commit()
 
 
+def find_all_app_deployments_by_apptype(project, apptype, environment):
+    """Find all tier deployments for a given application type
+       and specific environment
+    """
+
+    return (Session.query(AppDeployments)
+                   .join(Deployments)
+                   .join(Packages)
+                   .join(AppDefinitions)
+                   .filter(Packages.pkg_name==project)
+                   .filter(AppDefinitions.appType==apptype)
+                   .filter(AppDeployments.environment==environment)
+                   .all())
+
+
 def find_app_deployment(pkg_id, app_ids, environment):
     """Find specific tier deployment(s) based on package ID and
        application ID(s)
