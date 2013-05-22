@@ -350,7 +350,7 @@ class Hosts(Base):
     HostID = Column(u'HostID', INTEGER(), primary_key=True, nullable=False)
     SpecID = Column(u'SpecID', INTEGER())
     state = Column(u'state', Enum(u'baremetal', u'operational', u'repair',
-                   u'parts', u'reserved'), nullable=False)
+                   u'parts', u'reserved', u'escrow'), nullable=False)
     hostname = Column(u'hostname', VARCHAR(length=30))
     arch = Column(u'arch', VARCHAR(length=10))
     kernelVersion = Column(u'kernelVersion', VARCHAR(length=20))
@@ -814,6 +814,8 @@ class Ports(Base):
     __table_args__ = (
         ForeignKeyConstraint(['NetworkID'], ['networkDevice.NetworkID'],
                              ondelete='cascade'),
+        UniqueConstraint('NetworkID', 'portNumber',
+                         name='NetworkID_portNumber'),
         { 'mysql_engine' : 'InnoDB', 'mysql_charset' : 'utf8', },
     )
 
