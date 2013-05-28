@@ -937,9 +937,13 @@ class Vlans(Base):
 
     VlanID = Column(u'VlanID', INTEGER(), primary_key=True, nullable=False)
     name = Column(u'name', VARCHAR(length=20))
+    environmentID = Column(u'environmentID', INTEGER())
     description = Column(u'description', VARCHAR(length=50))
 
     __table_args__ = (
+        ForeignKeyConstraint(['environmentID'],
+                             ['environments.environmentID'],
+                             ondelete='cascade'),
         { 'mysql_engine' : 'InnoDB', 'mysql_charset' : 'utf8', },
     )
 
