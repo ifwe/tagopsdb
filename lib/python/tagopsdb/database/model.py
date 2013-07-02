@@ -296,8 +296,11 @@ class Deployments(Base):
 class Environments(Base):
     __tablename__ = 'environments'
 
-    environment = Column(u'environment', VARCHAR(length=15), primary_key=True,
-                         nullable=False)
+    environmentID = Column(u'environmentID', INTEGER(), primary_key=True,
+                           nullable=False)
+    environment = Column(u'environment', VARCHAR(length=15), nullable=False,
+                         unique=True)
+    env = Column(u'env', VARCHAR(length=12), nullable=False, unique=True)
     domain = Column(u'domain', VARCHAR(length=32), nullable=False,
                     unique=True)
     domain = Column(u'prefix', VARCHAR(length=1), nullable=False)
@@ -356,7 +359,7 @@ class Hosts(Base):
     kernelVersion = Column(u'kernelVersion', VARCHAR(length=20))
     distribution = Column(u'distribution', VARCHAR(length=20))
     timezone = Column(u'timezone', VARCHAR(length=10))
-    AppID = Column(u'AppID', SMALLINT(display_width=2), nullable=False)
+    AppID = Column(u'AppID', SMALLINT(display_width=6), nullable=False)
     cageLocation = Column(u'cageLocation', INTEGER())
     cabLocation = Column(u'cabLocation', VARCHAR(length=10))
     rackLocation = Column(u'rackLocation', INTEGER())
