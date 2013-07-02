@@ -6,16 +6,25 @@ from sqlalchemy.sql.expression import func
 from meta import Base
 
 
+app_jmx_attributes = Table(u'app_jmx_attributes', Base.metadata,
+    Column(u'AppID', SMALLINT(display_width=6), primary_key=True),
+    Column(u'jmx_attribute_id', INTEGER(), primary_key=True),
+    ForeignKeyConstraint(['AppID'], ['app_definitions.AppID'],
+                         ondelete='cascade'),
+    ForeignKeyConstraint(['jmx_attribute_id'],
+                         ['jmx_attributes.jmx_attribute_id'],
+                         ondelete='cascade'),
+    mysql_engine='InnoDB', mysql_charset='utf8',
+)
+
+
 jmx_attributes = Table(u'jmx_attributes', Base.metadata,
-    Column(u'groupName', VARCHAR(length=25)),
-    Column(u'obj', VARCHAR(length=300)),
-    Column(u'attr', VARCHAR(length=300)),
-    Column(u'appID', SMALLINT(display_width=2)),
-    Column(u'GangliaID', INTEGER()),
-    ForeignKeyConstraint(['appID'], ['app_definitions.AppID']),
-    ForeignKeyConstraint(['GangliaID'], ['ganglia.GangliaID']),
-    mysql_engine='InnoDB', mysql_charset='latin1',
-    )
+    Column(u'jmx_attribute_id', INTEGER(), primary_key=True),
+    Column(u'obj', VARCHAR(length=300), nullable=False),
+    Column(u'attr', VARCHAR(length=300), nullable=False),
+    Column(u'GgroupName', VARCHAR(length=25)),
+    mysql_engine='InnoDB', mysql_charset='utf8',
+)
 
 
 ns_service_binds = Table(u'ns_service_binds', Base.metadata,
@@ -40,21 +49,25 @@ class AppDefinitions(Base):
     Development_VlanID = Column(u'Development_VlanID', INTEGER(),
                                 nullable=False)
     Staging_VlanID = Column(u'Staging_VlanID', INTEGER(), nullable=False)
-    distribution = Column(u'distribution', Enum(u'co54', u'rh53', u'co60',
-                          u'co62'), default='co54', server_default='co54')
+    distribution = Column(u'distribution', Enum(u'co54', u'co62', u'co64',
+                          u'rh53', u'rh62', u'rh63', u'rh64'),
+                          default='co64', server_default='co64')
     appType = Column(u'appType', VARCHAR(length=100), nullable=False)
     hostBase = Column(u'hostBase', VARCHAR(length=100))
     puppetClass = Column(u'puppetClass', VARCHAR(length=100), nullable=False,
                          default='baseclass', server_default='baseclass')
     GangliaID = Column(u'GangliaID', INTEGER(), default=1, server_default='1')
+    GgroupName = Column(u'GgroupName', VARCHAR(length=25))
     description = Column(u'description', VARCHAR(length=100))
+    status = Column(u'status', Enum('active', 'inactive'), nullable=False,
+                    default='active', server_default='active')
 
     __table_args__ = (
         ForeignKeyConstraint(['Production_VlanID'], ['vlans.VlanID']),
         ForeignKeyConstraint(['Development_VlanID'], ['vlans.VlanID']),
         ForeignKeyConstraint(['Staging_VlanID'], ['vlans.VlanID']),
         ForeignKeyConstraint(['GangliaID'], ['ganglia.GangliaID']),
-        { 'mysql_engine' : 'InnoDB', },
+        { 'mysql_engine' : 'InnoDB', 'mysql_charset' : 'utf8', },
     )
 
 
