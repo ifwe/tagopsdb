@@ -14,7 +14,7 @@ def add_package(app_name, version, revision, user):
 
     app = find_app_by_name(app_name)
 
-    if find_package(app.pkg_name, version, revision):
+    if find_package(app_name, version, revision):
         raise PackageException('Current version of application "%s" '
                                'already found in Packages table' % app_name)
 
