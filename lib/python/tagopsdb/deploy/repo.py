@@ -115,7 +115,7 @@ def find_project_type(project):
 
     try:
         return (Session.query(PackageLocations.project_type)
-                       .filter_by(pkg_name=project)
+                       .filter_by(app_name=project)
                        .one())
     except sqlalchemy.orm.exc.NoResultFound:
         raise RepoException('No project "%s" found in the '
