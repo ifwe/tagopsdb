@@ -1,8 +1,7 @@
 import sqlalchemy.orm.exc
 
 from tagopsdb.database.meta import Session
-from tagopsdb.database.model import AppDefinitions, AppPackages, \
-                                    PackageLocations
+from tagopsdb.database.model import AppDefinitions, PackageLocations
 from tagopsdb.exceptions import RepoException
 
 
@@ -16,16 +15,16 @@ def add_app_location(project_type, pkg_type, pkg_name, app_name, path, arch,
     else:
         environment = False
 
-    app = PackageLocations(project_type, pkg_type, pkg_name, app_name, path,
-                           arch, build_host, environment)
-    Session.add(app)
+    project = PackageLocations(project_type, pkg_type, pkg_name, app_name,
+                               path, arch, build_host, environment)
+    Session.add(project)
     Session.flush()   # Needed to get pkgLocationID generated
 
-    return app.pkgLocationID
+    return project
 
 
-def add_app_packages_mapping(pkg_location_id, app_types):
-    """Add the mappings of the app types for a given package"""
+def add_app_packages_mapping(project, app_types):
+    """Add the mappings of the app types for a given project"""
 
     for app_type in app_types:
         try:
@@ -36,8 +35,7 @@ def add_app_packages_mapping(pkg_location_id, app_types):
             raise RepoException('App type "%s" is not found in the '
                                 'AppDefinitions table' % app_type)
 
-        app_pkg = AppPackages(pkg_location_id, app_def.AppID)
-        Session.add(app_pkg)
+        project.app_definitions.append(app_def)
 
 
 def delete_app_location(app_name):
@@ -52,8 +50,8 @@ def delete_app_location(app_name):
     Session.delete(app)
 
 
-def delete_app_packages_mapping(pkg_location_id, app_types):
-    """Delete the mappings of the app types for a given package"""
+def delete_app_packages_mapping(project, app_types):
+    """Delete the mappings of the app types for a given project"""
 
     for app_type in app_types:
         try:
@@ -64,12 +62,11 @@ def delete_app_packages_mapping(pkg_location_id, app_types):
             raise RepoException('App type "%s" is not found in the '
                                 'AppDefinitions table' % app_type)
 
-        app_pkg = find_app_package(pkg_location_id, app_def.AppID)
-        Session.delete(app_pkg)
+        project.app_definitions.remove(app_def)
 
 
 def find_app_location(app_name):
-    """ """
+    """Find a given project"""
 
     try:
         return (Session.query(PackageLocations)
@@ -80,32 +77,34 @@ def find_app_location(app_name):
                             'the PackageLocations table' % app_name)
 
 
-def find_app_package(pkg_location_id, app_id):
-    """Find a specific mapping in AppPackages"""
+def find_app_package(project, app_id):
+    """Find a specific mapping between a given project and app type"""
 
-    try:
-        return (Session.query(AppPackages)
-                       .filter_by(pkgLocationID=pkg_location_id)
-                       .filter_by(AppID=app_id)
-                       .one())
-    except sqlalchemy.orm.exc.NoResultFound:
-        raise RepoException('No entry with pkgLocationID "%s" and '
-                            'AppID "%s" found in AppPakcages table'
-                            % (pkg_location_id, app_id))
+    pass
+
+    # This is no longer valid
+    # try:
+    #     return (Session.query(AppPackages)
+    #                    .filter_by(pkgLocationID=pkg_location_id)
+    #                    .filter_by(AppID=app_id)
+    #                    .one())
+    # except sqlalchemy.orm.exc.NoResultFound:
+    #     raise RepoException('No entry with pkgLocationID "%s" and '
+    #                         'AppID "%s" found in AppPakcages table'
+    #                         % (pkg_location_id, app_id))
 
 
 def find_app_packages_mapping(app_name):
     """Find all app types related to a given package"""
 
     app_defs = (Session.query(AppDefinitions)
-                       .join(AppPackages)
-                       .join(PackageLocations)
-                       .filter(PackageLocations.app_name==app_name)
+                       .filter(AppDefinitions.package_locations.any(
+                               pkg_name=app_name))
                        .all())
 
     if not app_defs:
         raise RepoException('No entries found for project "%s" in '
-                            'the AppPackages table' % app_name)
+                            'the app_packages table' % app_name)
 
     return app_defs
 
