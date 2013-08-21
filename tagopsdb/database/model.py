@@ -1,351 +1,77 @@
 from sqlalchemy import *
-from sqlalchemy.dialects.mysql import INTEGER, SMALLINT, TINYINT, BOOLEAN
-from sqlalchemy.orm import relation
+from sqlalchemy.dialects.mysql import INTEGER, SMALLINT, TINYINT, BOOLEAN, \
+                                      MEDIUMTEXT
+from sqlalchemy.orm import object_mapper, relationship
 from sqlalchemy.sql.expression import func
 
 from meta import Base
 
 
-app_jmx_attributes = Table(u'app_jmx_attributes', Base.metadata,
-    Column(u'AppID', SMALLINT(display_width=6), primary_key=True),
-    Column(u'jmx_attribute_id', INTEGER(), primary_key=True),
-    ForeignKeyConstraint(['AppID'], ['app_definitions.AppID'],
-                         ondelete='cascade'),
-    ForeignKeyConstraint(['jmx_attribute_id'],
-                         ['jmx_attributes.jmx_attribute_id'],
-                         ondelete='cascade'),
-    mysql_engine='InnoDB', mysql_charset='utf8',
-)
+#
+# Class and table definitions for schema
+#
 
 
-jmx_attributes = Table(u'jmx_attributes', Base.metadata,
-    Column(u'jmx_attribute_id', INTEGER(), primary_key=True),
-    Column(u'obj', VARCHAR(length=300), nullable=False),
-    Column(u'attr', VARCHAR(length=300), nullable=False),
-    Column(u'GgroupName', VARCHAR(length=25)),
-    mysql_engine='InnoDB', mysql_charset='utf8',
-)
-
-
-ns_service_binds = Table(u'ns_service_binds', Base.metadata,
-    Column(u'serviceID', INTEGER(unsigned=True), nullable=False),
-    Column(u'monitorID', INTEGER(unsigned=True), nullable=False),
-    ForeignKeyConstraint(['serviceID'], ['ns_service.serviceID'],
-                         ondelete='cascade'),
-    ForeignKeyConstraint(['monitorID'], ['ns_monitor.monitorID'],
-                         ondelete='cascade'),
-    UniqueConstraint('serviceID', 'monitorID', name='serviceID_monitorID'),
-    mysql_engine='InnoDB', mysql_charset='utf8',
-)
-
-
-class AppDefinitions(Base):
-    __tablename__ = 'app_definitions'
-
-    AppID = Column(u'AppID', SMALLINT(display_width=2), primary_key=True,
-                   nullable=False)
-    Production_VlanID = Column(u'Production_VlanID', INTEGER(),
-                               nullable=False)
-    Development_VlanID = Column(u'Development_VlanID', INTEGER(),
-                                nullable=False)
-    Staging_VlanID = Column(u'Staging_VlanID', INTEGER(), nullable=False)
-    distribution = Column(u'distribution', Enum(u'co54', u'co62', u'co64',
-                          u'rh53', u'rh62', u'rh63', u'rh64'),
-                          default='co64', server_default='co64')
-    appType = Column(u'appType', VARCHAR(length=100), nullable=False)
-    hostBase = Column(u'hostBase', VARCHAR(length=100))
-    puppetClass = Column(u'puppetClass', VARCHAR(length=100), nullable=False,
-                         default='baseclass', server_default='baseclass')
-    GangliaID = Column(u'GangliaID', INTEGER(), default=1, server_default='1')
-    GgroupName = Column(u'GgroupName', VARCHAR(length=25))
-    description = Column(u'description', VARCHAR(length=100))
-    status = Column(u'status', Enum('active', 'inactive'), nullable=False,
-                    default='active', server_default='active')
+class TagOpsDB(object):
+    """Base class for some common default settings"""
 
     __table_args__ = (
-        ForeignKeyConstraint(['Production_VlanID'], ['vlans.VlanID']),
-        ForeignKeyConstraint(['Development_VlanID'], ['vlans.VlanID']),
-        ForeignKeyConstraint(['Staging_VlanID'], ['vlans.VlanID']),
-        ForeignKeyConstraint(['GangliaID'], ['ganglia.GangliaID']),
         { 'mysql_engine' : 'InnoDB', 'mysql_charset' : 'utf8', },
     )
-
-
-    def __init__(self, Production_VlanID, Development_VlanID, Staging_VlanID,
-                 distribution, appType, hostBase, puppetClass, GangliaID,
-                 description):
-        """ """
-
-        self.Production_VlanID = Production_VlanID
-        self.Development_VlanID = Development_VlanID
-        self.Staging_VlanID = Staging_VlanID
-        self.distribution = distribution
-        self.appType = appType
-        self.hostBase = hostBase
-        self.puppetClass = puppetClass
-        self.GangliaID = GangliaID
-        self.description = description
-
 
     def __repr__(self):
-        """ """
+        mapper = object_mapper(self)
+        keyvals = [(key, getattr(self, key))
+                   for key in mapper.columns.keys()]
 
-        return '<AppDefinitions("%s", "%s", "%s", "%s", "%s", "%s", "%s", ' \
-               '"%s", "%s")>' \
-               % (self.Production_VlanID, self.Development_VlanID,
-                  self.Staging_VlanID, self.distribution, self.appType,
-                  self.hostBase, self.puppetClass, self.GangliaID,
-                  self.description)
-
-
-class AppDeployments(Base):
-    __tablename__ = 'app_deployments'
-
-    AppDeploymentID = Column('AppDeploymentID', INTEGER(), primary_key=True,
-                             nullable=False)
-    DeploymentID = Column('DeploymentID', INTEGER(), nullable=False)
-    AppID = Column('AppID', SMALLINT(display_width=2), nullable=False)
-    user = Column('user', VARCHAR(length=32), nullable=False)
-    status = Column('status', Enum('complete', 'incomplete', 'inprogress',
-                    'invalidated', 'validated'), nullable=False)
-    environment = Column('environment', VARCHAR(length=15), nullable=False)
-    realized = Column('realized', TIMESTAMP(), nullable=False,
-                      default=func.current_timestamp(),
-                      server_default=func.current_timestamp())
-
-    __table_args__ = (
-        ForeignKeyConstraint(['DeploymentID'], ['deployments.DeploymentID'],
-                             ondelete='cascade'),
-        ForeignKeyConstraint(['AppID'], ['app_definitions.AppID'],
-                             ondelete='cascade'),
-        { 'mysql_engine' : 'InnoDB', 'mysql_charset' : 'utf8', },
-    )
+        return '<%(class_name)s (%(table_name)s) %(keyvals_string)s>' % dict(
+            class_name = type(self).__name__,
+            table_name = self.__table__.name,
+            keyvals_string = \
+                ' '.join('%s=%r'% (key, val) for (key, val) in keyvals),
+        )
 
 
-    def __init__(self, DeploymentID, AppID, user, status, environment,
-                 realized):
-        """ """
-
-        self.DeploymentID = DeploymentID
-        self.AppID = AppID
-        self.user = user
-        self.status = status
-        self.environment = environment
-        self.realized = realized
-
-
-    def __repr__(self):
-        """ """
-
-        return '<AppDeployments("%s", "%s", "%s", "%s", "%s", "%s")>' \
-               % (self.DeploymentID, self.AppID, self.user, self.status,
-                  self.environment, self.realized)
-
-
-class AppHipchatRooms(Base):
-    __tablename__ = 'app_hipchat_rooms'
-
-    AppID = Column(u'AppID', SMALLINT(display_width=2), nullable=False)
-    roomID = Column(u'roomID', INTEGER(), nullable=False)
-
-    __table_args__ = (
-        PrimaryKeyConstraint('AppID', 'roomID'),
-        ForeignKeyConstraint(['AppID'], ['app_definitions.AppID'],
-                             ondelete='cascade'),
-        ForeignKeyConstraint(['roomID'], ['hipchat.roomID'],
-                             ondelete='cascade'),
-        { 'mysql_engine' : 'InnoDB', 'mysql_charset' : 'utf8', },
-    )
-
-
-    def __init__(self, AppID, roomID):
-        """ """
-
-        self.AppID = AppID
-        self.roomID = roomID
-
-
-    def __repr__(self):
-        """ """
-
-        return '<AppHipchatRooms("%s", "%s")>' % (self.AppID, self.roomID)
-
-
-class AppPackages(Base):
-    __tablename__ = 'app_packages'
-
-    pkgLocationID = Column('pkgLocationID', INTEGER(), nullable=False)
-    AppID = Column('AppID', SMALLINT(display_width=2), nullable=False)
-
-    __table_args__ = (
-        PrimaryKeyConstraint('pkgLocationID', 'AppID'),
-        ForeignKeyConstraint(['pkgLocationID'],
-                             ['package_locations.pkgLocationID'],
-                             ondelete='cascade'),
-        ForeignKeyConstraint(['AppID'], ['app_definitions.AppID'],
-                             ondelete='cascade'),
-        { 'mysql_engine' : 'InnoDB', 'mysql_charset' : 'utf8', },
-    )
-
-
-    def __init__(self, pkgLocationID, AppID):
-        """ """
-
-        self.pkgLocationID = pkgLocationID
-        self.AppID = AppID
-
-
-    def __repr__(self):
-        """ """
-
-        return '<AppPackages("%s", "%s")>' % (self.pkgLocationID, self.AppID)
-
-
-class Asset(Base):
-    __tablename__ = 'asset'
-
-    AssetID = Column(u'AssetID', INTEGER(), primary_key=True, nullable=False)
-    HostID = Column(u'HostID', INTEGER())
-    NetworkID = Column(u'NetworkID', INTEGER())
-    dateReceived = Column(u'dateReceived', DATE())
-    description = Column(u'description', VARCHAR(length=20))
-    oemSerial = Column(u'oemSerial', VARCHAR(length=30), unique=True)
-    serviceTag = Column(u'serviceTag', VARCHAR(length=20))
-    taggedSerial = Column(u'taggedSerial', VARCHAR(length=20))
-    invoiceNumber = Column(u'invoiceNumber', VARCHAR(length=20))
-    locationSite = Column(u'locationSite', VARCHAR(length=20))
-    locationOwner = Column(u'locationOwner', VARCHAR(length=20))
-    costPerItem = Column(u'costPerItem', VARCHAR(length=20))
-    dateOfInvoice = Column(u'dateOfInvoice', DATE())
-    warrantyStart = Column(u'warrantyStart', DATE())
-    warrantyEnd = Column(u'warrantyEnd', DATE())
-    warrantyLevel = Column(u'warrantyLevel', VARCHAR(length=20))
-    warrantyID = Column(u'warrantyID', VARCHAR(length=20))
-    vendorContact = Column(u'vendorContact', VARCHAR(length=20))
-
-    __table_args__ = (
-        ForeignKeyConstraint(['HostID'], ['hosts.HostID'],
-                             ondelete='cascade'),
-        ForeignKeyConstraint(['NetworkID'], ['networkDevice.NetworkID'],
-                             ondelete='cascade'),
-        { 'mysql_engine' : 'InnoDB', 'mysql_charset' : 'utf8', },
-    )
-
-
-class Cname(Base):
-    __tablename__ = 'cname'
-
-    CnameID = Column(u'CnameID', INTEGER(), primary_key=True, nullable=False)
-    name = Column(u'name', VARCHAR(length=40))
-    IpID = Column(u'IpID', INTEGER())
-    ZoneID = Column(u'ZoneID', INTEGER())
-
-    __table_args__ = (
-        ForeignKeyConstraint(['IpID'], ['host_ips.IpID'], onupdate='cascade',
-                             ondelete='cascade'),
-        ForeignKeyConstraint(['ZoneID'], ['zones.ZoneID'], onupdate='cascade',
-                             ondelete='cascade'),
-        UniqueConstraint('name', 'ZoneID', name='name_ZoneID'),
-        { 'mysql_engine' : 'InnoDB', 'mysql_charset' : 'utf8', },
-    )
-
-
-class DefaultSpecs(Base):
-    __tablename__ = 'default_specs'
-
-    specID = Column(u'specID', INTEGER(), nullable=False)
-    AppID = Column(u'AppID', SMALLINT(display_width=2), nullable=False)
-    environment = Column(u'environment', VARCHAR(length=15), nullable=False)
-    priority = Column(u'priority', INTEGER(display_width=4), nullable=False,
-                      default='10', server_default='10')
-
-    __table_args__ = (
-        ForeignKeyConstraint(['specID'], ['host_specs.specID'],
-                             onupdate='cascade', ondelete='cascade'),
-        ForeignKeyConstraint(['AppID'], ['app_definitions.AppID'],
-                             onupdate='cascade', ondelete='cascade'),
-        ForeignKeyConstraint(['environment'], ['environments.environment'],
-                             onupdate='cascade', ondelete='cascade'),
-        PrimaryKeyConstraint('specID', 'AppID', 'environment'),
-        { 'mysql_engine' : 'InnoDB', 'mysql_charset' : 'utf8', },
-    )
-
-
-class Deployments(Base):
-    __tablename__ = 'deployments'
-
-    DeploymentID = Column(u'DeploymentID', INTEGER(), primary_key=True,
-                          nullable=False)
-    PackageID = Column(u'PackageID', INTEGER(), nullable=False)
-    user = Column(u'user', VARCHAR(length=32), nullable=False)
-    dep_type = Column(u'dep_type', Enum('deploy', 'rollback'), nullable=False)
-    declared = Column(u'declared', TIMESTAMP(), nullable=False,
-                      default=func.current_timestamp(),
-                      server_default=func.current_timestamp())
-
-    __table_args__ = (
-        ForeignKeyConstraint(['PackageID'], ['packages.PackageID'],
-                             ondelete='cascade'),
-        { 'mysql_engine' : 'InnoDB', 'mysql_charset' : 'utf8', },
-    )
-
-
-    def __init__(self, PackageID, user, dep_type, declared):
-        """ """
-
-        self.PackageID = PackageID
-        self.user = user
-        self.dep_type = dep_type
-        self.declared = declared
-
-
-    def __repr__(self):
-        """ """
-
-        return '<Deployments("%s", "%s", "%s", "%s")>' \
-               % (self.PackageID, self.user, self.dep_type, self.declared)
-
-
-class Environments(Base):
+class Environments(TagOpsDB, Base):
     __tablename__ = 'environments'
 
-    environmentID = Column(u'environmentID', INTEGER(), primary_key=True,
-                           nullable=False)
-    environment = Column(u'environment', VARCHAR(length=15), nullable=False,
-                         unique=True)
-    env = Column(u'env', VARCHAR(length=12), nullable=False, unique=True)
-    domain = Column(u'domain', VARCHAR(length=32), nullable=False,
-                    unique=True)
-    domain = Column(u'prefix', VARCHAR(length=1), nullable=False)
-
-    __table_args__ = (
-        { 'mysql_engine' : 'InnoDB', 'mysql_charset' : 'utf8', },
-    )
+    id = Column(u'environmentID', INTEGER(), primary_key=True)
+    environment = Column(VARCHAR(length=15), nullable=False, unique=True)
+    env = Column(VARCHAR(length=12), nullable=False, unique=True)
+    domain = Column(VARCHAR(length=32), nullable=False, unique=True)
+    prefix = Column(VARCHAR(length=1), nullable=False)
 
 
-class Ganglia(Base):
+    def __init__(self, environment, env, domain, prefix):
+        """ """
+
+        self.environment = environment
+        self.env = env
+        self.domain = domain
+        self.prefix = prefix
+
+
+class Ganglia(TagOpsDB, Base):
     __tablename__ = 'ganglia'
 
-    GangliaID = Column(u'GangliaID', INTEGER(), primary_key=True,
-                       nullable=False)
-    cluster_name = Column(u'cluster_name', VARCHAR(length=50))
-    port = Column(u'port', INTEGER(display_width=5), nullable=False,
-                  default='8649', server_default='8649')
-
-    __table_args__ = (
-        { 'mysql_engine' : 'InnoDB', 'mysql_charset' : 'utf8', },
-    )
+    id = Column(u'GangliaID', INTEGER(), primary_key=True)
+    cluster_name = Column(VARCHAR(length=50))
+    port = Column(INTEGER(display_width=5), nullable=False, default='8649',
+                  server_default='8649')
 
 
-class Hipchat(Base):
+    def __init__(self, cluster_name, port):
+        """ """
+
+        self.cluster_name = cluster_name
+        self.port = port
+
+
+class Hipchat(TagOpsDB, Base):
     __tablename__ = 'hipchat'
 
-    roomID = Column(u'roomID', INTEGER(), primary_key=True, nullable=False)
-    room_name = Column(u'room_name', VARCHAR(length=50), unique=True)
-
-    __table_args__ = (
-        { 'mysql_engine' : 'InnoDB', 'mysql_charset' : 'utf8', },
-    )
+    id = Column(u'roomID', INTEGER(), primary_key=True)
+    room_name = Column(VARCHAR(length=50), nullable=False, unique=True)
 
 
     def __init__(self, room_name):
@@ -354,444 +80,179 @@ class Hipchat(Base):
         self.room_name = room_name
 
 
-    def __repr__(self):
-        """ """
-
-        return '<Hipchat("%s", "%s")>' % (self.roomID, self.room_name)
-
-
-class Hosts(Base):
-    __tablename__ = 'hosts'
-
-    HostID = Column(u'HostID', INTEGER(), primary_key=True, nullable=False)
-    SpecID = Column(u'SpecID', INTEGER())
-    state = Column(u'state', Enum(u'baremetal', u'operational', u'repair',
-                   u'parts', u'reserved', u'escrow'), nullable=False)
-    hostname = Column(u'hostname', VARCHAR(length=30))
-    arch = Column(u'arch', VARCHAR(length=10))
-    kernelVersion = Column(u'kernelVersion', VARCHAR(length=20))
-    distribution = Column(u'distribution', VARCHAR(length=20))
-    timezone = Column(u'timezone', VARCHAR(length=10))
-    AppID = Column(u'AppID', SMALLINT(display_width=6), nullable=False)
-    cageLocation = Column(u'cageLocation', INTEGER())
-    cabLocation = Column(u'cabLocation', VARCHAR(length=10))
-    rackLocation = Column(u'rackLocation', INTEGER())
-    consolePort = Column(u'consolePort', VARCHAR(length=11))
-    powerPort = Column(u'powerPort', VARCHAR(length=10))
-    powerCircuit = Column(u'powerCircuit', VARCHAR(length=10))
-    environment = Column(u'environment', VARCHAR(length=15))
-
-    __table_args__ = (
-        ForeignKeyConstraint(['SpecID'], ['host_specs.specID']),
-        ForeignKeyConstraint(['AppID'], ['app_definitions.AppID']),
-        UniqueConstraint('cageLocation', 'cabLocation', 'consolePort'),
-        UniqueConstraint('cageLocation', 'cabLocation', 'rackLocation'),
-        { 'mysql_engine' : 'InnoDB', 'mysql_charset' : 'utf8', },
-    )
-
-
-    def __init__(self, SpecID, state, hostname, arch, kernelVersion,
-                 distribution, timezone, AppID, cageLocation, cabLocation,
-                 rackLocation, consolePort, powerPort, powerCircuit,
-                 environment):
-        """ """
-
-        self.SpecID = SpecID
-        self.state = state
-        self.hostname = hostname
-        self.arch = arch
-        self.kernelVersion = kernelVersion
-        self.distribution = distribution
-        self.timezone = timezone
-        self.AppID = AppID
-        self.cageLocation = cageLocation
-        self.cabLocation = cabLocation
-        self.rackLocation = rackLocation
-        self.consolePort = consolePort
-        self.powerPort = powerPort
-        self.powerCircuit = powerCircuit
-        self.environment = environment
-
-
-    def __repr__(self):
-        """ """
-
-        return '<Hosts(%r, %r, %r, %r, %r, %r, %r, %r, %r, %r, %r, %r, ' \
-               '%r, %r, %r)>' \
-               % (self.SpecID, self.state, self.hostname, self.arch,
-                  self.kernelVersion, self.distribution, self.timezone,
-                  self.AppID, self.cageLocation, self.cabLocation,
-                  self.rackLocation, self.consolePort, self.powerPort,
-                  self.powerCircuit, self.environment)
-
-
-class HostDeployments(Base):
-    __tablename__ = 'host_deployments'
-
-    HostDeploymentID = Column('HostDeploymentID', INTEGER(), primary_key=True,
-                              nullable=False)
-    DeploymentID = Column('DeploymentID', INTEGER(), nullable=False)
-    HostID = Column('HostID', INTEGER(), nullable=False)
-    user = Column('user', VARCHAR(length=32), nullable=False)
-    status = Column('status', Enum('inprogress', 'ok', 'failed'),
-                    nullable=False)
-    realized = Column('realized', TIMESTAMP(), nullable=False,
-                      default=func.current_timestamp(),
-                      server_default=func.current_timestamp())
-
-    __table_args__ = (
-        ForeignKeyConstraint(['DeploymentID'], ['deployments.DeploymentID'],
-                             ondelete='cascade'),
-        ForeignKeyConstraint(['HostID'], ['hosts.HostID'],
-                             ondelete='cascade'),
-        { 'mysql_engine' : 'InnoDB', 'mysql_charset' : 'utf8', },
-    )
-
-
-    def __init__(self, DeploymentID, HostID, user, status, realized):
-        """ """
-
-        self.DeploymentID = DeploymentID
-        self.HostID = HostID
-        self.user = user
-        self.status = status
-        self.realized = realized
-
-
-    def __repr__(self):
-        """ """
-
-        return '<HostDeployments("%s", "%s", "%s", "%s", "%s")>' \
-               % (self.DeploymentID, self.HostID, self.user, self.status,
-                  self.realized)
-
-
-class HostInterfaces(Base):
-    __tablename__ = 'host_interfaces'
-
-    InterfaceID = Column(u'InterfaceID', INTEGER(), primary_key=True,
-                         nullable=False)
-    HostID = Column(u'HostID', INTEGER(), index=True)
-    NetworkID = Column(u'NetworkID', INTEGER(), index=True)
-    interfaceName = Column(u'interfaceName', VARCHAR(length=10))
-    macAddress = Column(u'macAddress', VARCHAR(length=18), unique=True)
-    PortID = Column(u'PortID', INTEGER(), unique=True, index=True)
-
-    __table_args__ = (
-        ForeignKeyConstraint(['HostID'], ['hosts.HostID'],
-                             ondelete='cascade'),
-        ForeignKeyConstraint(['NetworkID'], ['networkDevice.NetworkID'],
-                             ondelete='cascade'),
-        ForeignKeyConstraint(['PortID'], ['ports.PortID']),
-        UniqueConstraint('HostID', 'interfaceName'),
-        { 'mysql_engine' : 'InnoDB', 'mysql_charset' : 'utf8', },
-    )
-
-
-class HostIps(Base):
-    __tablename__ = 'host_ips'
-
-    IpID = Column(u'IpID', INTEGER(), primary_key=True, nullable=False)
-    InterfaceID = Column(u'InterfaceID', INTEGER(), nullable=False,
-                         index=True)
-    SubnetID = Column(u'SubnetID', INTEGER(), nullable=False, unique=True,
-                      index=True)
-    priority = Column(u'priority', INTEGER(unsigned=True), nullable=False,
-                      default=1, server_default='1')
-    ARecord = Column(u'ARecord', VARCHAR(length=200))
-    comments = Column(u'comments', VARCHAR(length=200))
-
-    __table_args__ = (
-        ForeignKeyConstraint(['InterfaceID'], ['host_interfaces.InterfaceID'],
-                             ondelete='cascade'),
-        ForeignKeyConstraint(['SubnetID'], ['subnet.SubnetID'],
-                             ondelete='cascade'),
-        { 'mysql_engine' : 'InnoDB', 'mysql_charset' : 'utf8', },
-    )
-
-
-class HostSpecs(Base):
+class HostSpecs(TagOpsDB, Base):
     __tablename__ = 'host_specs'
 
-    specID = Column(u'specID', INTEGER(), primary_key=True, nullable=False)
-    gen = Column(u'gen', VARCHAR(length=4))
-    memorySize = Column(u'memorySize', INTEGER(display_width=4),
-                        nullable=False)
-    cores = Column(u'cores', SMALLINT(display_width=2), nullable=False)
-    cpuSpeed = Column(u'cpuSpeed', INTEGER(display_width=6), nullable=False)
-    diskSize = Column(u'diskSize', INTEGER(display_width=6), nullable=False)
-    vendor = Column(u'vendor', VARCHAR(length=20))
-    model = Column(u'model', VARCHAR(length=20))
-    control = Column(u'control', Enum(u'digi', u'ipmi', u'vmware'))
-    virtual = Column(u'virtual', BOOLEAN(), nullable=False, default=0,
-                     server_default='0')
-    expansions = Column(u'expansions', TEXT())
-
-    __table_args__ = (
-        { 'mysql_engine' : 'InnoDB', },
-    )
+    id = Column(u'specID', INTEGER(), primary_key=True)
+    gen = Column(VARCHAR(length=4))
+    memory_size = Column(u'memorySize', INTEGER(display_width=4))
+    cores = Column(SMALLINT(display_width=2), nullable=False)
+    cpu_speed = Column(u'cpuSpeed', INTEGER(display_width=6))
+    disk_size = Column(u'diskSize', INTEGER(display_width=6))
+    vendor = Column(VARCHAR(length=20))
+    model = Column(VARCHAR(length=20))
+    control = Column(Enum(u'digi', u'ipmi', u'libvirt', u'vmware'))
+    virtual = Column(BOOLEAN(), nullable=False, default=0, server_default='0')
+    expansions = Column(MEDIUMTEXT())
 
 
-class Iloms(Base):
-    __tablename__ = 'iloms'
+    def __init__(self, gen, memory_size, cores, cpu_speed, disk_size, vendor,
+                 model, control, virtual, expansions):
+        """ """
 
-    ILomID = Column(u'ILomID', INTEGER(), primary_key=True, nullable=False)
-    HostID = Column(u'HostID', INTEGER(), unique=True, index=True)
-    SubnetID = Column(u'SubnetID', INTEGER(), nullable=False, unique=True,
-                      index=True)
-    macAddress = Column(u'macAddress', VARCHAR(length=18), unique=True)
-    PortID = Column(u'PortID', INTEGER(), unique=True, index=True)
-    ARecord = Column(u'ARecord', VARCHAR(length=200))
-    comments = Column(u'comments', VARCHAR(length=200))
-
-    __table_args__ = (
-        ForeignKeyConstraint(['HostID'], ['hosts.HostID'],
-                             ondelete='cascade'),
-        ForeignKeyConstraint(['SubnetID'], ['subnet.SubnetID'],
-                             ondelete='cascade'),
-        ForeignKeyConstraint(['PortID'], ['ports.PortID'],
-                             ondelete='cascade'),
-        { 'mysql_engine' : 'InnoDB', 'mysql_charset' : 'utf8', },
-    )
+        self.gen = gen
+        self.memory_size = memory_size
+        self.cores = cores
+        self.cpu_speed = cpu_speed
+        self.disk_size = disk_size
+        self.vendor = vendor
+        self.model = model
+        self.control = control
+        self.virtual = virtual
+        self.expansions = expansions
 
 
-class Modules(Base):
-    __tablename__ = 'modules'
+class JmxAttributes(TagOpsDB, Base):
+    __tablename__ = 'jmx_attributes'
 
-    ModuleID = Column(u'ModuleID', INTEGER(), primary_key=True,
-                      nullable=False)
-    NetworkID = Column(u'NetworkID', INTEGER())
-    modelNumber = Column(u'modelNumber', VARCHAR(length=20))
-
-    __table_args__ = (
-        ForeignKeyConstraint(['NetworkID'], ['networkDevice.NetworkID'],
-                             ondelete='cascade'),
-        { 'mysql_engine' : 'InnoDB', 'mysql_charset' : 'utf8', },
-    )
+    id = Column(u'jmx_attribute_id', INTEGER(), primary_key=True)
+    obj = Column(VARCHAR(length=300), nullable=False)
+    attr = Column(VARCHAR(length=300), nullable=False)
+    g_group_name = Column(u'GgroupName', VARCHAR(length=25))
 
 
-class NetworkDevice(Base):
+locks = Table(u'locks', Base.metadata,
+    Column(u'val', VARCHAR(length=64), nullable=False, unique=True),
+    Column(u'host', VARCHAR(length=32), nullable=False),
+    mysql_engine='InnoDB', mysql_charset='utf8',
+)
+
+
+class NagCheckCommands(TagOpsDB, Base):
+    __tablename__ = 'nag_check_commands'
+
+    id = Column(INTEGER(), primary_key=True)
+    command_name = Column(VARCHAR(length=32), nullable=False, unique=True)
+    command_line = Column(VARCHAR(length=255), nullable=False)
+
+
+class NagContactGroups(TagOpsDB, Base):
+    __tablename__ = 'nag_contact_groups'
+
+    id = Column(INTEGER(), primary_key=True)
+    name = Column(VARCHAR(length=32), nullable=False, unique=True)
+    alias = Column(VARCHAR(length=80))
+
+
+class NagContacts(TagOpsDB, Base):
+    __tablename__ = 'nag_contacts'
+
+    id = Column(INTEGER(), primary_key=True)
+    name = Column(VARCHAR(length=32), nullable=False, unique=True)
+    alias = Column(VARCHAR(length=80))
+    email = Column(VARCHAR(length=80))
+    pager = Column(VARCHAR(length=80))
+
+
+class NagTimePeriods(TagOpsDB, Base):
+    __tablename__ = 'nag_time_periods'
+
+    id = Column(INTEGER(), primary_key=True)
+    name = Column(VARCHAR(length=32), nullable=False, unique=True)
+    alias = Column(VARCHAR(length=80))
+    sunday = Column(VARCHAR(length=32))
+    monday = Column(VARCHAR(length=32))
+    tuesday = Column(VARCHAR(length=32))
+    wednesday = Column(VARCHAR(length=32))
+    thursday = Column(VARCHAR(length=32))
+    friday = Column(VARCHAR(length=32))
+    saturday = Column(VARCHAR(length=32))
+
+
+class NetworkDevice(TagOpsDB, Base):
     __tablename__ = 'networkDevice'
 
-    NetworkID = Column(u'NetworkID', INTEGER(), primary_key=True,
-                       nullable=False)
-    systemName = Column(u'systemName', VARCHAR(length=20), unique=True)
-    model = Column(u'model', VARCHAR(length=50))
-    hardwareCode = Column(u'hardwareCode', VARCHAR(length=20))
-    softwareCode = Column(u'softwareCode', VARCHAR(length=20))
-
-    __table_args__ = (
-        { 'mysql_engine' : 'InnoDB', 'mysql_charset' : 'utf8', },
-    )
+    id = Column(u'NetworkID', INTEGER(), primary_key=True)
+    system_name = Column(u'systemName', VARCHAR(length=20), unique=True)
+    model = Column(VARCHAR(length=50))
+    hardware_code = Column(u'hardwareCode', VARCHAR(length=20))
+    software_code = Column(u'softwareCode', VARCHAR(length=20))
 
 
-class NsDevice(Base):
+    def __init__(self, system_name, model, hardware_code, software_code):
+        """ """
+
+        self.system_name = system_name
+        self.model = model
+        self.hardware_code = hardware_code
+        self.software_code = software_code
+
+
+class NsDevice(TagOpsDB, Base):
     __tablename__ = 'ns_device'
 
-    deviceID = Column(u'deviceID', INTEGER(unsigned=True), primary_key=True,
-                      nullable=False)
-    proto = Column(u'proto', VARCHAR(length=6), nullable=False)
-    host = Column(u'host', VARCHAR(length=32), nullable=False)
+    id = Column(u'deviceID', INTEGER(unsigned=True), primary_key=True)
+    proto = Column(VARCHAR(length=6), nullable=False)
+    host = Column(VARCHAR(length=32), nullable=False)
 
     __table_args__ = (
-        UniqueConstraint('proto', 'host', name='proto_host'),
+        UniqueConstraint(u'proto', u'host', name=u'proto_host'),
         { 'mysql_engine' : 'InnoDB', 'mysql_charset' : 'utf8', },
     )
 
 
-class NsMonitor(Base):
+    def __init__(self, proto, host):
+        """ """
+
+        self.proto = proto
+        self.host = host
+
+
+class NsMonitor(TagOpsDB, Base):
     __tablename__ = 'ns_monitor'
 
-    monitorID = Column(u'monitorID', INTEGER(unsigned=True), primary_key=True,
-                       nullable=False)
-    monitor = Column(u'monitor', VARCHAR(length=32), nullable=False,
-                     unique=True)
-
-    __table_args__ = (
-        { 'mysql_engine' : 'InnoDB', 'mysql_charset' : 'utf8', },
-    )
+    id = Column(u'monitorID', INTEGER(unsigned=True), primary_key=True)
+    monitor = Column(VARCHAR(length=32), nullable=False, unique=True)
 
 
-class NsService(Base):
+    def __init__(self, monitor):
+        """ """
+
+        self.monitor = monitor
+
+
+class NsService(TagOpsDB, Base):
     __tablename__ = 'ns_service'
 
-    serviceID = Column(u'serviceID', INTEGER(unsigned=True), primary_key=True,
-                       nullable=False)
-    serviceName = Column(u'serviceName', VARCHAR(length=64), nullable=False,
-                         unique=True)
-    proto = Column(u'proto', VARCHAR(length=16), nullable=False)
-    port = Column(u'port', SMALLINT(display_width=5, unsigned=True),
-                  nullable=False)
-
-    __table_args__ = (
-        { 'mysql_engine' : 'InnoDB', 'mysql_charset' : 'utf8', },
-    )
+    id = Column(u'serviceID', INTEGER(unsigned=True), primary_key=True)
+    service_name = Column(u'serviceName', VARCHAR(length=64), nullable=False,
+                          unique=True)
+    proto = Column(VARCHAR(length=16), nullable=False)
+    port = Column(SMALLINT(display_width=5, unsigned=True), nullable=False)
 
 
-class NsServiceMax(Base):
-    __tablename__ = 'ns_service_max'
-
-    primaryID = Column(u'primaryID', INTEGER(), primary_key=True,
-                       nullable=False)
-    specID = Column(u'specID', INTEGER(), nullable=False)
-    serviceID = Column(u'serviceID', INTEGER(unsigned=True), nullable=False)
-    maxClient = Column(u'maxClient', INTEGER(unsigned=True), nullable=False,
-                       default=0, server_default='0')
-    maxReq = Column(u'maxReq', INTEGER(unsigned=True), nullable=False,
-                    default=0, server_default='0')
-
-    __table_args__ = (
-        ForeignKeyConstraint(['specID'], ['host_specs.specID'],
-                             ondelete='cascade'),
-        ForeignKeyConstraint(['serviceID'], ['ns_service.serviceID'],
-                             ondelete='cascade'),
-        UniqueConstraint('specID', 'serviceID', name='specID_serviceID'),
-        { 'mysql_engine' : 'InnoDB', 'mysql_charset' : 'utf8', },
-    )
-
-
-class NsServiceParams(Base):
-    __tablename__ = 'ns_service_params'
-
-    primaryID = Column(u'primaryID', INTEGER(), primary_key=True,
-                       nullable=False)
-    serviceID = Column(u'serviceID', INTEGER(unsigned=True), nullable=False)
-    param = Column(u'param', VARCHAR(length=32), nullable=False)
-    value = Column(u'value', VARCHAR(length=128), nullable=False)
-
-    __table_args__ = (
-        ForeignKeyConstraint(['serviceID'], ['ns_service.serviceID'],
-                             ondelete='cascade'),
-        { 'mysql_engine' : 'InnoDB', 'mysql_charset' : 'utf8', },
-    )
-
-
-class NsVip(Base):
-    __tablename__ = 'ns_vip'
-
-    vipID = Column(u'vipID', INTEGER(unsigned=True), primary_key=True,
-                   nullable=False)
-    vserver = Column(u'vserver', VARCHAR(length=64), nullable=False)
-    deviceID = Column(u'deviceID', INTEGER(unsigned=True), nullable=False)
-
-    __table_args__ = (
-        ForeignKeyConstraint(['deviceID'], ['ns_device.deviceID'],
-                             ondelete='cascade'),
-        UniqueConstraint('deviceID', 'vserver', name='device_vserver'),
-        { 'mysql_engine' : 'InnoDB', 'mysql_charset' : 'utf8', },
-    )
-
-
-class NsVipBinds(Base):
-    __tablename__ = 'ns_vip_binds'
-
-    primaryID = Column(u'primaryID', INTEGER(), primary_key=True,
-                       nullable=False)
-    appID = Column(u'appID', SMALLINT(display_width=6), nullable=False)
-    environment = Column(u'environment', VARCHAR(length=15), nullable=False)
-    vipID = Column(u'vipID', INTEGER(unsigned=True), nullable=False)
-    serviceID = Column(u'serviceID', INTEGER(unsigned=True), nullable=False)
-
-    __table_args__ = (
-        ForeignKeyConstraint(['appID'], ['app_definitions.AppID'],
-                             ondelete='cascade'),
-        ForeignKeyConstraint(['vipID'], ['ns_vip.vipID'], ondelete='cascade'),
-        ForeignKeyConstraint(['serviceID'], ['ns_service.serviceID'],
-                             ondelete='cascade'),
-        UniqueConstraint('appID', 'environment', 'vipID', 'serviceID',
-                         name='nsVipBindsID'),
-        { 'mysql_engine' : 'InnoDB', 'mysql_charset' : 'utf8', },
-    )
-
-
-class NsWeight(Base):
-    __tablename__ = 'ns_weight'
-
-    primaryID = Column(u'primaryID', INTEGER(), primary_key=True,
-                       nullable=False)
-    vipID = Column(u'vipID', INTEGER(unsigned=True), nullable=False)
-    specID = Column(u'specID', INTEGER(), nullable=False)
-    weight = Column(u'weight', TINYINT(display_width=3, unsigned=True),
-                    nullable=False)
-
-    __table_args__ = (
-        ForeignKeyConstraint(['vipID'], ['ns_vip.vipID'], ondelete='cascade'),
-        ForeignKeyConstraint(['specID'], ['host_specs.specID'],
-                             ondelete='cascade'),
-        UniqueConstraint('vipID', 'specID', name='vipID_specID'),
-        { 'mysql_engine' : 'InnoDB', 'mysql_charset' : 'utf8', },
-    )
-
-
-class Packages(Base):
-    __tablename__ = 'packages'
-
-    PackageID = Column(u'PackageID', INTEGER(), primary_key=True,
-                       nullable=False)
-    pkg_name = Column(u'pkg_name', VARCHAR(length=255), nullable=False)
-    version = Column(u'version', VARCHAR(length=63), nullable=False)
-    revision = Column(u'revision', VARCHAR(length=63), nullable=False)
-    created = Column(u'created', TIMESTAMP(), nullable=False,
-                     default=func.current_timestamp(),
-                     server_default=func.current_timestamp())
-    creator = Column(u'creator', VARCHAR(length=255), nullable=False)
-    builder = Column(u'builder', Enum(u'developer', u'hudson', u'jenkins'),
-                     nullable=False, default='developer',
-                     server_default='developer')
-    project_type = Column(u'project_type', Enum(u'application', u'tagconfig'),
-                          nullable=False, default='application',
-                          server_default='application')
-
-    __table_args__ = (
-        UniqueConstraint('pkg_name', 'version', 'revision', 'builder',
-                         name='unique_package'),
-        { 'mysql_engine' : 'InnoDB', },
-    )
-
-
-    def __init__(self, pkg_name, version, revision, created, creator,
-                 builder, project_type):
+    def __init__(self, service_name, proto, port):
         """ """
 
-        self.pkg_name = pkg_name
-        self.version = version
-        self.revision = revision
-        self.created = created
-        self.creator = creator
-        self.builder = builder
-        self.project_type = project_type
+        self.service_name = service_name
+        self.proto = proto
+        self.port = port
 
 
-    def __repr__(self):
-        """ """
-
-        return '<Packages("%s", "%s", "%s", "%s", "%s", "%s", "%s")>' \
-               % (self.pkg_name, self.version, self.revision, self.created,
-                  self.creator, self.builder, self.project_type)
-
-
-class PackageLocations(Base):
+class PackageLocations(TagOpsDB, Base):
     __tablename__ = 'package_locations'
 
-    pkgLocationID = Column(u'pkgLocationID', INTEGER(), primary_key=True,
-                           nullable=False)
-    project_type = Column(u'project_type', Enum(u'application', u'tagconfig'),
-                          nullable=False, default='application',
-                          server_default='application')
-    pkg_type = Column(u'pkg_type', VARCHAR(length=255), nullable=False)
-    pkg_name = Column(u'pkg_name', VARCHAR(length=255), nullable=False,
-                      unique=True)
-    app_name = Column(u'app_name', VARCHAR(length=255), nullable=False,
-                      unique=True)
-    path = Column(u'path', VARCHAR(length=255), nullable=False, unique=True)
-    arch = Column(u'arch', Enum(u'i386', u'x86_64', u'noarch'),
-                  nullable=False, default='noarch', server_default='noarch')
-    build_host = Column(u'build_host', VARCHAR(length=30), nullable=False)
-    environment = Column(u'environment', BOOLEAN(), nullable=False)
-
-    __table_args__ = (
-        { 'mysql_engine' : 'InnoDB', 'mysql_charset' : 'utf8', },
-    )
+    id = Column(u'pkgLocationID', INTEGER(), primary_key=True)
+    project_type = Column(Enum(u'application', u'tagconfig'), nullable=False,
+                          default='application', server_default='application')
+    pkg_type = Column(VARCHAR(length=255), nullable=False)
+    pkg_name = Column(VARCHAR(length=255), nullable=False, unique=True)
+    app_name = Column(VARCHAR(length=255), nullable=False, unique=True)
+    path = Column(VARCHAR(length=255), nullable=False, unique=True)
+    arch = Column(Enum(u'i386', u'x86_64', u'noarch'), nullable=False,
+                  default='noarch', server_default='noarch')
+    build_host = Column(VARCHAR(length=30), nullable=False)
+    environment = Column(BOOLEAN(), nullable=False)
 
 
     def __init__(self, project_type, pkg_type, pkg_name, app_name, path, arch,
@@ -808,172 +269,907 @@ class PackageLocations(Base):
         self.environment = environment
 
 
-    def __repr__(self):
-        """ """
+class Packages(TagOpsDB, Base):
+    __tablename__ = 'packages'
 
-        return '<PackageLocations("%s", "%s", "%s", "%s", "%s", "%s", ' \
-               '"%s", "%s")>' % (self.project_type, self.pkg_type,
-                                 self.pkg_name, self.app_name, self.path,
-                                 self.arch, self.build_host, self.environment)
-
-
-class Ports(Base):
-    __tablename__ = 'ports'
-
-    PortID = Column(u'PortID', INTEGER(), primary_key=True, nullable=False)
-    NetworkID = Column(u'NetworkID', INTEGER())
-    portNumber = Column(u'portNumber', VARCHAR(length=20))
-    description = Column(u'description', VARCHAR(length=50))
-    speed = Column(u'speed', VARCHAR(length=20))
-    duplex = Column(u'duplex', VARCHAR(length=20))
+    id = Column(u'PackageID', INTEGER(), primary_key=True)
+    pkg_name = Column(VARCHAR(length=255), nullable=False)
+    version = Column(VARCHAR(length=63), nullable=False)
+    revision = Column(VARCHAR(length=63), nullable=False)
+    created = Column(TIMESTAMP(), nullable=False,
+                     default=func.current_timestamp(),
+                     server_default=func.current_timestamp())
+    creator = Column(VARCHAR(length=255), nullable=False)
+    builder = Column(Enum(u'developer', u'hudson', u'jenkins'),
+                     nullable=False, default='developer',
+                     server_default='developer')
+    project_type = Column(Enum(u'application', u'tagconfig'), nullable=False,
+                          default='application', server_default='application')
 
     __table_args__ = (
-        ForeignKeyConstraint(['NetworkID'], ['networkDevice.NetworkID'],
-                             ondelete='cascade'),
+        UniqueConstraint(u'pkg_name', u'version', u'revision', u'builder',
+                         name=u'unique_package'),
+        { 'mysql_engine' : 'InnoDB', 'mysql_charset' : 'utf8', },
+    )
+
+
+    def __init__(self, pkg_name, version, revision, created, creator,
+                 builder, project_type):
+        """ """
+
+        self.pkg_name = pkg_name
+        self.version = version
+        self.revision = revision
+        self.created = created
+        self.creator = creator
+        self.builder = builder
+        self.project_type = project_type
+
+
+class Zones(TagOpsDB, Base):
+    __tablename__ = 'zones'
+
+    id = Column(u'ZoneID', INTEGER(), primary_key=True)
+    zone_name = Column(u'zoneName',VARCHAR(length=30))
+    mx_priority = Column(u'mxPriority', INTEGER())
+    mx_host_id = Column(u'mxHostID', VARCHAR(length=30))
+    ns_priority = Column(u'nsPriority', INTEGER())
+    nameserver = Column(VARCHAR(length=30))
+
+
+    def __init__(self, zone_name, mx_priority, mx_host_id, ns_priority,
+                 nameserver):
+        """ """
+
+        self.zone_name = zone_name
+        self.mx_priority = mx_priority
+        self.mx_host_id = mx_host_id
+        self.ns_priority = ns_priority
+        self.nameserver = nameserver
+
+
+class Deployments(TagOpsDB, Base):
+    __tablename__ = 'deployments'
+
+    id = Column(u'DeploymentID', INTEGER(), primary_key=True)
+    package_id = Column(u'PackageID', INTEGER(),
+                        ForeignKey(Packages.id, ondelete='cascade'),
+                        nullable=False)
+    user = Column(VARCHAR(length=32), nullable=False)
+    dep_type = Column(Enum('deploy', 'rollback'), nullable=False)
+    declared = Column(TIMESTAMP(), nullable=False,
+                      default=func.current_timestamp(),
+                      server_default=func.current_timestamp())
+
+
+    def __init__(self, package_id, user, dep_type, declared):
+        """ """
+
+        self.package_id = package_id
+        self.user = user
+        self.dep_type = dep_type
+        self.declared = declared
+
+
+class NagCommandArguments(TagOpsDB, Base):
+    __tablename__ = 'nag_command_arguments'
+
+    id = Column(INTEGER(), primary_key=True)
+    check_command_id = Column(INTEGER(),
+                              ForeignKey(NagCheckCommands.id,
+                                         ondelete='cascade'),
+                              nullable=False)
+    label = Column(VARCHAR(length=32), nullable=False)
+    description = Column(VARCHAR(length=255), nullable=False)
+    arg_order = Column(INTEGER(), nullable=False)
+    default_value = Column(VARCHAR(length=80))
+
+    __table_args__ = (
+        UniqueConstraint(u'check_command_id', u'arg_order',
+                         name='check_command_arg_order'),
+        { 'mysql_engine' : 'InnoDB', 'mysql_charset' : 'utf8', },
+    )
+
+
+nag_contact_groups_members = Table(u'nag_contact_groups_members',
+    Base.metadata,
+    Column(u'contact_id', INTEGER(),
+           ForeignKey(NagContacts.id, ondelete='cascade'),
+           primary_key=True),
+    Column(u'contact_group_id', INTEGER(),
+           ForeignKey(NagContactGroups.id, ondelete='cascade'),
+           primary_key=True),
+    mysql_engine='InnoDB', mysql_charset='utf8',
+)
+
+
+class NagServices(TagOpsDB, Base):
+    __tablename__ = 'nag_services'
+
+    id = Column(INTEGER(), primary_key=True)
+    check_command_id = Column(INTEGER(),
+                              ForeignKey(NagCheckCommands.id,
+                                         ondelete='cascade'),
+                              nullable=False)
+    description = Column(VARCHAR(length=255), nullable=False)
+    max_check_attempts = Column(INTEGER(), nullable=False)
+    check_interval = Column(INTEGER(), nullable=False)
+    check_period_id = Column(INTEGER(),
+                             ForeignKey(NagTimePeriods.id,
+                                        ondelete='cascade'),
+                             nullable=False)
+    retry_interval = Column(INTEGER(), nullable=False)
+    notification_interval = Column(INTEGER(), nullable=False)
+    notification_period_id = Column(INTEGER(),
+                                    ForeignKey(NagTimePeriods.id,
+                                               ondelete='cascade'),
+                                    nullable=False)
+
+
+ns_service_binds = Table(u'ns_service_binds', Base.metadata,
+    Column(u'serviceID', INTEGER(unsigned=True),
+           ForeignKey(NsService.id, ondelete='cascade'),
+           primary_key=True),
+    Column(u'monitorID', INTEGER(unsigned=True),
+           ForeignKey(NsMonitor.id, ondelete='cascade'),
+           primary_key=True),
+    mysql_engine='InnoDB', mysql_charset='utf8',
+)
+
+
+class NsServiceMax(TagOpsDB, Base):
+    __tablename__ = 'ns_service_max'
+
+    spec_id = Column(u'specID', INTEGER(),
+                     ForeignKey(HostSpecs.id, ondelete='cascade'),
+                     primary_key=True)
+    service_id = Column(u'serviceID', INTEGER(unsigned=True),
+                        ForeignKey(NsService.id, ondelete='cascade'),
+                        primary_key=True)
+    max_client = Column(u'maxClient', INTEGER(unsigned=True), nullable=False,
+                        default=0, server_default='0')
+    max_requests = Column(u'maxReq', INTEGER(unsigned=True), nullable=False,
+                          default=0, server_default='0')
+
+
+    def __init__(self, spec_id, service_id, max_client, max_requests):
+        """ """
+
+        self.spec_id = spec_id
+        self.service_id = service_id
+        self.max_client = max_client
+        self.max_requests = max_requests
+
+
+class NsServiceParams(TagOpsDB, Base):
+    __tablename__ = 'ns_service_params'
+
+    service_id = Column(u'serviceID', INTEGER(unsigned=True),
+                        ForeignKey(NsService.id, ondelete='cascade'),
+                        primary_key=True)
+    param = Column(VARCHAR(length=32), primary_key=True)
+    value = Column(VARCHAR(length=128), nullable=False)
+
+
+    def __init__(self, service_id, param, value):
+        """ """
+
+        self.service_id = service_id
+        self.param = param
+        self.value = value
+
+
+class NsVip(TagOpsDB, Base):
+    __tablename__ = 'ns_vip'
+
+    id = Column(u'vipID', INTEGER(unsigned=True), primary_key=True)
+    vserver = Column(VARCHAR(length=64), nullable=False)
+    device_id = Column(u'deviceID', INTEGER(unsigned=True),
+                       ForeignKey(NsDevice.id, ondelete='cascade'),
+                       nullable=False)
+
+    __table_args__ = (
+        UniqueConstraint(u'deviceID', u'vserver', name=u'device_vserver'),
+        { 'mysql_engine' : 'InnoDB', 'mysql_charset' : 'utf8', },
+    )
+
+
+    def __init__(self, vserver, device_id):
+        """ """
+
+        self.vserver = vserver
+        self.device_id = device_id
+
+
+class Ports(TagOpsDB, Base):
+    __tablename__ = 'ports'
+
+    id = Column(u'PortID', INTEGER(), primary_key=True)
+    network_id = Column(u'NetworkID', INTEGER(),
+                        ForeignKey(NetworkDevice.id, ondelete='cascade'))
+    port_number = Column(u'portNumber', VARCHAR(length=20))
+    description = Column(VARCHAR(length=50))
+    speed = Column(VARCHAR(length=20))
+    duplex = Column(VARCHAR(length=20))
+
+    __table_args__ = (
         UniqueConstraint('NetworkID', 'portNumber',
                          name='NetworkID_portNumber'),
         { 'mysql_engine' : 'InnoDB', 'mysql_charset' : 'utf8', },
     )
 
-    def __init__(self, NetworkID=None, portNumber=None, description=None,
-                 speed=None, duplex=None):
+
+    def __init__(self, network_id, port_number, description, speed, duplex):
         """ """
 
-        self.NetworkID = NetworkID
-        self.portNumber = portNumber
+        self.network_id = network_id
+        self.port_number = port_number
         self.description = description
         self.speed = speed
         self.duplex = duplex
 
 
-class ProcessorInfo(Base):
-    __tablename__ = 'processor_info'
-
-    processorId = Column(u'processorId', INTEGER(), primary_key=True,
-                         nullable=False)
-    cores = Column(u'cores', INTEGER())
-    capacity = Column(u'capacity', FLOAT())
-    hyperthreaded = Column(u'hyperthreaded', INTEGER())
-    processor_name = Column(u'processor_name', VARCHAR(length=20))
-    clock_speed = Column(u'clock_speed', FLOAT())
-
-
-class ServiceEvent(Base):
-    __tablename__ = 'serviceEvent'
-
-    ServiceID = Column(u'ServiceID', INTEGER(), primary_key=True,
-                       nullable=False)
-    HostID = Column(u'HostID', INTEGER())
-    NetworkID = Column(u'NetworkID', INTEGER())
-    user = Column(u'user', VARCHAR(length=20))
-    serviceStatus = Column(u'serviceStatus', VARCHAR(length=100))
-    powerStatus = Column(u'powerStatus', VARCHAR(length=10))
-    vendorTicket = Column(u'vendorTicket', VARCHAR(length=20))
-    comments = Column(u'comments', TEXT())
-    serviceDate = Column(u'serviceDate', TIMESTAMP(), nullable=False,
-                         default=func.current_timestamp(),
-                         onupdate=func.current_timestamp(),
-                         server_onupdate=func.current_timestamp())
-
-    __table_args__ = (
-        ForeignKeyConstraint(['HostID'], ['hosts.HostID'],
-                             ondelete='cascade'),
-        ForeignKeyConstraint(['NetworkID'], ['networkDevice.NetworkID'],
-                             ondelete='cascade'),
-        { 'mysql_engine' : 'InnoDB', 'mysql_charset' : 'utf8', },
-    )
-
-
-class SpecProcessor(Base):
-    __tablename__ = 'spec_processor'
-
-    specId = Column(u'specId', INTEGER(), primary_key=True, nullable=False)
-    processorId = Column(u'processorId', INTEGER())
-
-
-class SpecidToMaxclients(Base):
-    __tablename__ = 'specid_to_maxclients'
-
-    specID = Column(u'specID', INTEGER(), nullable=False)
-    AppID = Column(u'AppID', SMALLINT(display_width=2), nullable=False)
-    vip_maxclients = Column(u'vip_maxclients', VARCHAR(length=4),
-                            nullable=False)
-
-    __table_args__ = (
-        PrimaryKeyConstraint('specID', 'AppID'),
-        ForeignKeyConstraint(['specID'], ['host_specs.specID']),
-        ForeignKeyConstraint(['AppID'], ['app_definitions.AppID']),
-        { 'mysql_engine' : 'InnoDB', },
-    )
-
-
-class Subnet(Base):
-    __tablename__ = 'subnet'
-
-    SubnetID = Column(u'SubnetID', INTEGER(), primary_key=True,
-                      nullable=False)
-    VlanID = Column(u'VlanID', INTEGER())
-    ipAddress = Column(u'ipAddress', VARCHAR(length=15), unique=True)
-    netmask = Column(u'netmask', VARCHAR(length=15))
-    gateway = Column(u'gateway', VARCHAR(length=15))
-    ZoneID = Column(u'ZoneID', INTEGER())
-
-    __table_args__ = (
-        ForeignKeyConstraint(['VlanID'], ['vlans.VlanID'],
-                             ondelete='cascade'),
-        ForeignKeyConstraint(['ZoneID'], ['zones.ZoneID']),
-        { 'mysql_engine' : 'InnoDB', 'mysql_charset' : 'utf8', },
-    )
-
-
-class UsageStats(Base):
-    __tablename__ = 'usage_stats'
-
-    primaryID = Column(u'primaryID', INTEGER(), primary_key=True,
-                       nullable=False)
-    date = Column(u'date', DATE())
-    appType = Column(u'appType', VARCHAR(length=100))
-    servers = Column(u'servers', INTEGER(display_width=5))
-    cores = Column(u'cores', INTEGER(display_width=6))
-    cpu = Column(u'cpu', INTEGER(display_width=6))
-    environment = Column(u'environment', Enum(u'production', u'staging',
-                         u'development'))
-
-
-class UsageStats2(Base):
-    __tablename__ = 'usage_stats_2'
-
-    hostname = Column(u'hostname', VARCHAR(length=30), primary_key=True,
-                      nullable=False, default='', server_default='')
-    util = Column(u'util', FLOAT())
-
-
-class Vlans(Base):
+class Vlans(TagOpsDB, Base):
     __tablename__ = 'vlans'
 
-    VlanID = Column(u'VlanID', INTEGER(), primary_key=True, nullable=False)
-    name = Column(u'name', VARCHAR(length=20))
-    environmentID = Column(u'environmentID', INTEGER())
-    description = Column(u'description', VARCHAR(length=50))
+    id = Column(u'VlanID', INTEGER(), primary_key=True)
+    name = Column(VARCHAR(length=20))
+    environment_id = Column(u'environmentID', INTEGER(),
+                            ForeignKey(Environments.id, ondelete='cascade'))
+    description = Column(VARCHAR(length=50))
+
+
+    def __init__(self, name, description):
+        """ """
+
+        self.name = name
+        self.description = description
+
+
+class AppDefinitions(TagOpsDB, Base):
+    __tablename__ = 'app_definitions'
+
+    id = Column(u'AppID', SMALLINT(display_width=2), primary_key=True)
+    production_vlan_id = Column(u'Production_VlanID', INTEGER(),
+                                ForeignKey(Vlans.id), nullable=False)
+    development_vlan_id = Column(u'Development_VlanID', INTEGER(),
+                                 ForeignKey(Vlans.id), nullable=False)
+    staging_vlan_id = Column(u'Staging_VlanID', INTEGER(),
+                             ForeignKey(Vlans.id), nullable=False)
+    distribution = Column(Enum(u'co54', u'co62', u'co64', u'rh53', u'rh62',
+                               u'rh63', u'rh64'), nullable=False,
+                          default='co64', server_default='co64')
+    app_type = Column(u'appType', VARCHAR(length=100), nullable=False)
+    host_base = Column(u'hostBase', VARCHAR(length=100))
+    puppet_class = Column(u'puppetClass', VARCHAR(length=100), nullable=False,
+                          default='baseclass', server_default='baseclass')
+    ganglia_id = Column(u'GangliaID', INTEGER(), ForeignKey(Ganglia.id),
+                        nullable=False, default=1, server_default='1')
+    ganglia_group_name = Column(u'GgroupName', VARCHAR(length=25))
+    description = Column(VARCHAR(length=100))
+    status = Column(Enum('active', 'inactive'), nullable=False,
+                    default='active', server_default='active')
+
+
+    def __init__(self, production_vlan_id, development_vlan_id,
+                 staging_vlan_id, distribution, app_type, host_base,
+                 puppet_class, ganglia_id, ganglia_group_name,
+                 description, status):
+        """ """
+
+        self.production_vlan_id = production_vlan_id
+        self.development_vlan_id = development_vlan_id
+        self.staging_vlan_id = staging_vlan_id
+        self.distribution = distribution
+        self.app_type = app_type
+        self.host_base = host_base
+        self.puppet_class = puppet_class
+        self.ganglia_id = ganglia_id
+        self.ganglia_group_name = ganglia_group_name
+        self.description = description
+        self.status = status
+
+
+class NagServicesArguments(TagOpsDB, Base):
+    __tablename__ = 'nag_services_arguments'
+
+    service_id = Column(INTEGER(),
+                        ForeignKey(NagServices.id, ondelete='cascade'),
+                        primary_key=True)
+    command_argument_id = Column(INTEGER(),
+                                 ForeignKey(NagCommandArguments.id,
+                                            ondelete='cascade'),
+                                 primary_key=True)
+    value = Column(VARCHAR(length=120), nullable=False)
+
+
+nag_services_contact_groups = Table(u'nag_services_contact_groups',
+    Base.metadata,
+    Column(u'service_id', INTEGER(),
+           ForeignKey(NagServices.id, ondelete='cascade'),
+           primary_key=True),
+    Column(u'contact_group_id', INTEGER(),
+           ForeignKey(NagContactGroups.id, ondelete='cascade'),
+           primary_key=True),
+    mysql_engine='InnoDB', mysql_charset='utf8',
+)
+
+nag_services_contacts = Table(u'nag_services_contacts', Base.metadata,
+    Column(u'service_id', INTEGER(),
+           ForeignKey(NagServices.id, ondelete='cascade'),
+           primary_key=True),
+    Column(u'contact_id', INTEGER(),
+           ForeignKey(NagContacts.id, ondelete='cascade'),
+           primary_key=True),
+    mysql_engine='InnoDB', mysql_charset='utf8',
+)
+
+
+class NsWeight(TagOpsDB, Base):
+    __tablename__ = 'ns_weight'
+
+    vip_id = Column(u'vipID', INTEGER(unsigned=True),
+                    ForeignKey(NsVip.id, ondelete='cascade'),
+                    primary_key=True)
+    spec_id = Column(u'specID', INTEGER(),
+                     ForeignKey(HostSpecs.id, ondelete='cascade'),
+                     primary_key=True)
+    weight = Column(TINYINT(display_width=3, unsigned=True), nullable=False)
+
+
+    def __init__(self, vip_id, spec_id, weight):
+        """ """
+
+        self.vip_id = vip_id
+        self.spec_id = spec_id
+        self.weight = weight
+
+
+class Subnet(TagOpsDB, Base):
+    __tablename__ = 'subnet'
+
+    id = Column(u'SubnetID', INTEGER(), primary_key=True)
+    vlan_id = Column(u'VlanID', INTEGER(),
+                     ForeignKey(Vlans.id, ondelete='cascade'))
+    ip_address = Column(u'ipAddress', VARCHAR(length=15), unique=True)
+    netmask = Column(VARCHAR(length=15))
+    gateway = Column(VARCHAR(length=15))
+    zone_id = Column(u'ZoneID', INTEGER(), ForeignKey(Zones.id))
+
+
+    def __init__(self, vlan_id, ip_address, netmask, gateway, zone_id):
+        """ """
+
+        self.vlan_id = vlan_id
+        self.ip_address = ip_address
+        self.netmask = netmask
+        self.gateway = gateway
+        self.zone_id = zone_id
+
+
+class AppDeployments(TagOpsDB, Base):
+    __tablename__ = 'app_deployments'
+
+    id = Column(u'AppDeploymentID', INTEGER(), primary_key=True)
+    deployment_id = Column(u'DeploymentID', INTEGER(),
+                           ForeignKey(Deployments.id, ondelete='cascade'),
+                           nullable=False)
+    app_id = Column(u'AppID', SMALLINT(display_width=6),
+                    ForeignKey(AppDefinitions.id, ondelete='cascade'),
+                    nullable=False)
+    user = Column(VARCHAR(length=32), nullable=False)
+    status = Column(Enum('complete', 'incomplete', 'inprogress',
+                         'invalidated', 'validated'),
+                    nullable=False)
+    environment = Column(VARCHAR(length=15), nullable=False)
+    realized = Column(TIMESTAMP(), nullable=False,
+                      default=func.current_timestamp(),
+                      server_default=func.current_timestamp())
+
+
+    def __init__(self, deployment_id, app_id, user, status, environment,
+                 realized):
+        """ """
+
+        self.deployment_id = deployment_id
+        self.app_id = app_id
+        self.user = user
+        self.status = status
+        self.environment = environment
+        self.realized = realized
+
+
+app_hipchat_rooms = Table(u'app_hipchat_rooms', Base.metadata,
+    Column(u'AppID', SMALLINT(display_width=6),
+           ForeignKey(AppDefinitions.id, ondelete='cascade'),
+           primary_key=True),
+    Column(u'roomID', INTEGER(), ForeignKey(Hipchat.id, ondelete='cascade'),
+           primary_key=True),
+    mysql_engine='InnoDB', mysql_charset='utf8',
+)
+
+
+app_jmx_attributes = Table(u'app_jmx_attributes', Base.metadata,
+    Column(u'AppID', SMALLINT(display_width=6),
+           ForeignKey(AppDefinitions.id, ondelete='cascade'),
+           primary_key=True),
+    Column(u'jmx_attribute_id', INTEGER(),
+           ForeignKey(JmxAttributes.id, ondelete='cascade'),
+           primary_key=True),
+    mysql_engine='InnoDB', mysql_charset='utf8',
+)
+
+
+app_packages = Table(u'app_packages', Base.metadata,
+    Column(u'pkgLocationID', INTEGER(),
+           ForeignKey(PackageLocations.id, ondelete='cascade'),
+           primary_key=True),
+    Column(u'AppID', SMALLINT(display_width=6),
+           ForeignKey(AppDefinitions.id, ondelete='cascade'),
+           primary_key=True),
+    mysql_engine='InnoDB', mysql_charset='utf8',
+)
+
+
+class DefaultSpecs(TagOpsDB, Base):
+    __tablename__ = 'default_specs'
+
+    spec_id = Column(u'specID', INTEGER(),
+                     ForeignKey(HostSpecs.id, ondelete='cascade'),
+                     primary_key=True)
+    app_id = Column(u'AppID', SMALLINT(display_width=6),
+                    ForeignKey(AppDefinitions.id, ondelete='cascade'),
+                    primary_key=True)
+    environment_id = Column(u'environmentID', INTEGER(),
+                            ForeignKey(Environments.id, ondelete='cascade'),
+                            primary_key=True)
+    priority = Column(INTEGER(display_width=4), nullable=False, default='10',
+                      server_default='10')
+
+
+    def __init__(self, spec_id, app_id, environment_id, priority):
+        """ """
+
+        self.spec_id = spec_id
+        self.app_id = app_id
+        self.environment_id = environment_id
+        self.priority = priority
+
+
+class Hosts(TagOpsDB, Base):
+    __tablename__ = 'hosts'
+
+    id = Column(u'HostID', INTEGER(), primary_key=True)
+    spec_id = Column(u'SpecID', INTEGER(), ForeignKey(HostSpecs.id))
+    state = Column(Enum(u'baremetal', u'operational', u'repair', u'parts',
+                   u'reserved', u'escrow'), nullable=False)
+    hostname = Column(VARCHAR(length=30))
+    arch = Column(VARCHAR(length=10))
+    kernel_version = Column(u'kernelVersion', VARCHAR(length=20))
+    distribution = Column(VARCHAR(length=20))
+    timezone = Column(VARCHAR(length=10))
+    app_id = Column(u'AppID', SMALLINT(display_width=6),
+                    ForeignKey(AppDefinitions.id), nullable=False)
+    cage_location = Column(u'cageLocation', INTEGER())
+    cab_location = Column(u'cabLocation', VARCHAR(length=10))
+    rack_location = Column(u'rackLocation', INTEGER())
+    console_port = Column(u'consolePort', VARCHAR(length=11))
+    power_port = Column(u'powerPort', VARCHAR(length=10))
+    power_circuit = Column(u'powerCircuit', VARCHAR(length=10))
+    environment = Column(VARCHAR(length=15))
 
     __table_args__ = (
-        ForeignKeyConstraint(['environmentID'],
-                             ['environments.environmentID'],
-                             ondelete='cascade'),
+        UniqueConstraint(u'cageLocation', u'cabLocation', u'consolePort'),
+        UniqueConstraint(u'cageLocation', u'cabLocation', u'rackLocation'),
         { 'mysql_engine' : 'InnoDB', 'mysql_charset' : 'utf8', },
     )
 
 
-class Zones(Base):
-    __tablename__ = 'zones'
+    def __init__(self, spec_id, state, hostname, arch, kernel_version,
+                 distribution, timezone, app_id, cage_location, cab_location,
+                 rack_location, console_port, power_port, power_circuit,
+                 environment):
+        """ """
 
-    ZoneID = Column(u'ZoneID', INTEGER(), primary_key=True, nullable=False)
-    zoneName = Column(u'zoneName', VARCHAR(length=30))
-    mxPriority = Column(u'mxPriority', INTEGER())
-    mxHostID = Column(u'mxHostID', VARCHAR(length=30))
-    nsPriority = Column(u'nsPriority', INTEGER())
-    nameserver = Column(u'nameserver', VARCHAR(length=30))
+        self.spec_id = spec_id
+        self.state = state
+        self.hostname = hostname
+        self.arch = arch
+        self.kernel_version = kernel_version
+        self.distribution = distribution
+        self.timezone = timezone
+        self.app_id = app_id
+        self.cage_location = cage_location
+        self.cab_location = cab_location
+        self.rack_location = rack_location
+        self.console_port = console_port
+        self.power_port = power_port
+        self.power_circuit = power_circuit
+        self.environment = environment
+
+
+class NagApptypesServices(TagOpsDB, Base):
+    __tablename__ = 'nag_apptypes_services'
+
+    app_id = Column(SMALLINT(display_width=2),
+                    ForeignKey(AppDefinitions.id, ondelete='cascade'),
+                    primary_key=True)
+    service_id = Column(INTEGER(),
+                        ForeignKey(NagServices.id, ondelete='cascade'),
+                        primary_key=True)
+    server_app_id = Column(SMALLINT(display_width=6),
+                           ForeignKey(AppDefinitions.id),
+                           primary_key=True)
+    environment_id = Column(INTEGER(),
+                            ForeignKey(Environments.id, ondelete='cascade'),
+                            primary_key=True)
+
+
+class NsVipBinds(TagOpsDB, Base):
+    __tablename__ = 'ns_vip_binds'
+
+    app_id = Column(u'appID', SMALLINT(display_width=6),
+                    ForeignKey(AppDefinitions.id, ondelete='cascade'),
+                    primary_key=True)
+    vip_id = Column(u'vipID', INTEGER(unsigned=True),
+                    ForeignKey(NsVip.id, ondelete='cascade'),
+                    primary_key=True)
+    service_id = Column(u'serviceID', INTEGER(unsigned=True),
+                        ForeignKey(NsService.id, ondelete='cascade'),
+                        primary_key=True)
+    environment_id = Column(u'environmentID', INTEGER(),
+                            ForeignKey(Environments.id, ondelete='cascade'),
+                            primary_key=True)
+
+
+class Asset(TagOpsDB, Base):
+    __tablename__ = 'asset'
+
+    id = Column(u'AssetID', INTEGER(), primary_key=True)
+    host_id = Column(u'HostID', INTEGER(),
+                     ForeignKey(Hosts.id, ondelete='cascade'),
+                     nullable=False)
+    date_received = Column(u'dateReceived', DATE())
+    description = Column(VARCHAR(length=20))
+    oem_serial = Column(u'oemSerial', VARCHAR(length=30), unique=True)
+    service_tag = Column(u'serviceTag', VARCHAR(length=20))
+    tagged_serial = Column(u'taggedSerial', VARCHAR(length=20))
+    invoice_number = Column(u'invoiceNumber', VARCHAR(length=20))
+    location_site = Column(u'locationSite', VARCHAR(length=20))
+    location_owner = Column(u'locationOwner', VARCHAR(length=20))
+    cost_per_item = Column(u'costPerItem', VARCHAR(length=20))
+    date_of_invoice = Column(u'dateOfInvoice', DATE())
+    warranty_start = Column(u'warrantyStart', DATE())
+    warranty_end = Column(u'warrantyEnd', DATE())
+    warranty_level = Column(u'warrantyLevel', VARCHAR(length=20))
+    warranty_id = Column(u'warrantyID', VARCHAR(length=20))
+    vendor_contact = Column(u'vendorContact', VARCHAR(length=20))
+
+
+    def __init__(self, host_id, date_received, description, oem_serial,
+                 service_tag, tagged_serial, invoice_number, location_site,
+                 location_owner, cost_per_item, date_of_invoice,
+                 warranty_start, warranty_end, warranty_level, warranty_id,
+                 vendor_contact):
+        """ """
+
+        self.host_id = host_id
+        self.date_received = date_received
+        self.description = description
+        self.oem_serial = oem_serial
+        self.service_tag = service_tag
+        self.tagged_serial = tagged_serial
+        self.invoice_number = invoice_number
+        self.location_site = location_site
+        self.location_owner = location_owner
+        self.cost_per_item = cost_per_item
+        self.date_of_invoice = date_of_invoice
+        self.warranty_start = warranty_start
+        self.warranty_end = warranty_end
+        self.warranty_level = warranty_level
+        self.warranty_id = warranty_id
+        self.vendor_contact = vendor_contact
+
+
+class HostDeployments(TagOpsDB, Base):
+    __tablename__ = 'host_deployments'
+
+    id = Column(u'HostDeploymentID', INTEGER(), primary_key=True)
+    deployment_id = Column(u'DeploymentID', INTEGER(),
+                           ForeignKey(Deployments.id, ondelete='cascade'),
+                           nullable=False)
+    host_id = Column(u'HostID', INTEGER(),
+                     ForeignKey(Hosts.id, ondelete='cascade'),
+                     nullable=False)
+    user = Column(VARCHAR(length=32), nullable=False)
+    status = Column(Enum('inprogress', 'failed', 'ok'), nullable=False)
+    realized = Column(TIMESTAMP(), nullable=False,
+                      default=func.current_timestamp(),
+                      server_default=func.current_timestamp())
+
+
+    def __init__(self, deployment_id, host_id, user, status, realized):
+        """ """
+
+        self.deployment_id = deployment_id
+        self.host_id = host_id
+        self.user = user
+        self.status = status
+        self.realized = realized
+
+
+class HostInterfaces(TagOpsDB, Base):
+    __tablename__ = 'host_interfaces'
+
+    id = Column(u'InterfaceID', INTEGER(), primary_key=True)
+    host_id = Column(u'HostID', INTEGER(),
+                     ForeignKey(Hosts.id, ondelete='cascade'),
+                     index=True)
+    network_id = Column(u'NetworkID', INTEGER(),
+                        ForeignKey(NetworkDevice.id, ondelete='cascade'),
+                        index = True)
+    interface_name = Column(u'interfaceName', VARCHAR(length=10))
+    mac_address = Column(u'macAddress', VARCHAR(length=18), unique=True)
+    port_id = Column(u'PortID', INTEGER(), ForeignKey(Ports.id),
+                     unique=True, index=True)
 
     __table_args__ = (
+        UniqueConstraint(u'HostID', u'interfaceName'),
         { 'mysql_engine' : 'InnoDB', 'mysql_charset' : 'utf8', },
     )
+
+
+    def __init__(self, host_id, network_id, interface_name, mac_address,
+                 port_id):
+        """ """
+
+        self.host_id = host_id
+        self.network_id = network_id
+        self.interface_name = interface_name
+        self.mac_address = mac_address
+        self.port_id = port_id
+
+
+class Iloms(TagOpsDB, Base):
+    __tablename__ = 'iloms'
+
+    id = Column(u'ILomID', INTEGER(), primary_key=True)
+    host_id = Column(u'HostID', INTEGER(),
+                     ForeignKey(Hosts.id, ondelete='cascade'),
+                     unique=True, index=True)
+    subnet_id = Column(u'SubnetID', INTEGER(),
+                       ForeignKey(Subnet.id, ondelete='cascade'),
+                       nullable=False, unique=True, index=True)
+    mac_address = Column(u'macAddress', VARCHAR(length=18), unique=True)
+    port_id = Column(u'PortID', INTEGER(),
+                     ForeignKey(Ports.id, ondelete='cascade'),
+                     unique=True, index=True)
+    a_record = Column(u'ARecord', VARCHAR(length=200))
+    comments = Column(VARCHAR(length=200))
+
+
+    def __init__(self, host_id, subnet_id, mac_address, port_id, a_record,
+                 comments):
+        """ """
+
+        self.host_id = host_id
+        self.subnet_id = subnet_id
+        self.mac_address = mac_address
+        self.port_id = port_id
+        self.a_record = a_record
+        self.comments = comments
+
+
+class NagHostsServices(TagOpsDB, Base):
+    __tablename__ = 'nag_hosts_services'
+
+    host_id = Column(INTEGER(), ForeignKey(Hosts.id, ondelete='cascade'),
+                     primary_key=True)
+    service_id = Column(INTEGER(),
+                        ForeignKey(NagServices.id, ondelete='cascade'),
+                        primary_key=True)
+    server_app_id = Column(SMALLINT(display_width=6),
+                           ForeignKey(AppDefinitions.id),
+                           primary_key=True)
+
+
+class ServiceEvent(TagOpsDB, Base):
+    __tablename__ = 'serviceEvent'
+
+    id = Column(u'ServiceID', INTEGER(), primary_key=True)
+    host_id = Column(u'HostID', INTEGER(),
+                     ForeignKey(Hosts.id, ondelete='cascade'))
+    user = Column(VARCHAR(length=20))
+    service_status = Column(u'serviceStatus', VARCHAR(length=100))
+    power_status = Column(u'powerStatus', VARCHAR(length=10))
+    vendor_ticket = Column(u'vendorTicket', VARCHAR(length=20))
+    comments = Column(TEXT())
+    service_date = Column(u'serviceDate', TIMESTAMP(), nullable=False,
+                          default=func.current_timestamp(),
+                          onupdate=func.current_timestamp(),
+                          server_onupdate=func.current_timestamp())
+
+
+    def __init__(self, host_id, user, service_status, power_status,
+                 vendor_ticket, comments, service_date):
+        """ """
+
+        self.host_id = host_id
+        self.user = user
+        self.service_status = service_status
+        self.power_status = power_status
+        self.vendor_ticket = vendor_ticket
+        self.comments = comments
+        self.service_date = service_date
+
+
+class HostIps(TagOpsDB, Base):
+    __tablename__ = 'host_ips'
+
+    id = Column(u'IpID', INTEGER(), primary_key=True)
+    interface_id = Column(u'InterfaceID', INTEGER(),
+                          ForeignKey(HostInterfaces.id, ondelete='cascade'),
+                          nullable=False, index=True)
+    subnet_id = Column(u'SubnetID', INTEGER(),
+                       ForeignKey(Subnet.id, ondelete='cascade'),
+                       nullable=False, unique=True, index=True)
+    priority = Column(INTEGER(unsigned=True), nullable=False, default=1,
+                      server_default='1')
+    a_record = Column(u'ARecord', VARCHAR(length=200))
+    comments = Column(VARCHAR(length=200))
+
+
+    def __init__(self, interface_id, subnet_id, priority, a_record, comments):
+        """ """
+
+        self.interface_id = interface_id
+        self.subnet_id = subnet_id
+        self.priority = priority
+        self.a_record = a_record
+        self.comments = comments
+
+
+class Cname(TagOpsDB, Base):
+    __tablename__ = 'cname'
+
+    id = Column(u'CnameID', INTEGER(), primary_key=True)
+    name = Column(VARCHAR(length=40))
+    ip_id = Column(u'IpID', INTEGER(),
+                   ForeignKey(HostIps.id, onupdate='cascade',
+                              ondelete='cascade'))
+    zone_id = Column(u'ZoneID', INTEGER(),
+                     ForeignKey(Zones.id, onupdate='cascade',
+                                ondelete='cascade'))
+
+    __table_args__ = (
+        UniqueConstraint(u'name', u'ZoneID', name=u'name_ZoneID'),
+        { 'mysql_engine' : 'InnoDB', 'mysql_charset' : 'utf8', },
+    )
+
+
+    def __init__(self, name, ip_id, zone_id):
+        """ """
+
+        self.name = name
+        self.ip_id = ip_id
+        self.zone_id = zone_id
+
+
+#
+# Relationships
+#
+
+
+Environments.host_specs = relationship(DefaultSpecs)
+Environments.ns_services = relationship(NsVipBinds)
+Environments.ns_vips = relationship(NsVipBinds)
+
+Ganglia.app_definitions = relationship(AppDefinitions)
+
+HostSpecs.services = relationship(NsServiceMax)
+
+NagCheckCommands.nag_command_arguments = relationship(NagCommandArguments)
+
+NagContactGroups.nag_contacts = \
+    relationship(NagContacts, secondary=nag_contact_groups_members,
+                 backref='nag_contact_groups')
+
+NetworkDevice.host_interface = relationship(HostInterfaces, uselist=False)
+NetworkDevice.ports = relationship(Ports)
+
+NsDevice.vips = relationship(NsVip)
+
+NsService.ns_monitors = relationship(NsMonitor, secondary=ns_service_binds)
+NsService.service_params = relationship(NsServiceParams)
+
+PackageLocations.app_definitions = relationship(AppDefinitions,
+                                                secondary=app_packages,
+                                                backref='package_locations')
+
+Packages.deployments = relationship(Deployments)
+
+Zones.cnames = relationship(Cname, backref='zone')
+
+Deployments.app_deployments = relationship(AppDeployments)
+Deployments.host_deployments = relationship(HostDeployments)
+
+NagServices.applications = relationship(NagApptypesServices)
+NagServices.check_period = \
+    relationship(NagTimePeriods, foreign_keys=[ NagServices.check_period_id ],
+                 uselist=False)
+NagServices.command_arguments = relationship(NagServicesArguments,
+                                             backref='nag_services')
+NagServices.contact_groups = \
+    relationship(NagContactGroups, secondary=nag_services_contact_groups,
+                 backref='nag_services')
+NagServices.contacts = \
+    relationship(NagContacts, secondary=nag_services_contacts,
+                 backref='nag_services')
+NagServices.environments = relationship(NagApptypesServices)
+NagServices.hosts = relationship(NagHostsServices)
+NagServices.nag_check_command = relationship(NagCheckCommands, uselist=False,
+                                             backref='nag_services')
+NagServices.notification_period = \
+    relationship(NagTimePeriods,
+                 foreign_keys=[ NagServices.notification_period_id ],
+                 uselist=False)
+
+NsServiceMax.service = relationship(NsService, uselist=False)
+
+NsVip.host_specs = relationship(NsWeight, backref='ns_vip')
+
+Ports.network_interface = relationship(HostInterfaces, uselist=False)
+
+Vlans.subnets = relationship(Subnet)
+
+AppDefinitions.app_deployments = relationship(AppDeployments)
+AppDefinitions.hipchats = relationship(Hipchat, secondary=app_hipchat_rooms,
+                                       backref='app_definitions')
+AppDefinitions.hosts = relationship(Hosts)
+AppDefinitions.host_specs = relationship(DefaultSpecs)
+AppDefinitions.ns_services = relationship(NsVipBinds)
+AppDefinitions.nag_app_services = relationship(NagApptypesServices)
+AppDefinitions.nag_host_services = relationship(NagHostsServices)
+AppDefinitions.development_vlans = \
+    relationship(Vlans, foreign_keys=[ AppDefinitions.development_vlan_id ])
+AppDefinitions.production_vlans = \
+    relationship(Vlans, foreign_keys=[ AppDefinitions.production_vlan_id ])
+AppDefinitions.staging_vlans = \
+    relationship(Vlans, foreign_keys=[ AppDefinitions.staging_vlan_id ])
+
+NagServicesArguments.command_argument = \
+    relationship(NagCommandArguments, backref='nag_services_assoc')
+
+NsWeight.host_spec = relationship(NsVip, uselist=False,
+                                  backref='ns_vip_assocs')
+
+Subnet.zone = relationship(Zones, uselist=False, backref='subnets')
+
+DefaultSpecs.host_spec = relationship(HostSpecs, uselist=False)
+
+Hosts.host_deployments = relationship(HostDeployments)
+Hosts.host_interfaces = relationship(HostInterfaces, backref='host')
+Hosts.host_spec = relationship(HostSpecs, uselist=False, backref='hosts')
+Hosts.ilom = relationship(Iloms, uselist=False, backref='host')
+Hosts.service_events = relationship(ServiceEvent, backref='host')
+
+NagApptypesServices.application = relationship(AppDefinitions)
+NagApptypesServices.environment = relationship(Environments)
+NagApptypesServices.service = relationship(NagServices)
+
+NsVipBinds.ns_service = relationship(NsService)
+NsVipBinds.ns_vip = relationship(NsVip)
+
+Asset.host = relationship(Hosts, uselist=False)
+
+HostInterfaces.host_ips = relationship(HostIps, backref='host_interface')
+
+Iloms.port = relationship(Subnet, uselist=False, backref='port')
+Iloms.subnet = relationship(Subnet, uselist=False, backref='ilom')
+
+NagHostsServices.host = relationship(Hosts)
+NagHostsServices.service = relationship(NagServices)
+
+HostIps.subnet = relationship(Subnet, uselist=False, backref='host_ip')
+
+Cname.host = relationship(HostIps, uselist=False)

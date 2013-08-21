@@ -1,10 +1,10 @@
-from setuptools import setup, find_packages
+from setuptools import setup
 
 # Let's add this later
 # long_description = open('README.txt').read()
 
 # Get version of project
-execfile('version.py')
+execfile('tagopsdb/version.py')
 
 setup_args = dict(
     name = 'TagOpsDB Library',
@@ -15,7 +15,6 @@ setup_args = dict(
     author_email = 'klareau@tagged.com',
     license = 'Apache License, Version 2.0',
     packages = ['tagopsdb', 'tagopsdb.database', 'tagopsdb.deploy'],
-    package_dir = {'' : 'lib/python'},
     scripts = [],
 )
 

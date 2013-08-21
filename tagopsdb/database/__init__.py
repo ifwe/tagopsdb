@@ -1,16 +1,19 @@
 import sqlalchemy.exc
 import yaml
+import yaml.parser
 
 from sqlalchemy import create_engine
 
 from tagopsdb.database.meta import Base, Session
-#from tagopsdb.database.test_db import Testing
 from tagopsdb.database.model import *
 from tagopsdb.exceptions import PermissionsException
 
 
-def create_dbconn_string(db_user, db_password):
-    """Create the connection string for the database"""
+def load_db_config():
+    """Load configuration for database from system file"""
+
+    data = {}
+    db_host = db_name = None
 
     with open('/etc/tagops/tagopsdb.yml') as conf_file:
         try:
@@ -18,16 +21,37 @@ def create_dbconn_string(db_user, db_password):
         except yaml.parser.ParserError, e:
             raise RuntimeError('YAML parse error: %s' % e)
 
-    db_host = data['db']['hostname']
-    db_name = data['db']['db_name']
+    # These must exist in configuration file
+    try:
+        db_host = data['db']['hostname']
+        db_name = data['db']['db_name']
+    except KeyError as e:
+        raise RuntimeError('Missing parameter: %s' % e)
 
-    return 'mysql+oursql://%s:%s@%s/%s' % (db_user, db_password,
-                                           db_host, db_name)
+    return db_host, db_name
 
 
-def init_session(db_user, db_password):
-    #engine = create_engine('sqlite:///testing.db', echo=True)
-    dbconn_string = create_dbconn_string(db_user, db_password)
+def create_dbconn_string(db_user, db_password, **kwargs):
+    """Create the connection string for the database"""
+
+    protocol = 'mysql+oursql'
+
+    db_dict = dict(protocol=protocol, user=db_user,
+                   password=db_password, host=kwargs['hostname'],
+                   name=kwargs['db_name'])
+
+    return '%(protocol)s://%(user)s:%(password)s@%(host)s/%(name)s' % db_dict
+
+
+def init_session(db_user, db_password, **kwargs):
+    """Initialize database session"""
+
+    if 'hostname' not in kwargs or 'db_name' not in kwargs:
+        db_host, db_name = load_db_config()
+        kwargs.setdefault('hostname', db_host)
+        kwargs.setdefault('db_name', db_name)
+
+    dbconn_string = create_dbconn_string(db_user, db_password, **kwargs)
     engine = create_engine(dbconn_string)
 
     # Ensure connection information is valid
