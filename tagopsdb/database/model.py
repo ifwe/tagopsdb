@@ -1128,7 +1128,9 @@ AppDefinitions.hipchats = relationship(Hipchat, secondary=app_hipchat_rooms,
 AppDefinitions.hosts = relationship(Hosts)
 AppDefinitions.host_specs = relationship(DefaultSpecs)
 AppDefinitions.ns_services = relationship(NsVipBinds)
-AppDefinitions.nag_app_services = relationship(NagApptypesServices)
+AppDefinitions.nag_app_services = \
+    relationship(NagApptypesServices,
+                 primaryjoin=NagApptypesServices.app_id == AppDefinitions.id)
 AppDefinitions.nag_host_services = relationship(NagHostsServices)
 AppDefinitions.development_vlans = \
     relationship(Vlans, foreign_keys=[ AppDefinitions.development_vlan_id ])
@@ -1153,7 +1155,8 @@ Hosts.host_spec = relationship(HostSpecs, uselist=False, backref='hosts')
 Hosts.ilom = relationship(Iloms, uselist=False, backref='host')
 Hosts.service_events = relationship(ServiceEvent, backref='host')
 
-NagApptypesServices.application = relationship(AppDefinitions)
+NagApptypesServices.application = \
+    relationship(AppDefinitions, foreign_keys=[ NagApptypesServices.app_id ])
 NagApptypesServices.environment = relationship(Environments)
 NagApptypesServices.service = relationship(NagServices)
 
