@@ -124,8 +124,8 @@ def find_app_deployment(pkg_id, app_ids, environment):
                    .join(AppDefinitions)
                    .join(Deployments)
                    .join(Packages)
-                   .join(subq, AppDeployments.id == subq.c.id)
-                   .group_by(subq.c.app_id)
+                   .join(subq, AppDeployments.id == subq.c.AppDeploymentID)
+                   .group_by(subq.c.AppID)
                    .all())
 
 
@@ -159,7 +159,7 @@ def find_apptype_by_appid(app_id):
 
     try:
         app_def = (Session.query(AppDefinitions)
-                          .filter_by(app_id=app_id)
+                          .filter_by(id=app_id)
                           .one())
         return app_def.app_type
     except sqlalchemy.orm.exc.NoResultFound:
@@ -199,10 +199,12 @@ def find_deployed_version(project, env, version=None, revision=None,
         subq = (subq.order_by(AppDeployments.realized.desc())
                     .subquery(name='t_ordered'))
 
-        versions = (Session.query(subq.c.app_type,
+        # The actual column name must be used in the subquery
+        # usage below; DB itself should be corrected
+        versions = (Session.query(subq.c.appType,
                                   subq.c.version,
                                   subq.c.revision)
-                           .group_by(subq.c.app_type, subq.c.environment)
+                           .group_by(subq.c.appType, subq.c.environment)
                            .all())
     else:
         hostsq = (Session.query(Hosts.hostname, Hosts.app_id,
@@ -344,7 +346,7 @@ def find_hipchat_rooms_for_app(project, apptypes=None):
             return []
 
         app_defs = repo.find_app_packages_mapping(project)
-        apptypes = [ x.appType for x in app_defs ]
+        apptypes = [ x.app_type for x in app_defs ]
 
     rooms_query = (Session.query(Hipchat.room_name)
                           .filter(Hipchat.app_definitions.any(
@@ -395,7 +397,7 @@ def find_next_latest_validated_deployment(project, app_id, env):
                     .order_by(AppDeployments.realized.desc())
                     .subquery(name='t_ordered'))
 
-    subq2 = (Session.query(subq1.c.id)
+    subq2 = (Session.query(subq1.c.DeploymentID)
                     .group_by(subq1.c.pkg_name)
                     .subquery(name='t_ordered2'))
 
