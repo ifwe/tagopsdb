@@ -366,6 +366,22 @@ def find_latest_deployed_version(project, env, apptypes=None, apptier=False):
                                  apptier=apptier)
 
 
+def find_latest_deployment(package_name, app_id, env):
+    """Find the most recent deployment for a given package in a given
+       environment for the given application ID
+    """
+
+    return (Session.query(AppDeployments, Packages)
+                   .join(Deployments)
+                   .join(Packages)
+                   .filter(Packages.pkg_name==package_name)
+                   .filter(AppDeployments.app_id==app_id)
+                   .filter(AppDeployments.environment==env)
+                   .filter(AppDeployments.status!='invalidated')
+                   .order_by(AppDeployments.realized.desc())
+                   .first())
+
+
 def find_latest_validated_deployment(project, app_id, env):
     """Find the most recent deployment that was validated for a given
        project, application type and environment.
@@ -409,6 +425,26 @@ def find_next_latest_validated_deployment(project, app_id, env):
                    .filter(AppDeployments.environment==env)
                    .filter(AppDeployments.status=='validated')
                    .filter(~Deployments.id.in_(subq2))
+                   .order_by(AppDeployments.realized.desc())
+                   .first())
+
+
+def find_previous_validated_deployment(project, app_id, env):
+    """Find the previous validated deployment, ignoring if the current
+       deployment is validated or not, for a given project, application
+       type and environment.
+    """
+
+    # Get current deployment
+    app_dep, pkg = find_latest_deployment(project, app_id, env)
+
+    return (Session.query(AppDeployments, Packages.id)
+                   .join(Deployments)
+                   .join(Packages)
+                   .filter(AppDeployments.id!=app_dep.id)
+                   .filter(Packages.pkg_name==project)
+                   .filter(AppDeployments.app_id==app_id)
+                   .filter(AppDeployments.environment==env)
                    .order_by(AppDeployments.realized.desc())
                    .first())
 
