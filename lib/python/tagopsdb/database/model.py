@@ -738,7 +738,8 @@ class Packages(Base):
     builder = Column(u'builder', Enum(u'developer', u'hudson', u'jenkins'),
                      nullable=False, default='developer',
                      server_default='developer')
-    project_type = Column(u'project_type', Enum(u'application', u'tagconfig'),
+    project_type = Column(u'project_type',
+                          Enum(u'application', u'kafka-config', u'tagconfig'),
                           nullable=False, default='application',
                           server_default='application')
 
@@ -775,7 +776,8 @@ class PackageLocations(Base):
 
     pkgLocationID = Column(u'pkgLocationID', INTEGER(), primary_key=True,
                            nullable=False)
-    project_type = Column(u'project_type', Enum(u'application', u'tagconfig'),
+    project_type = Column(u'project_type',
+                          Enum(u'application', u'kafka-config', u'tagconfig'),
                           nullable=False, default='application',
                           server_default='application')
     pkg_type = Column(u'pkg_type', VARCHAR(length=255), nullable=False)
