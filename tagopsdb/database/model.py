@@ -243,8 +243,9 @@ class PackageLocations(TagOpsDB, Base):
     __tablename__ = 'package_locations'
 
     id = Column(u'pkgLocationID', INTEGER(), primary_key=True)
-    project_type = Column(Enum(u'application', u'tagconfig'), nullable=False,
-                          default='application', server_default='application')
+    project_type = Column(Enum(u'application', u'kafka-config', u'tagconfig'),
+                          nullable=False, default='application',
+                          server_default='application')
     pkg_type = Column(VARCHAR(length=255), nullable=False)
     pkg_name = Column(VARCHAR(length=255), nullable=False, unique=True)
     app_name = Column(VARCHAR(length=255), nullable=False, unique=True)
@@ -283,8 +284,9 @@ class Packages(TagOpsDB, Base):
     builder = Column(Enum(u'developer', u'hudson', u'jenkins'),
                      nullable=False, default='developer',
                      server_default='developer')
-    project_type = Column(Enum(u'application', u'tagconfig'), nullable=False,
-                          default='application', server_default='application')
+    project_type = Column(Enum(u'application', u'kafka-config', u'tagconfig'),
+                          nullable=False, default='application',
+                          server_default='application')
 
     __table_args__ = (
         UniqueConstraint(u'pkg_name', u'version', u'revision', u'builder',
