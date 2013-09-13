@@ -1,3 +1,0 @@
-oursql==0.9.3.1
-PyYAML==3.10
-SQLAlchemy==0.8.0

@@ -1,1 +1,1 @@
-tagopsdb/version.py
+lib/python/tagopsdb/version.py
