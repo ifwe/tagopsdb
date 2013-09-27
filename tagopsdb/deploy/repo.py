@@ -1,7 +1,10 @@
 import sqlalchemy.orm.exc
 
+from sqlalchemy import func
+
 from tagopsdb.database.meta import Session
-from tagopsdb.database.model import AppDefinitions, PackageLocations
+from tagopsdb.database.model import AppDefinitions, PackageDefinitions, \
+                                    PackageLocations, ProjectPackage, Projects
 from tagopsdb.exceptions import RepoException
 
 
@@ -20,10 +23,17 @@ def add_app_location(project_type, pkg_type, pkg_name, app_name, path, arch,
     Session.add(project)
     Session.flush()   # Needed to get pkgLocationID generated
 
-    return project
+    # Transitional code to synchronize with new tables
+    project_new = add_project(app_name)
+    pkg_def = add_package_definition('rpm', 'matching', pkg_name,
+                                     path, arch, 'jenkins', build_host,
+                                     environment)
+    pkg_def.package_names.append(pkg_name)
+
+    return project, project_new, pkg_def
 
 
-def add_app_packages_mapping(project, app_types):
+def add_app_packages_mapping(project, project_new, pkg_def, app_types):
     """Add the mappings of the app types for a given project"""
 
     for app_type in app_types:
@@ -36,6 +46,38 @@ def add_app_packages_mapping(project, app_types):
                                 'AppDefinitions table' % app_type)
 
         project.app_definitions.append(app_def)
+
+        # Transitional code to synchronize with new tables
+        if project_new is not None:
+            proj_pkg = ProjectPackage()
+            project_new.proj_pkg.append(proj_pkg)
+            pkg_def.proj_pkg.append(proj_pkg)
+            app_def.proj_pkg.append(proj_pkg)
+
+
+def add_package_definition(deploy_type, validation_type, pkg_name, path,
+                           arch, build_type, build_host, env_specific):
+    """Add base definition for a package"""
+
+    pkg_def = PackageDefinitions(deploy_type, validation_type, pkg_name,
+                                 path, arch, build_type, build_host,
+                                 env_specific, func.current_timestamp())
+    Session.add(pkg_def)
+
+    Session.flush()   # Needed to get pkg_ef_id generated
+
+    return pkg_def
+
+
+def add_project(name):
+    """Add a new project to the database"""
+
+    project = Projects(name)
+    Session.add(project)
+
+    Session.flush()   # Needed to get project_id generated
+
+    return project
 
 
 def delete_app_location(app_name):
@@ -107,6 +149,18 @@ def find_app_packages_mapping(app_name):
                             'the app_packages table' % app_name)
 
     return app_defs
+
+
+def find_project(name):
+    """Find a given project"""
+
+    try:
+        return (Session.query(Projects)
+                       .filter_by(name=name)
+                       .one())
+    except sqlalchemy.orm.exc.NoResultFound:
+        raise RepoException('No entry found for project "%s" in '
+                            'the Projects table' % name)
 
 
 def find_project_type(project):

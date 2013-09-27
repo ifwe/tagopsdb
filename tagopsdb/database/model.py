@@ -1,7 +1,7 @@
 from sqlalchemy import *
 from sqlalchemy.dialects.mysql import INTEGER, SMALLINT, TINYINT, BOOLEAN, \
                                       MEDIUMTEXT
-from sqlalchemy.orm import object_mapper, relationship
+from sqlalchemy.orm import relationship
 from sqlalchemy.sql.expression import func
 
 from meta import Base
@@ -12,27 +12,7 @@ from meta import Base
 #
 
 
-class TagOpsDB(object):
-    """Base class for some common default settings"""
-
-    __table_args__ = (
-        { 'mysql_engine' : 'InnoDB', 'mysql_charset' : 'utf8', },
-    )
-
-    def __repr__(self):
-        mapper = object_mapper(self)
-        keyvals = [(key, getattr(self, key))
-                   for key in mapper.columns.keys()]
-
-        return '<%(class_name)s (%(table_name)s) %(keyvals_string)s>' % dict(
-            class_name = type(self).__name__,
-            table_name = self.__table__.name,
-            keyvals_string = \
-                ' '.join('%s=%r'% (key, val) for (key, val) in keyvals),
-        )
-
-
-class Environments(TagOpsDB, Base):
+class Environments(Base):
     __tablename__ = 'environments'
 
     id = Column(u'environmentID', INTEGER(), primary_key=True)
@@ -51,7 +31,7 @@ class Environments(TagOpsDB, Base):
         self.prefix = prefix
 
 
-class Ganglia(TagOpsDB, Base):
+class Ganglia(Base):
     __tablename__ = 'ganglia'
 
     id = Column(u'GangliaID', INTEGER(), primary_key=True)
@@ -67,7 +47,7 @@ class Ganglia(TagOpsDB, Base):
         self.port = port
 
 
-class Hipchat(TagOpsDB, Base):
+class Hipchat(Base):
     __tablename__ = 'hipchat'
 
     id = Column(u'roomID', INTEGER(), primary_key=True)
@@ -80,7 +60,7 @@ class Hipchat(TagOpsDB, Base):
         self.room_name = room_name
 
 
-class HostSpecs(TagOpsDB, Base):
+class HostSpecs(Base):
     __tablename__ = 'host_specs'
 
     id = Column(u'specID', INTEGER(), primary_key=True)
@@ -112,7 +92,7 @@ class HostSpecs(TagOpsDB, Base):
         self.expansions = expansions
 
 
-class JmxAttributes(TagOpsDB, Base):
+class JmxAttributes(Base):
     __tablename__ = 'jmx_attributes'
 
     id = Column(u'jmx_attribute_id', INTEGER(), primary_key=True)
@@ -128,7 +108,7 @@ locks = Table(u'locks', Base.metadata,
 )
 
 
-class NagCheckCommands(TagOpsDB, Base):
+class NagCheckCommands(Base):
     __tablename__ = 'nag_check_commands'
 
     id = Column(INTEGER(), primary_key=True)
@@ -136,7 +116,7 @@ class NagCheckCommands(TagOpsDB, Base):
     command_line = Column(VARCHAR(length=255), nullable=False)
 
 
-class NagContactGroups(TagOpsDB, Base):
+class NagContactGroups(Base):
     __tablename__ = 'nag_contact_groups'
 
     id = Column(INTEGER(), primary_key=True)
@@ -144,7 +124,7 @@ class NagContactGroups(TagOpsDB, Base):
     alias = Column(VARCHAR(length=80))
 
 
-class NagContacts(TagOpsDB, Base):
+class NagContacts(Base):
     __tablename__ = 'nag_contacts'
 
     id = Column(INTEGER(), primary_key=True)
@@ -154,7 +134,7 @@ class NagContacts(TagOpsDB, Base):
     pager = Column(VARCHAR(length=80))
 
 
-class NagTimePeriods(TagOpsDB, Base):
+class NagTimePeriods(Base):
     __tablename__ = 'nag_time_periods'
 
     id = Column(INTEGER(), primary_key=True)
@@ -169,7 +149,7 @@ class NagTimePeriods(TagOpsDB, Base):
     saturday = Column(VARCHAR(length=32))
 
 
-class NetworkDevice(TagOpsDB, Base):
+class NetworkDevice(Base):
     __tablename__ = 'networkDevice'
 
     id = Column(u'NetworkID', INTEGER(), primary_key=True)
@@ -188,7 +168,7 @@ class NetworkDevice(TagOpsDB, Base):
         self.software_code = software_code
 
 
-class NsDevice(TagOpsDB, Base):
+class NsDevice(Base):
     __tablename__ = 'ns_device'
 
     id = Column(u'deviceID', INTEGER(unsigned=True), primary_key=True)
@@ -208,7 +188,7 @@ class NsDevice(TagOpsDB, Base):
         self.host = host
 
 
-class NsMonitor(TagOpsDB, Base):
+class NsMonitor(Base):
     __tablename__ = 'ns_monitor'
 
     id = Column(u'monitorID', INTEGER(unsigned=True), primary_key=True)
@@ -221,7 +201,7 @@ class NsMonitor(TagOpsDB, Base):
         self.monitor = monitor
 
 
-class NsService(TagOpsDB, Base):
+class NsService(Base):
     __tablename__ = 'ns_service'
 
     id = Column(u'serviceID', INTEGER(unsigned=True), primary_key=True)
@@ -239,7 +219,43 @@ class NsService(TagOpsDB, Base):
         self.port = port
 
 
-class PackageLocations(TagOpsDB, Base):
+class PackageDefinitions(Base):
+    __tablename__ = 'package_definitions'
+
+    id = Column(u'pkg_def_id', INTEGER(), primary_key=True)
+    deploy_type = Column(VARCHAR(length=30), nullable=False)
+    validation_type = Column(VARCHAR(length=15), nullable=False)
+    pkg_name = Column(VARCHAR(length=255), nullable=False)
+    path = Column(VARCHAR(length=255), nullable=False)
+    arch = Column(Enum('i386', 'x86_64', 'noarch'), nullable=False,
+                  default='noarch', server_default='noarch')
+    build_type = Column(Enum(u'developer', u'hudson', u'jenkins'),
+                        nullable=False, default='jenkins',
+                        server_default='jenkins')
+    build_host = Column(VARCHAR(length=255), nullable=False)
+    env_specific = Column(BOOLEAN(), nullable=False, default=0,
+                          server_default='0')
+    created = Column(TIMESTAMP(), nullable=False,
+                     default=func.current_timestamp(),
+                     server_default=func.current_timestamp())
+
+
+    def __init__(self, deploy_type, validation_type, pkg_name, path, arch,
+                 build_type, build_host, env_specific, created):
+        """ """
+
+        self.deploy_type = deploy_type
+        self.validation_type = validation_type
+        self.pkg_name = pkg_name
+        self.path = path
+        self.arch = arch
+        self.build_type = build_type
+        self.build_host = build_host
+        self.env_specific = env_specific
+        self.created = created
+
+
+class PackageLocations(Base):
     __tablename__ = 'package_locations'
 
     id = Column(u'pkgLocationID', INTEGER(), primary_key=True)
@@ -270,10 +286,13 @@ class PackageLocations(TagOpsDB, Base):
         self.environment = environment
 
 
-class Packages(TagOpsDB, Base):
+class Packages(Base):
     __tablename__ = 'packages'
 
-    id = Column(u'PackageID', INTEGER(), primary_key=True)
+    id = Column(u'package_id', INTEGER(), primary_key=True)
+    pkg_def_id = Column(INTEGER(),
+                        ForeignKey(PackageDefinitions.id, ondelete='cascade'),
+                        nullable=False)
     pkg_name = Column(VARCHAR(length=255), nullable=False)
     version = Column(VARCHAR(length=63), nullable=False)
     revision = Column(VARCHAR(length=63), nullable=False)
@@ -295,10 +314,11 @@ class Packages(TagOpsDB, Base):
     )
 
 
-    def __init__(self, pkg_name, version, revision, created, creator,
-                 builder, project_type):
+    def __init__(self, pkg_def_id, pkg_name, version, revision, created,
+                 creator, builder, project_type):
         """ """
 
+        self.pkg_def_id = pkg_def_id
         self.pkg_name = pkg_name
         self.version = version
         self.revision = revision
@@ -308,7 +328,20 @@ class Packages(TagOpsDB, Base):
         self.project_type = project_type
 
 
-class Zones(TagOpsDB, Base):
+class Projects(Base):
+    __tablename__ = 'projects'
+
+    id = Column(u'project_id', INTEGER(), primary_key=True)
+    name = Column(VARCHAR(length=255), nullable=False)
+
+
+    def __init__(self, name):
+        """ """
+
+        self.name = name
+
+
+class Zones(Base):
     __tablename__ = 'zones'
 
     id = Column(u'ZoneID', INTEGER(), primary_key=True)
@@ -330,11 +363,11 @@ class Zones(TagOpsDB, Base):
         self.nameserver = nameserver
 
 
-class Deployments(TagOpsDB, Base):
+class Deployments(Base):
     __tablename__ = 'deployments'
 
     id = Column(u'DeploymentID', INTEGER(), primary_key=True)
-    package_id = Column(u'PackageID', INTEGER(),
+    package_id = Column(INTEGER(),
                         ForeignKey(Packages.id, ondelete='cascade'),
                         nullable=False)
     user = Column(VARCHAR(length=32), nullable=False)
@@ -353,7 +386,7 @@ class Deployments(TagOpsDB, Base):
         self.declared = declared
 
 
-class NagCommandArguments(TagOpsDB, Base):
+class NagCommandArguments(Base):
     __tablename__ = 'nag_command_arguments'
 
     id = Column(INTEGER(), primary_key=True)
@@ -385,7 +418,7 @@ nag_contact_groups_members = Table(u'nag_contact_groups_members',
 )
 
 
-class NagServices(TagOpsDB, Base):
+class NagServices(Base):
     __tablename__ = 'nag_services'
 
     id = Column(INTEGER(), primary_key=True)
@@ -419,7 +452,7 @@ ns_service_binds = Table(u'ns_service_binds', Base.metadata,
 )
 
 
-class NsServiceMax(TagOpsDB, Base):
+class NsServiceMax(Base):
     __tablename__ = 'ns_service_max'
 
     spec_id = Column(u'specID', INTEGER(),
@@ -443,7 +476,7 @@ class NsServiceMax(TagOpsDB, Base):
         self.max_requests = max_requests
 
 
-class NsServiceParams(TagOpsDB, Base):
+class NsServiceParams(Base):
     __tablename__ = 'ns_service_params'
 
     service_id = Column(u'serviceID', INTEGER(unsigned=True),
@@ -461,7 +494,7 @@ class NsServiceParams(TagOpsDB, Base):
         self.value = value
 
 
-class NsVip(TagOpsDB, Base):
+class NsVip(Base):
     __tablename__ = 'ns_vip'
 
     id = Column(u'vipID', INTEGER(unsigned=True), primary_key=True)
@@ -483,7 +516,24 @@ class NsVip(TagOpsDB, Base):
         self.device_id = device_id
 
 
-class Ports(TagOpsDB, Base):
+class PackageNames(Base):
+    __tablename__ = 'package_names'
+
+    id = Column(u'pkg_name_id', INTEGER(), primary_key=True)
+    name = Column(VARCHAR(length=255), nullable=False)
+    pkg_def_id = Column(INTEGER(),
+                        ForeignKey(PackageDefinitions.id, ondelete='cascade'),
+                        nullable=False)
+
+
+    def __init__(self, name, pkg_def_id):
+        """ """
+
+        self.name = name
+        self.pkg_def_id = pkg_def_id
+
+
+class Ports(Base):
     __tablename__ = 'ports'
 
     id = Column(u'PortID', INTEGER(), primary_key=True)
@@ -511,7 +561,7 @@ class Ports(TagOpsDB, Base):
         self.duplex = duplex
 
 
-class Vlans(TagOpsDB, Base):
+class Vlans(Base):
     __tablename__ = 'vlans'
 
     id = Column(u'VlanID', INTEGER(), primary_key=True)
@@ -528,7 +578,7 @@ class Vlans(TagOpsDB, Base):
         self.description = description
 
 
-class AppDefinitions(TagOpsDB, Base):
+class AppDefinitions(Base):
     __tablename__ = 'app_definitions'
 
     id = Column(u'AppID', SMALLINT(display_width=2), primary_key=True)
@@ -572,7 +622,7 @@ class AppDefinitions(TagOpsDB, Base):
         self.status = status
 
 
-class NagServicesArguments(TagOpsDB, Base):
+class NagServicesArguments(Base):
     __tablename__ = 'nag_services_arguments'
 
     service_id = Column(INTEGER(),
@@ -607,7 +657,7 @@ nag_services_contacts = Table(u'nag_services_contacts', Base.metadata,
 )
 
 
-class NsWeight(TagOpsDB, Base):
+class NsWeight(Base):
     __tablename__ = 'ns_weight'
 
     vip_id = Column(u'vipID', INTEGER(unsigned=True),
@@ -627,7 +677,7 @@ class NsWeight(TagOpsDB, Base):
         self.weight = weight
 
 
-class Subnet(TagOpsDB, Base):
+class Subnet(Base):
     __tablename__ = 'subnet'
 
     id = Column(u'SubnetID', INTEGER(), primary_key=True)
@@ -649,7 +699,7 @@ class Subnet(TagOpsDB, Base):
         self.zone_id = zone_id
 
 
-class AppDeployments(TagOpsDB, Base):
+class AppDeployments(Base):
     __tablename__ = 'app_deployments'
 
     id = Column(u'AppDeploymentID', INTEGER(), primary_key=True)
@@ -713,7 +763,7 @@ app_packages = Table(u'app_packages', Base.metadata,
 )
 
 
-class DefaultSpecs(TagOpsDB, Base):
+class DefaultSpecs(Base):
     __tablename__ = 'default_specs'
 
     spec_id = Column(u'specID', INTEGER(),
@@ -738,7 +788,7 @@ class DefaultSpecs(TagOpsDB, Base):
         self.priority = priority
 
 
-class Hosts(TagOpsDB, Base):
+class Hosts(Base):
     __tablename__ = 'hosts'
 
     id = Column(u'HostID', INTEGER(), primary_key=True)
@@ -790,7 +840,7 @@ class Hosts(TagOpsDB, Base):
         self.environment = environment
 
 
-class NagApptypesServices(TagOpsDB, Base):
+class NagApptypesServices(Base):
     __tablename__ = 'nag_apptypes_services'
 
     app_id = Column(SMALLINT(display_width=2),
@@ -807,7 +857,7 @@ class NagApptypesServices(TagOpsDB, Base):
                             primary_key=True)
 
 
-class NsVipBinds(TagOpsDB, Base):
+class NsVipBinds(Base):
     __tablename__ = 'ns_vip_binds'
 
     app_id = Column(u'appID', SMALLINT(display_width=6),
@@ -824,7 +874,21 @@ class NsVipBinds(TagOpsDB, Base):
                             primary_key=True)
 
 
-class Asset(TagOpsDB, Base):
+class ProjectPackage(Base):
+    __tablename__ = 'project_package'
+
+    project_id = Column(INTEGER(),
+                        ForeignKey(Projects.id, ondelete='cascade'),
+                        primary_key=True)
+    pkg_def_id = Column(INTEGER(),
+                        ForeignKey(PackageDefinitions.id, ondelete='cascade'),
+                        primary_key=True)
+    app_id = Column(SMALLINT(display_width=6),
+                    ForeignKey(AppDefinitions.id, ondelete='cascade'),
+                    primary_key=True)
+
+
+class Asset(Base):
     __tablename__ = 'asset'
 
     id = Column(u'AssetID', INTEGER(), primary_key=True)
@@ -873,7 +937,7 @@ class Asset(TagOpsDB, Base):
         self.vendor_contact = vendor_contact
 
 
-class HostDeployments(TagOpsDB, Base):
+class HostDeployments(Base):
     __tablename__ = 'host_deployments'
 
     id = Column(u'HostDeploymentID', INTEGER(), primary_key=True)
@@ -900,7 +964,7 @@ class HostDeployments(TagOpsDB, Base):
         self.realized = realized
 
 
-class HostInterfaces(TagOpsDB, Base):
+class HostInterfaces(Base):
     __tablename__ = 'host_interfaces'
 
     id = Column(u'InterfaceID', INTEGER(), primary_key=True)
@@ -932,7 +996,7 @@ class HostInterfaces(TagOpsDB, Base):
         self.port_id = port_id
 
 
-class Iloms(TagOpsDB, Base):
+class Iloms(Base):
     __tablename__ = 'iloms'
 
     id = Column(u'ILomID', INTEGER(), primary_key=True)
@@ -962,7 +1026,7 @@ class Iloms(TagOpsDB, Base):
         self.comments = comments
 
 
-class NagHostsServices(TagOpsDB, Base):
+class NagHostsServices(Base):
     __tablename__ = 'nag_hosts_services'
 
     host_id = Column(INTEGER(), ForeignKey(Hosts.id, ondelete='cascade'),
@@ -975,7 +1039,7 @@ class NagHostsServices(TagOpsDB, Base):
                            primary_key=True)
 
 
-class ServiceEvent(TagOpsDB, Base):
+class ServiceEvent(Base):
     __tablename__ = 'serviceEvent'
 
     id = Column(u'ServiceID', INTEGER(), primary_key=True)
@@ -1005,7 +1069,7 @@ class ServiceEvent(TagOpsDB, Base):
         self.service_date = service_date
 
 
-class HostIps(TagOpsDB, Base):
+class HostIps(Base):
     __tablename__ = 'host_ips'
 
     id = Column(u'IpID', INTEGER(), primary_key=True)
@@ -1031,7 +1095,7 @@ class HostIps(TagOpsDB, Base):
         self.comments = comments
 
 
-class Cname(TagOpsDB, Base):
+class Cname(Base):
     __tablename__ = 'cname'
 
     id = Column(u'CnameID', INTEGER(), primary_key=True)
@@ -1084,11 +1148,18 @@ NsDevice.vips = relationship(NsVip)
 NsService.ns_monitors = relationship(NsMonitor, secondary=ns_service_binds)
 NsService.service_params = relationship(NsServiceParams)
 
+PackageDefinitions.packages = relationship(Packages,
+                                           backref='package_definition')
+PackageDefinitions.package_names = relationship(PackageNames)
+PackageDefinitions.proj_pkg = relationship(ProjectPackage)
+
 PackageLocations.app_definitions = relationship(AppDefinitions,
                                                 secondary=app_packages,
                                                 backref='package_locations')
 
 Packages.deployments = relationship(Deployments)
+
+Projects.proj_pkg = relationship(ProjectPackage)
 
 Zones.cnames = relationship(Cname, backref='zone')
 
@@ -1134,6 +1205,7 @@ AppDefinitions.nag_app_services = \
     relationship(NagApptypesServices,
                  primaryjoin=NagApptypesServices.app_id == AppDefinitions.id)
 AppDefinitions.nag_host_services = relationship(NagHostsServices)
+AppDefinitions.proj_pkg = relationship(ProjectPackage)
 AppDefinitions.development_vlans = \
     relationship(Vlans, foreign_keys=[ AppDefinitions.development_vlan_id ])
 AppDefinitions.production_vlans = \
@@ -1164,6 +1236,10 @@ NagApptypesServices.service = relationship(NagServices)
 
 NsVipBinds.ns_service = relationship(NsService)
 NsVipBinds.ns_vip = relationship(NsVip)
+
+ProjectPackage.app_definitions = relationship(AppDefinitions)
+ProjectPackage.package_definitions = relationship(PackageDefinitions)
+ProjectPackage.projects = relationship(Projects)
 
 Asset.host = relationship(Hosts, uselist=False)
 
