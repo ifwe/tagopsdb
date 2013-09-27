@@ -76,7 +76,7 @@ def find_package_definition(project_id):
         pkg_def = (Session.query(PackageDefinitions)
                           .join(ProjectPackage)
                           .filter(ProjectPackage.project_id==project_id)
-                          .one())
+                          .first())
     except sqlalchemy.orm.exc.NoResultFound:
         raise PackageException('Entry for project ID "%s" not found in '
                                'ProjectPackages table' % project_id)
