@@ -332,7 +332,7 @@ class Projects(Base):
     __tablename__ = 'projects'
 
     id = Column(u'project_id', INTEGER(), primary_key=True)
-    name = Column(VARCHAR(length=255), nullable=False)
+    name = Column(VARCHAR(length=255), nullable=False, unique=True)
 
 
     def __init__(self, name):
@@ -525,8 +525,12 @@ class PackageNames(Base):
                         ForeignKey(PackageDefinitions.id, ondelete='cascade'),
                         nullable=False)
 
+    __table_args__ = (
+        UniqueConstraint(u'name', u'pkg_def_id', name='name_pkg_def_id'),
+        { 'mysql_engine' : 'InnoDB', 'mysql_charset' : 'utf8', },
+    )
 
-    def __init__(self, name, pkg_def_id):
+    def __init__(self, name, pkg_def_id=None):
         """ """
 
         self.name = name
@@ -804,6 +808,7 @@ class Hosts(Base):
                     ForeignKey(AppDefinitions.id), nullable=False)
     cage_location = Column(u'cageLocation', INTEGER())
     cab_location = Column(u'cabLocation', VARCHAR(length=10))
+    section = Column(VARCHAR(length=10))
     rack_location = Column(u'rackLocation', INTEGER())
     console_port = Column(u'consolePort', VARCHAR(length=11))
     power_port = Column(u'powerPort', VARCHAR(length=10))
@@ -819,8 +824,8 @@ class Hosts(Base):
 
     def __init__(self, spec_id, state, hostname, arch, kernel_version,
                  distribution, timezone, app_id, cage_location, cab_location,
-                 rack_location, console_port, power_port, power_circuit,
-                 environment):
+                 section, rack_location, console_port, power_port,
+                 power_circuit, environment):
         """ """
 
         self.spec_id = spec_id
@@ -833,6 +838,7 @@ class Hosts(Base):
         self.app_id = app_id
         self.cage_location = cage_location
         self.cab_location = cab_location
+        self.section = section
         self.rack_location = rack_location
         self.console_port = console_port
         self.power_port = power_port
