@@ -4,7 +4,8 @@ from sqlalchemy import func
 
 from tagopsdb.database.meta import Session
 from tagopsdb.database.model import AppDefinitions, PackageDefinitions, \
-                                    PackageLocations, ProjectPackage, Projects
+                                    PackageLocations, PackageNames, \
+                                    ProjectPackage, Projects
 from tagopsdb.exceptions import RepoException
 
 
@@ -28,7 +29,12 @@ def add_app_location(project_type, pkg_type, pkg_name, app_name, path, arch,
     pkg_def = add_package_definition('rpm', 'matching', pkg_name,
                                      path, arch, 'jenkins', build_host,
                                      environment)
-    pkg_def.package_names.append(pkg_name)
+    Session.add(pkg_def)
+    Session.flush()   # Needed to get pkg_def_id generated
+
+    package_name = PackageNames(pkg_name, pkg_def.id)
+    Session.add(package_name)
+    pkg_def.package_names.append(package_name)
 
     return project, project_new, pkg_def
 
@@ -48,11 +54,11 @@ def add_app_packages_mapping(project, project_new, pkg_def, app_types):
         project.app_definitions.append(app_def)
 
         # Transitional code to synchronize with new tables
-        if project_new is not None:
-            proj_pkg = ProjectPackage()
-            project_new.proj_pkg.append(proj_pkg)
-            pkg_def.proj_pkg.append(proj_pkg)
-            app_def.proj_pkg.append(proj_pkg)
+        proj_pkg = ProjectPackage()
+        proj_pkg.projects = project_new
+        proj_pkg.package_definitions = pkg_def
+        proj_pkg.app_definitions = app_def
+        Session.add(proj_pkg)
 
 
 def add_package_definition(deploy_type, validation_type, pkg_name, path,
