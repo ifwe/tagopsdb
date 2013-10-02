@@ -5,7 +5,8 @@ from sqlalchemy.sql.expression import func
 import tagopsdb.deploy.repo as repo
 
 from tagopsdb.database.meta import Session
-from tagopsdb.database.model import PackageLocations, Packages
+from tagopsdb.database.model import PackageDefinitions, PackageLocations, \
+                                    Packages, ProjectPackage
 from tagopsdb.exceptions import NotImplementedException, PackageException
 
 
@@ -13,13 +14,16 @@ def add_package(app_name, version, revision, user):
     """Add the requested version for the package of a given application"""
 
     app = find_app_by_name(app_name)
+    project = repo.find_project(app_name)
+    pkg_def = find_package_definition(project.id)
 
     if find_package(app_name, version, revision):
         raise PackageException('Current version of application "%s" '
                                'already found in Packages table' % app_name)
 
-    pkg = Packages(app.pkg_name, version, revision, func.current_timestamp(),
-                   user, app.pkg_type, app.project_type)
+    pkg = Packages(pkg_def.id, app.pkg_name, version, revision,
+                   func.current_timestamp(), user, app.pkg_type,
+                   app.project_type)
     Session.add(pkg)
 
 
@@ -58,6 +62,26 @@ def find_package(app_name, version, revision):
                        .one())
     except sqlalchemy.orm.exc.NoResultFound:
         return None
+
+
+def find_package_definition(project_id):
+    """Find package definition for a given package
+
+       Note that in this transitional state, we are actually checking
+       against the project and that there will be only one entry in
+       the ProjectPackage table for a given project.  THIS WILL CHANGE.
+    """
+
+    try:
+        pkg_def = (Session.query(PackageDefinitions)
+                          .join(ProjectPackage)
+                          .filter(ProjectPackage.project_id==project_id)
+                          .first())
+    except sqlalchemy.orm.exc.NoResultFound:
+        raise PackageException('Entry for project ID "%s" not found in '
+                               'ProjectPackages table' % project_id)
+
+    return pkg_def
 
 
 def list_packages(app_names):
