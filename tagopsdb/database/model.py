@@ -592,8 +592,8 @@ class AppDefinitions(Base):
                                  ForeignKey(Vlans.id), nullable=False)
     staging_vlan_id = Column(u'Staging_VlanID', INTEGER(),
                              ForeignKey(Vlans.id), nullable=False)
-    distribution = Column(Enum(u'co54', u'co62', u'co64', u'rh53', u'rh62',
-                               u'rh63', u'rh64'), nullable=False,
+    distribution = Column(Enum(u'co54', u'co62', u'co64', u'co65', u'rh53',
+                               u'rh62', u'rh63', u'rh64'), nullable=False,
                           default='co64', server_default='co64')
     app_type = Column(u'appType', VARCHAR(length=100), nullable=False)
     host_base = Column(u'hostBase', VARCHAR(length=100))
