@@ -21,7 +21,7 @@ def add_package(app_name, version, revision, user):
         raise PackageException('Current version of application "%s" '
                                'already found in Packages table' % app_name)
 
-    pkg = Packages(pkg_def.id, app.pkg_name, version, revision,
+    pkg = Packages(pkg_def.id, app.pkg_name, version, revision, 'pending',
                    func.current_timestamp(), user, app.pkg_type,
                    app.project_type)
     Session.add(pkg)
