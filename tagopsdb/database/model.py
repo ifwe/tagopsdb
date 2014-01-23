@@ -296,6 +296,8 @@ class Packages(Base):
     pkg_name = Column(VARCHAR(length=255), nullable=False)
     version = Column(VARCHAR(length=63), nullable=False)
     revision = Column(VARCHAR(length=63), nullable=False)
+    status = Column(Enum('completed', 'failed', 'pending', 'processing',
+                         'removed'), nullable=False)
     created = Column(TIMESTAMP(), nullable=False,
                      default=func.current_timestamp(),
                      server_default=func.current_timestamp())
@@ -314,14 +316,15 @@ class Packages(Base):
     )
 
 
-    def __init__(self, pkg_def_id, pkg_name, version, revision, created,
-                 creator, builder, project_type):
+    def __init__(self, pkg_def_id, pkg_name, version, revision, status,
+                 created, creator, builder, project_type):
         """ """
 
         self.pkg_def_id = pkg_def_id
         self.pkg_name = pkg_name
         self.version = version
         self.revision = revision
+        self.status = status
         self.created = created
         self.creator = creator
         self.builder = builder
