@@ -52,7 +52,7 @@ def init_session(db_user, db_password, **kwargs):
         kwargs.setdefault('db_name', db_name)
 
     dbconn_string = create_dbconn_string(db_user, db_password, **kwargs)
-    engine = create_engine(dbconn_string)
+    engine = create_engine(dbconn_string, pool_recycle=3600)
 
     # Ensure connection information is valid
     try:
