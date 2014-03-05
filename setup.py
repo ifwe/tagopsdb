@@ -7,7 +7,7 @@ from setuptools import setup
 execfile('tagopsdb/version.py')
 
 setup_args = dict(
-    name = 'TagOpsDB Library',
+    name = 'tagopsdb',
     version = __version__,
     description = 'Python library to interface with TagOps database',
     # long_description = long_description,
