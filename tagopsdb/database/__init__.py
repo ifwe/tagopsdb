@@ -4,7 +4,8 @@ import yaml.parser
 
 from sqlalchemy import create_engine
 
-from tagopsdb.database.meta import Base, Session
+from .model import Base
+from tagopsdb.database.meta import Session
 from tagopsdb.database.model import *
 from tagopsdb.exceptions import PermissionsException
 
