@@ -44,13 +44,8 @@ def create_dbconn_string(db_user, db_password, **kwargs):
     return '%(protocol)s://%(user)s:%(password)s@%(host)s/%(name)s' % db_dict
 
 
-def init_session(db_user, db_password, **kwargs):
+def init_session(db_user, db_password, db_host, db_name):
     """Initialize database session"""
-
-    if 'hostname' not in kwargs or 'db_name' not in kwargs:
-        db_host, db_name = load_db_config()
-        kwargs.setdefault('hostname', db_host)
-        kwargs.setdefault('db_name', db_name)
 
     dbconn_string = create_dbconn_string(db_user, db_password, **kwargs)
     engine = create_engine(dbconn_string, pool_recycle=3600)
