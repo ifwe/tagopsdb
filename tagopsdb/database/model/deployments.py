@@ -1,34 +1,32 @@
-from sqlalchemy import Column, Enum, ForeignKey, TIMESTAMP, VARCHAR
-from sqlalchemy.dialects.mysql import INTEGER
-
-from sqlalchemy.orm import relationship
+from elixir import Field
+from elixir import String, Integer, Enum, DateTime
+from elixir import using_options, belongs_to
 from sqlalchemy.sql.expression import func
 
 from .base import Base
 
-from .packages import Packages
-
 
 class Deployments(Base):
-    __tablename__ = 'deployments'
+    using_options(tablename='deployments')
 
-    id = Column(u'DeploymentID', INTEGER(), primary_key=True)
-    package_id = Column(INTEGER(),
-                        ForeignKey(Packages.id, ondelete='cascade'),
-                        nullable=False)
-    user = Column(VARCHAR(length=32), nullable=False)
-    dep_type = Column(Enum('deploy', 'rollback'), nullable=False)
-    declared = Column(TIMESTAMP(), nullable=False,
-                      default=func.current_timestamp(),
-                      server_default=func.current_timestamp())
+    id = Field(Integer, colname='DeploymentID', primary_key=True)
+    user = Field(String(length=32), nullable=False)
+    dep_type = Field(
+        Enum('deploy', 'rollback'),
+        nullable=False,
+    )
 
-    app_deployments = relationship('AppDeployments')
-    host_deployments = relationship('HostDeployments')
+    declared = Field(
+        DateTime,
+        nullable=False,
+        default=func.current_timestamp(),
+        server_default=func.current_timestamp(),
+    )
 
-    def __init__(self, package_id, user, dep_type, declared):
-        """ """
-
-        self.package_id = package_id
-        self.user = user
-        self.dep_type = dep_type
-        self.declared = declared
+    belongs_to(
+        'package',
+        of_kind='Packages',
+        colname='package_id',
+        target_column='package_id',
+        inverse='deployments'
+    )

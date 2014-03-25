@@ -1,34 +1,41 @@
-from sqlalchemy import Column, ForeignKey
+from elixir import Field
+from elixir import Integer
+from elixir import using_options, belongs_to
+from sqlalchemy import ForeignKey
 from sqlalchemy.dialects.mysql import INTEGER
-
-from sqlalchemy.orm import relationship
 
 from .base import Base
 
-from .host_specs import HostSpecs
-from .ns_service import NsService
-
 
 class NsServiceMax(Base):
-    __tablename__ = 'ns_service_max'
+    using_options(tablename='ns_service_max')
 
-    spec_id = Column(u'specID', INTEGER(),
-                     ForeignKey(HostSpecs.id, ondelete='cascade'),
-                     primary_key=True)
-    service_id = Column(u'serviceID', INTEGER(unsigned=True),
-                        ForeignKey(NsService.id, ondelete='cascade'),
-                        primary_key=True)
-    max_client = Column(u'maxClient', INTEGER(unsigned=True), nullable=False,
-                        default=0, server_default='0')
-    max_requests = Column(u'maxReq', INTEGER(unsigned=True), nullable=False,
-                          default=0, server_default='0')
+    spec_id = Field(
+        Integer,
+        ForeignKey('host_specs.specID'),
+        colname='specID',
+        primary_key=True
+    )
+    service_id = Field(
+        Integer,
+        ForeignKey('ns_service.serviceID'),
+        colname='serviceID',
+        primary_key=True
+    )
+    max_client = Field(
+        INTEGER(unsigned=True),
+        colname='maxClient',
+        nullable=False,
+        default=0,
+        server_default='0'
+    )
+    max_requests = Field(
+        INTEGER(unsigned=True),
+        colname='maxReq',
+        nullable=False,
+        default=0,
+        server_default='0'
+    )
 
-    service = relationship('NsService', uselist=False)
-
-    def __init__(self, spec_id, service_id, max_client, max_requests):
-        """ """
-
-        self.spec_id = spec_id
-        self.service_id = service_id
-        self.max_client = max_client
-        self.max_requests = max_requests
+    # belongs_to('ns_service', of_kind='NsService', field=service_id)
+    # belongs_to('host_spec', of_kind='HostSpecs', field=spec_id)

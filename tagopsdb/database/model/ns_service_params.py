@@ -1,23 +1,23 @@
-from sqlalchemy import Column, ForeignKey, VARCHAR
+from elixir import Field
+from elixir import String, Integer
+from elixir import using_options, belongs_to
+from sqlalchemy import ForeignKey
 from sqlalchemy.dialects.mysql import INTEGER
 
 from .base import Base
 
-from .ns_service import NsService
-
 
 class NsServiceParams(Base):
-    __tablename__ = 'ns_service_params'
+    using_options(tablename='ns_service_params')
 
-    service_id = Column(u'serviceID', INTEGER(unsigned=True),
-                        ForeignKey(NsService.id, ondelete='cascade'),
-                        primary_key=True)
-    param = Column(VARCHAR(length=32), primary_key=True)
-    value = Column(VARCHAR(length=128), nullable=False)
+    service_id = Field(
+        Integer,
+        ForeignKey('ns_service.serviceID'),
+        colname='serviceID',
+        primary_key=True
+    )
 
-    def __init__(self, service_id, param, value):
-        """ """
+    param = Field(String(length=32), primary_key=True)
+    value = Field(String(length=128), nullable=False)
 
-        self.service_id = service_id
-        self.param = param
-        self.value = value
+    # belongs_to('ns_service', of_kind='NsService', field=service_id)

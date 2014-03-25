@@ -1,16 +1,12 @@
-from sqlalchemy import Column, VARCHAR
-from sqlalchemy.dialects.mysql import INTEGER
+from elixir import Field
+from elixir import Integer, String
+from elixir import using_options
 
 from .base import Base
 
 
 class NsMonitor(Base):
-    __tablename__ = 'ns_monitor'
+    using_options(tablename='ns_monitor')
 
-    id = Column(u'monitorID', INTEGER(unsigned=True), primary_key=True)
-    monitor = Column(VARCHAR(length=32), nullable=False, unique=True)
-
-    def __init__(self, monitor):
-        """ """
-
-        self.monitor = monitor
+    id = Field(Integer, colname='monitorID', primary_key=True)
+    monitor = Field(String(length=32), nullable=False, unique=True)

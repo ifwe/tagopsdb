@@ -1,27 +1,17 @@
-from sqlalchemy import Column, UniqueConstraint, VARCHAR
-from sqlalchemy.dialects.mysql import INTEGER
-
-from sqlalchemy.orm import relationship
+from elixir import Field
+from elixir import String, Integer
+from elixir import using_options, using_table_options
+from sqlalchemy import UniqueConstraint
 
 from .base import Base
 
 
 class NsDevice(Base):
-    __tablename__ = 'ns_device'
-
-    id = Column(u'deviceID', INTEGER(unsigned=True), primary_key=True)
-    proto = Column(VARCHAR(length=6), nullable=False)
-    host = Column(VARCHAR(length=32), nullable=False)
-
-    vips = relationship('NsVip')
-
-    __table_args__ = (
-        UniqueConstraint(u'proto', u'host', name=u'proto_host'),
-        {'mysql_engine': 'InnoDB', 'mysql_charset': 'utf8'},
+    using_options(tablename='ns_device')
+    using_table_options(
+        UniqueConstraint(u'proto', u'host', name=u'proto_host')
     )
 
-    def __init__(self, proto, host):
-        """ """
-
-        self.proto = proto
-        self.host = host
+    id = Field(Integer, colname='deviceID', primary_key=True)
+    proto = Field(String(length=6), nullable=False)
+    host = Field(String(length=32), nullable=False)

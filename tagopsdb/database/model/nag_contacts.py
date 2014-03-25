@@ -1,14 +1,15 @@
-from sqlalchemy import Column, VARCHAR
-from sqlalchemy.dialects.mysql import INTEGER
+from elixir import Field
+from elixir import String, Integer
+from elixir import using_options
 
 from .base import Base
 
 
 class NagContacts(Base):
-    __tablename__ = 'nag_contacts'
+    using_options(tablename='nag_contacts')
 
-    id = Column(INTEGER(), primary_key=True)
-    name = Column(VARCHAR(length=32), nullable=False, unique=True)
-    alias = Column(VARCHAR(length=80))
-    email = Column(VARCHAR(length=80))
-    pager = Column(VARCHAR(length=80))
+    id = Field(Integer, primary_key=True)
+    name = Field(String(length=32), nullable=False, unique=True)
+    alias = Field(String(length=80))
+    email = Field(String(length=80))
+    pager = Field(String(length=80))

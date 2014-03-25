@@ -1,16 +1,12 @@
-from sqlalchemy import Column, VARCHAR
-from sqlalchemy.dialects.mysql import INTEGER
+from elixir import Field
+from elixir import Integer, String
+from elixir import using_options
 
 from .base import Base
 
 
 class Hipchat(Base):
-    __tablename__ = 'hipchat'
+    using_options(tablename='hipchat')
 
-    id = Column(u'roomID', INTEGER(), primary_key=True)
-    room_name = Column(VARCHAR(length=50), nullable=False, unique=True)
-
-    def __init__(self, room_name):
-        """ """
-
-        self.room_name = room_name
+    id = Field(Integer, colname='roomID', primary_key=True)
+    room_name = Field(String(length=50), nullable=False, unique=True)
