@@ -1,17 +1,18 @@
-from sqlalchemy import Column, Table, ForeignKey
-from sqlalchemy.dialects.mysql import INTEGER, SMALLINT
-
+from elixir import using_options, belongs_to
 from .base import Base
 
 
-AppPackages = app_packages = Table(
-    u'app_packages',
-    Base.metadata,
-    Column(u'pkgLocationID', INTEGER(),
-           ForeignKey('package_locations.pkgLocationID', ondelete='cascade'),
-           primary_key=True),
-    Column(u'AppID', SMALLINT(display_width=6),
-           ForeignKey('app_definitions.AppID', ondelete='cascade'),
-           primary_key=True),
-    mysql_engine='InnoDB', mysql_charset='utf8',
-)
+class AppPackages(Base):
+    using_options(tablename='app_packages')
+    belongs_to(
+        'app',
+        of_kind='AppDefinitions',
+        colname='AppID',
+        primary_key=True
+    )
+    belongs_to(
+        'package_location',
+        of_kind='PackageLocations',
+        colname='pkgLocationID',
+        primary_key=True
+    )

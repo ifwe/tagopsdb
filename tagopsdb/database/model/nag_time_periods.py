@@ -1,19 +1,20 @@
-from sqlalchemy import Column, VARCHAR
-from sqlalchemy.dialects.mysql import INTEGER
+from elixir import Field
+from elixir import String, Integer
+from elixir import using_options
 
 from .base import Base
 
 
 class NagTimePeriods(Base):
-    __tablename__ = 'nag_time_periods'
+    using_options(tablename='nag_time_periods')
 
-    id = Column(INTEGER(), primary_key=True)
-    name = Column(VARCHAR(length=32), nullable=False, unique=True)
-    alias = Column(VARCHAR(length=80))
-    sunday = Column(VARCHAR(length=32))
-    monday = Column(VARCHAR(length=32))
-    tuesday = Column(VARCHAR(length=32))
-    wednesday = Column(VARCHAR(length=32))
-    thursday = Column(VARCHAR(length=32))
-    friday = Column(VARCHAR(length=32))
-    saturday = Column(VARCHAR(length=32))
+    id = Field(Integer, primary_key=True)
+    name = Field(String(length=32), nullable=False, unique=True)
+    alias = Field(String(length=80))
+    sunday = Field(String(length=32))
+    monday = Field(String(length=32))
+    tuesday = Field(String(length=32))
+    wednesday = Field(String(length=32))
+    thursday = Field(String(length=32))
+    friday = Field(String(length=32))
+    saturday = Field(String(length=32))

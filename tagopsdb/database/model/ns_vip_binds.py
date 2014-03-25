@@ -1,31 +1,25 @@
-from sqlalchemy import Column, ForeignKey
-from sqlalchemy.dialects.mysql import INTEGER, SMALLINT
-
-from sqlalchemy.orm import relationship
+from elixir import Field
+from elixir import Integer
+from elixir import using_options, belongs_to
+from sqlalchemy import ForeignKey
 
 from .base import Base
 
-from .environments import Environments
-from .app_definitions import AppDefinitions
-from .ns_service import NsService
-from .ns_vip import NsVip
-
 
 class NsVipBinds(Base):
-    __tablename__ = 'ns_vip_binds'
+    using_options(tablename='ns_vip_binds')
 
-    app_id = Column(u'appID', SMALLINT(display_width=6),
-                    ForeignKey(AppDefinitions.id, ondelete='cascade'),
-                    primary_key=True)
-    vip_id = Column(u'vipID', INTEGER(unsigned=True),
-                    ForeignKey(NsVip.id, ondelete='cascade'),
-                    primary_key=True)
-    service_id = Column(u'serviceID', INTEGER(unsigned=True),
-                        ForeignKey(NsService.id, ondelete='cascade'),
-                        primary_key=True)
-    environment_id = Column(u'environmentID', INTEGER(),
-                            ForeignKey(Environments.id, ondelete='cascade'),
-                            primary_key=True)
+    # app_id = Field(Integer, colname='appID', primary_key=True)
+    vip_id = Field(
+        Integer,
+        ForeignKey('ns_vip.vipID'),
+        colname='vipID',
+        primary_key=True
+    )
+    service_id = Field(Integer, colname='serviceID', primary_key=True)
+    environment_id = Field(Integer, colname='environmentID', primary_key=True)
 
-    ns_service = relationship('NsService')
-    ns_vip = relationship('NsVip')
+    # belongs_to('app_definition', of_kind='AppDefinitions', colname='appID')
+    belongs_to('ns_vip', of_kind='NsVip', field=vip_id)
+    # belongs_to('ns_service', of_kind='NsService', colname='serviceID')
+    # belongs_to('environment', of_kind='Environment', colname='environmentID')

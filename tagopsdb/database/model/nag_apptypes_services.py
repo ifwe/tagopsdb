@@ -1,29 +1,32 @@
-from sqlalchemy import Column, ForeignKey
-from sqlalchemy.dialects.mysql import INTEGER, SMALLINT
-
-from sqlalchemy.orm import relationship
-
 from .base import Base
+
+from elixir import using_options, belongs_to
 
 
 class NagApptypesServices(Base):
-    __tablename__ = 'nag_apptypes_services'
+    using_options(tablename='nag_apptypes_services')
 
-    app_id = Column(SMALLINT(display_width=2),
-                    ForeignKey('app_definitions.AppID', ondelete='cascade'),
-                    primary_key=True)
-    service_id = Column(INTEGER(),
-                        ForeignKey('nag_services.id', ondelete='cascade'),
-                        primary_key=True)
-    server_app_id = Column(SMALLINT(display_width=6),
-                           ForeignKey('app_definitions.AppID'),
-                           primary_key=True)
-    environment_id = Column(
-        INTEGER(),
-        ForeignKey('environments.environmentID', ondelete='cascade'),
+    belongs_to(
+        'app',
+        of_kind='AppDefinitions',
+        colname='app_id',
         primary_key=True
     )
-
-    application = relationship('AppDefinitions', foreign_keys=[app_id])
-    environment = relationship('Environments')
-    service = relationship('NagServices')
+    belongs_to(
+        'service',
+        of_kind='NagServices',
+        colname='service_id',
+        primary_key=True
+    )
+    belongs_to(
+        'server_app',
+        of_kind='AppDefinitions',
+        colname='server_app_id',
+        primary_key=True
+    )
+    belongs_to(
+        'environment',
+        of_kind='Environments',
+        colname='environment_id',
+        primary_key=True
+    )

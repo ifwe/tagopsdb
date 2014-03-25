@@ -1,13 +1,22 @@
+from elixir import EntityBase, EntityMeta, using_table_options, using_options_defaults
 from sqlalchemy.orm import object_mapper
-from sqlalchemy.ext.declarative import declarative_base
 
 
-class TagOpsDBBase(object):
+class TagOpsDBBase(EntityBase):
     """Base class for some common default settings"""
+    __metaclass__ = EntityMeta
 
-    __table_args__ = (
-        {'mysql_engine': 'InnoDB', 'mysql_charset': 'utf8', },
+    using_options_defaults(
+        table_options=dict(mysql_engine='InnoDB', mysql_charset='utf8')
     )
+
+    @classmethod
+    def all(cls, *args, **kwargs):
+        return cls.query.all(*args, **kwargs)
+
+    @classmethod
+    def first(cls, *args, **kwargs):
+        return cls.query.first(*args, **kwargs)
 
     def __repr__(self):
         mapper = object_mapper(self)
@@ -29,12 +38,12 @@ class TagOpsDBBase(object):
             else:
                 v_str = repr(getattr(self, attr))
 
-            kv_strs.append('\n%s=%s' % (attr, v_str))
+            kv_strs.append('%s=%s' % (attr, v_str))
 
         return '<%(class_name)s (%(table_name)s) %(fields_str)s>' % dict(
             class_name=type(self).__name__,
-            table_name=self.__table__.name,
+            table_name=self.table.name,
             fields_str=' '.join(kv_strs),
         )
 
-Base = declarative_base(cls=TagOpsDBBase)
+Base = TagOpsDBBase

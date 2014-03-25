@@ -1,33 +1,26 @@
-from sqlalchemy import Column, UniqueConstraint, ForeignKey, VARCHAR
-from sqlalchemy.dialects.mysql import INTEGER
-
-from sqlalchemy.orm import relationship
+from elixir import Field
+from elixir import String, Integer
+from elixir import using_options, belongs_to
 
 from .base import Base
 
 
 class Cname(Base):
-    __tablename__ = 'cname'
+    using_options(tablename='cname')
+    id = Field(Integer, colname='CnameID', primary_key=True)
+    name = Field(String(length=40))
 
-    id = Column(u'CnameID', INTEGER(), primary_key=True)
-    name = Column(VARCHAR(length=40))
-    ip_id = Column(u'IpID', INTEGER(),
-                   ForeignKey('host_ips.IpID', onupdate='cascade',
-                              ondelete='cascade'))
-    zone_id = Column(u'ZoneID', INTEGER(),
-                     ForeignKey('zones.ZoneID', onupdate='cascade',
-                                ondelete='cascade'))
-
-    host = relationship('HostIps', uselist=False)
-
-    __table_args__ = (
-        UniqueConstraint(u'name', u'ZoneID', name=u'name_ZoneID'),
-        {'mysql_engine': 'InnoDB', 'mysql_charset': 'utf8'},
+    belongs_to(
+        'host',
+        of_kind='HostIps',
+        colname='IpID',
+        onupdate='cascade',
+        ondelete='cascade',
     )
-
-    def __init__(self, name, ip_id, zone_id):
-        """ """
-
-        self.name = name
-        self.ip_id = ip_id
-        self.zone_id = zone_id
+    belongs_to(
+        'zone',
+        of_kind='Zones',
+        colname='ZoneID',
+        onupdate='cascade',
+        ondelete='cascade',
+    )

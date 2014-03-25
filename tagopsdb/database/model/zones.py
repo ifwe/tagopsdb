@@ -1,29 +1,21 @@
-from sqlalchemy import Column, VARCHAR
-from sqlalchemy.dialects.mysql import INTEGER
-
-from sqlalchemy.orm import relationship
+from elixir import Field
+from elixir import String, Integer
+from elixir import using_options, has_many
 
 from .base import Base
 
 
 class Zones(Base):
-    __tablename__ = 'zones'
+    using_options(tablename='zones')
 
-    id = Column(u'ZoneID', INTEGER(), primary_key=True)
-    zone_name = Column(u'zoneName', VARCHAR(length=30))
-    mx_priority = Column(u'mxPriority', INTEGER())
-    mx_host_id = Column(u'mxHostID', VARCHAR(length=30))
-    ns_priority = Column(u'nsPriority', INTEGER())
-    nameserver = Column(VARCHAR(length=30))
+    id = Field(Integer, colname='ZoneID', primary_key=True)
 
-    cnames = relationship('Cname', backref='zone')
+    zone_name = Field(String(length=30), colname='zoneName', synonym='name')
+    mx_priority = Field(Integer, colname='mxPriority')
+    mx_host_id = Field(String(length=30), colname='mxHostID')
+    ns_priority = Field(Integer, colname='nsPriority')
+    nameserver = Field(String(length=30))
 
-    def __init__(self, zone_name, mx_priority, mx_host_id, ns_priority,
-                 nameserver):
-        """ """
-
-        self.zone_name = zone_name
-        self.mx_priority = mx_priority
-        self.mx_host_id = mx_host_id
-        self.ns_priority = ns_priority
-        self.nameserver = nameserver
+    # has_many('subnets', of_kind='Subnet')
+    # has_many('cnames', of_kind='Cnames')
+    # has_many('hosts', of_kind='HostIps', through='cnames', via='host')

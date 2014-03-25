@@ -1,26 +1,38 @@
-from sqlalchemy import Column, ForeignKey, VARCHAR
-from sqlalchemy.dialects.mysql import INTEGER
-
-from sqlalchemy.orm import relationship
+from elixir import Field
+from elixir import String, Integer
+from elixir import using_options, has_many, belongs_to
 
 from .base import Base
 
-from .environments import Environments
-
 
 class Vlans(Base):
-    __tablename__ = 'vlans'
-
-    id = Column(u'VlanID', INTEGER(), primary_key=True)
-    name = Column(VARCHAR(length=20))
-    environment_id = Column(u'environmentID', INTEGER(),
-                            ForeignKey(Environments.id, ondelete='cascade'))
-    description = Column(VARCHAR(length=50))
-
-    subnets = relationship('Subnet')
-
-    def __init__(self, name, description):
-        """ """
-
-        self.name = name
-        self.description = description
+    using_options(tablename='vlans')
+    id = Field(Integer, colname='VlanID', primary_key=True)
+    name = Field(String(length=20))
+    description = Field(String(length=50))
+    # belongs_to(
+    #     'environment',
+    #     of_kind='Environments',
+    #     colname='environmentID',
+    #     ondelete='cascade',
+    # )
+    has_many(
+        'subnets',
+        of_kind='Subnet',
+        # foreign_keys=id
+    )
+    # # has_many(
+    # #     'development_apps',
+    # #     of_kind='AppDefinitions',
+    # #     colname='Development_VlanID'
+    # # )
+    # has_many(
+    #     'staging_apps',
+    #     of_kind='AppDefinitions',
+    #     colname='Staging_VlanID'
+    # )
+    # has_many(
+    #     'production_apps',
+    #     of_kind='AppDefinitions',
+    #     colname='Production_VlanID'
+    # )

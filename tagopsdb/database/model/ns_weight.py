@@ -1,30 +1,23 @@
-from sqlalchemy import Column, ForeignKey
-from sqlalchemy.dialects.mysql import INTEGER, TINYINT
-
-from sqlalchemy.orm import relationship
+from elixir import Field
+from elixir import Integer
+from elixir import using_options, belongs_to
+from sqlalchemy import ForeignKey
+from sqlalchemy.dialects.mysql import TINYINT
 
 from .base import Base
 
-from .host_specs import HostSpecs
-from .ns_vip import NsVip
-
 
 class NsWeight(Base):
-    __tablename__ = 'ns_weight'
+    using_options(tablename='ns_weight')
 
-    vip_id = Column(u'vipID', INTEGER(unsigned=True),
-                    ForeignKey(NsVip.id, ondelete='cascade'),
-                    primary_key=True)
-    spec_id = Column(u'specID', INTEGER(),
-                     ForeignKey(HostSpecs.id, ondelete='cascade'),
-                     primary_key=True)
-    weight = Column(TINYINT(display_width=3, unsigned=True), nullable=False)
+    vip_id = Field(
+        Integer,
+        ForeignKey('ns_vip.vipID'),
+        colname='vipID',
+        primary_key=True
+    )
+    # spec_id = Field(Integer, colname='specID', primary_key=True)
+    weight = Field(TINYINT(display_width=3, unsigned=True), nullable=False)
 
-    host_spec = relationship('NsVip', uselist=False, backref='ns_vip_assocs')
-
-    def __init__(self, vip_id, spec_id, weight):
-        """ """
-
-        self.vip_id = vip_id
-        self.spec_id = spec_id
-        self.weight = weight
+    belongs_to('ns_vip', of_kind='NsVip', field=vip_id)
+    # belongs_to('host_spec', of_kind='HostSpecs', colname='specID', primary_key=True)

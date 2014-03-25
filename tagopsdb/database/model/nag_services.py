@@ -1,62 +1,32 @@
-from sqlalchemy import Column, ForeignKey, VARCHAR
-from sqlalchemy.dialects.mysql import INTEGER
-
-from sqlalchemy.orm import relationship
+from elixir import Field
+from elixir import String, Integer
+from elixir import using_options, belongs_to
 
 from .base import Base
 
 
 class NagServices(Base):
-    __tablename__ = 'nag_services'
+    using_options(tablename='nag_services')
 
-    id = Column(INTEGER(), primary_key=True)
-    check_command_id = Column(INTEGER(),
-                              ForeignKey('nag_check_commands.id',
-                                         ondelete='cascade'),
-                              nullable=False)
-    description = Column(VARCHAR(length=255), nullable=False)
-    max_check_attempts = Column(INTEGER(), nullable=False)
-    check_interval = Column(INTEGER(), nullable=False)
-    check_period_id = Column(INTEGER(),
-                             ForeignKey('nag_time_periods.id',
-                                        ondelete='cascade'),
-                             nullable=False)
-    retry_interval = Column(INTEGER(), nullable=False)
-    notification_interval = Column(INTEGER(), nullable=False)
-    notification_period_id = Column(INTEGER(),
-                                    ForeignKey('nag_time_periods.id',
-                                               ondelete='cascade'),
-                                    nullable=False)
+    id = Field(Integer, primary_key=True)
+    description = Field(String(length=255), nullable=False)
+    max_check_attempts = Field(Integer, nullable=False)
+    check_interval = Field(Integer, nullable=False)
+    retry_interval = Field(Integer, nullable=False)
+    notification_interval = Field(Integer, nullable=False)
 
-    applications = relationship('NagApptypesServices')
-    check_period = relationship(
-        'NagTimePeriods',
-        foreign_keys=[check_period_id],
-        uselist=False
+    belongs_to(
+        'check_command',
+        of_kind='NagCheckCommands',
+        colname='check_command_id'
     )
-    command_arguments = relationship(
-        'NagServicesArguments',
-        backref='nag_services'
+    belongs_to(
+        'check_period',
+        of_kind='NagTimePeriods',
+        colname='check_period_id'
     )
-    contact_groups = relationship(
-        'NagContactGroups',
-        secondary='nag_services_contact_groups',
-        backref='nag_services'
-    )
-    contacts = relationship(
-        'NagContacts',
-        secondary='nag_services_contacts',
-        backref='nag_services'
-    )
-    environments = relationship('NagApptypesServices')
-    hosts = relationship('NagHostsServices')
-    nag_check_command = relationship(
-        'NagCheckCommands',
-        uselist=False,
-        backref='nag_services'
-    )
-    notification_period = relationship(
-        'NagTimePeriods',
-        foreign_keys=[notification_period_id],
-        uselist=False
+    belongs_to(
+        'notification_period',
+        of_kind='NagTimePeriods',
+        colname='notification_period_id'
     )

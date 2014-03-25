@@ -1,44 +1,46 @@
-from sqlalchemy import Column, Enum, VARCHAR
-from sqlalchemy.dialects.mysql import INTEGER, BOOLEAN
-
-from sqlalchemy.orm import relationship
+from elixir import Field
+from elixir import String, Integer, Boolean, Enum
+from elixir import using_options, has_many
 
 from .base import Base
 
-from .app_packages import AppPackages
-
 
 class PackageLocations(Base):
-    __tablename__ = 'package_locations'
+    using_options(tablename='package_locations')
 
-    id = Column(u'pkgLocationID', INTEGER(), primary_key=True)
-    project_type = Column(Enum(u'application', u'kafka-config', u'tagconfig'),
-                          nullable=False, default='application',
-                          server_default='application')
-    pkg_type = Column(VARCHAR(length=255), nullable=False)
-    pkg_name = Column(VARCHAR(length=255), nullable=False, unique=True)
-    app_name = Column(VARCHAR(length=255), nullable=False, unique=True)
-    path = Column(VARCHAR(length=255), nullable=False, unique=True)
-    arch = Column(Enum(u'i386', u'x86_64', u'noarch'), nullable=False,
-                  default='noarch', server_default='noarch')
-    build_host = Column(VARCHAR(length=30), nullable=False)
-    environment = Column(BOOLEAN(), nullable=False)
+    id = Field(Integer, colname='pkgLocationID', primary_key=True)
+    pkg_type = Field(String(length=255), nullable=False)
+    pkg_name = Field(String(length=255), nullable=False, unique=True)
+    app_name = Field(String(length=255), nullable=False, unique=True)
+    path = Field(String(length=255), nullable=False, unique=True)
+    build_host = Field(String(length=30), nullable=False)
+    environment = Field(Boolean, nullable=False)
 
-    app_definitions = relationship(
-        'AppDefinitions',
-        secondary=AppPackages,
-        backref='package_locations'
+    arch = Field(
+        String(length=6),
+        Enum(u'i386', u'x86_64', u'noarch'),
+        nullable=False,
+        default='noarch',
+        server_default='noarch'
+    )
+    project_type = Field(
+        String(length=12),
+        Enum(u'application', u'kafka-config', u'tagconfig'),
+        nullable=False,
+        default='application',
+        server_default='application'
     )
 
-    def __init__(self, project_type, pkg_type, pkg_name, app_name, path, arch,
-                 build_host, environment=False):
-        """ """
-
-        self.project_type = project_type
-        self.pkg_type = pkg_type
-        self.pkg_name = pkg_name
-        self.app_name = app_name
-        self.path = path
-        self.arch = arch
-        self.build_host = build_host
-        self.environment = environment
+    # TODO: should this be has_one?
+    # has_many(
+    #     'app_packages',
+    #     of_kind='AppPackages',
+    #     colname='pkgLocationID'
+    # )
+    # has_many(
+    #     'app_definitions',
+    #     of_kind='AppDefinitions',
+    #     through='app_package',
+    #     via='app_definition'
+    # )
+    # has_many('deployments', of_kind='Deployments', colname='package_id')

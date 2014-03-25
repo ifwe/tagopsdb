@@ -1,8 +1,7 @@
+import sqlalchemy
 import sqlalchemy.exc
 import yaml
 import yaml.parser
-
-from sqlalchemy import create_engine
 
 from .model import Base
 from tagopsdb.database.meta import Session
@@ -44,11 +43,14 @@ def create_dbconn_string(db_user, db_password, **kwargs):
     return '%(protocol)s://%(user)s:%(password)s@%(host)s/%(name)s' % db_dict
 
 
-def init_session(db_user, db_password, db_host, db_name):
-    """Initialize database session"""
-
-    dbconn_string = create_dbconn_string(db_user, db_password, **kwargs)
-    engine = create_engine(dbconn_string, pool_recycle=3600)
+def create_engine(db_user, db_password, db_host, db_name):
+    dbconn_string = create_dbconn_string(
+        db_user,
+        db_password,
+        hostname=db_host,
+        db_name=db_name
+    )
+    engine = sqlalchemy.create_engine(dbconn_string, pool_recycle=3600)
 
     # Ensure connection information is valid
     try:
@@ -56,6 +58,13 @@ def init_session(db_user, db_password, db_host, db_name):
     except sqlalchemy.exc.DBAPIError, e:
         raise PermissionsException(e)
 
+    return engine
+
+
+def init_session(db_user, db_password, db_host, db_name):
+    """Initialize database session"""
+
+    engine = create_engine(db_user, db_password, db_host, db_name)
     Session.configure(bind=engine)
 
 

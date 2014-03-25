@@ -1,46 +1,73 @@
-from sqlalchemy import Column, Enum, TIMESTAMP, VARCHAR
-from sqlalchemy.dialects.mysql import INTEGER, BOOLEAN
-
-from sqlalchemy.orm import relationship
+from elixir import Field
+from elixir import String, Integer, Boolean, DateTime, Enum
+from elixir import using_options, has_many, belongs_to, has_and_belongs_to_many
+from sqlalchemy import ForeignKey
 from sqlalchemy.sql.expression import func
 
 from .base import Base
 
 
 class PackageDefinitions(Base):
-    __tablename__ = 'package_definitions'
+    using_options(tablename='package_definitions')
 
-    id = Column(u'pkg_def_id', INTEGER(), primary_key=True)
-    deploy_type = Column(VARCHAR(length=30), nullable=False)
-    validation_type = Column(VARCHAR(length=15), nullable=False)
-    pkg_name = Column(VARCHAR(length=255), nullable=False)
-    path = Column(VARCHAR(length=255), nullable=False)
-    arch = Column(Enum('i386', 'x86_64', 'noarch'), nullable=False,
-                  default='noarch', server_default='noarch')
-    build_type = Column(Enum(u'developer', u'hudson', u'jenkins'),
-                        nullable=False, default='jenkins',
-                        server_default='jenkins')
-    build_host = Column(VARCHAR(length=255), nullable=False)
-    env_specific = Column(BOOLEAN(), nullable=False, default=0,
-                          server_default='0')
-    created = Column(TIMESTAMP(), nullable=False,
-                     default=func.current_timestamp(),
-                     server_default=func.current_timestamp())
+    id = Field(Integer, colname='pkg_def_id', primary_key=True)
+    deploy_type = Field(String(length=30), nullable=False)
+    validation_type = Field(String(length=15), nullable=False)
+    pkg_name = Field(String(length=255), nullable=False)
 
-    packages = relationship('Packages', backref='package_definition')
-    package_names = relationship('PackageNames')
-    proj_pkg = relationship('ProjectPackage')
+    path = Field(String(length=255), nullable=False)
+    arch = Field(
+        String(length=6),
+        Enum(u'i386', u'x86_64', u'noarch'),
+        nullable=False,
+        default='noarch',
+        server_default='noarch'
+    )
 
-    def __init__(self, deploy_type, validation_type, pkg_name, path, arch,
-                 build_type, build_host, env_specific, created):
-        """ """
+    build_type = Field(
+        String(length=9),
+        Enum('developer', 'hudson', 'jenkins'),
+        nullable=False,
+        default='developer',
+        server_default='developer'
+    )
 
-        self.deploy_type = deploy_type
-        self.validation_type = validation_type
-        self.pkg_name = pkg_name
-        self.path = path
-        self.arch = arch
-        self.build_type = build_type
-        self.build_host = build_host
-        self.env_specific = env_specific
-        self.created = created
+    build_host = Field(String(length=255), nullable=False)
+    env_specific = Field(
+        Boolean,
+        nullable=False,
+        default=0,
+        server_default='0'
+    )
+
+    created = Field(
+        DateTime,
+        nullable=False,
+        default=func.current_timestamp(),
+        server_default=func.current_timestamp(),
+    )
+
+    has_many('packages', of_kind='Packages')
+    # has_many(
+    #     'package_name',
+    #     of_kind='PackageNames',
+    # )
+    has_and_belongs_to_many(
+        'projects',
+        of_kind='Projects',
+        inverse='package_definitions',
+        tablename='project_package',
+        local_colname='pkg_def_id',
+        remote_colname='project_id',
+        table_kwargs=dict(extend_existing=True)
+    )
+
+    has_and_belongs_to_many(
+        'app_definitions',
+        of_kind='AppDefinitions',
+        inverse='package_definitions',
+        tablename='project_package',
+        local_colname='pkg_def_id',
+        remote_colname='app_id',
+        table_kwargs=dict(extend_existing=True)
+    )

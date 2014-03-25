@@ -1,17 +1,18 @@
-from sqlalchemy import Column, Table, ForeignKey
-from sqlalchemy.dialects.mysql import INTEGER
-
+from elixir import using_options, belongs_to
 from .base import Base
 
 
-NagContactGroupsMembers = nag_contact_groups_members = Table(
-    u'nag_contact_groups_members',
-    Base.metadata,
-    Column(u'contact_id', INTEGER(),
-           ForeignKey('nag_contacts.id', ondelete='cascade'),
-           primary_key=True),
-    Column(u'contact_group_id', INTEGER(),
-           ForeignKey('nag_contact_groups.id', ondelete='cascade'),
-           primary_key=True),
-    mysql_engine='InnoDB', mysql_charset='utf8',
-)
+class NagContactGroupsMembers(Base):
+    using_options(tablename='nag_contact_groups_members')
+    belongs_to(
+        'contact',
+        of_kind='NagContacts',
+        colname='contact_id',
+        primary_key=True
+    )
+    belongs_to(
+        'contact_group',
+        of_kind='NagContactGroups',
+        colname='contact_group_id',
+        primary_key=True
+    )

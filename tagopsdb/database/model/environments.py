@@ -1,29 +1,15 @@
-from sqlalchemy import Column, VARCHAR
-from sqlalchemy.dialects.mysql import INTEGER
-
-from sqlalchemy.orm import relationship
+from elixir import Field
+from elixir import String, Integer
+from elixir import using_options
 
 from .base import Base
 
 
 class Environments(Base):
-    __tablename__ = 'environments'
+    using_options(tablename='environments')
 
-    id = Column(u'environmentID', INTEGER(), primary_key=True)
-    environment = Column(VARCHAR(length=15), nullable=False, unique=True)
-    env = Column(VARCHAR(length=12), nullable=False, unique=True)
-    domain = Column(VARCHAR(length=32), nullable=False, unique=True)
-    prefix = Column(VARCHAR(length=1), nullable=False)
-
-    host_specs = relationship('DefaultSpecs')
-    # XXX: should this be NsServices ?
-    ns_services = relationship('NsVipBinds')
-    ns_vips = relationship('NsVipBinds')
-
-    def __init__(self, environment, env, domain, prefix):
-        """ """
-
-        self.environment = environment
-        self.env = env
-        self.domain = domain
-        self.prefix = prefix
+    id = Field(Integer, colname='environmentID', primary_key=True)
+    environment = Field(String(length=15), nullable=False, unique=True)
+    env = Field(String(length=12), nullable=False, unique=True)
+    domain = Field(String(length=32), nullable=False, unique=True)
+    prefix = Field(String(length=1), nullable=False)

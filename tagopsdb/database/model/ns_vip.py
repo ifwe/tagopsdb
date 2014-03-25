@@ -1,31 +1,34 @@
-from sqlalchemy import Column, UniqueConstraint, ForeignKey, VARCHAR
+from elixir import Field
+from elixir import String
+from elixir import using_options, belongs_to, has_many
 from sqlalchemy.dialects.mysql import INTEGER
-
-from sqlalchemy.orm import relationship
 
 from .base import Base
 
-from .ns_device import NsDevice
-
 
 class NsVip(Base):
-    __tablename__ = 'ns_vip'
+    using_options(tablename='ns_vip')
 
-    id = Column(u'vipID', INTEGER(unsigned=True), primary_key=True)
-    vserver = Column(VARCHAR(length=64), nullable=False)
-    device_id = Column(u'deviceID', INTEGER(unsigned=True),
-                       ForeignKey(NsDevice.id, ondelete='cascade'),
-                       nullable=False)
+    id = Field(INTEGER(unsigned=True), colname='vipID', primary_key=True)
+    vserver = Field(String(length=64), nullable=False)
 
-    host_specs = relationship('NsWeight', backref='ns_vip')
-
-    __table_args__ = (
-        UniqueConstraint(u'deviceID', u'vserver', name=u'device_vserver'),
-        {'mysql_engine': 'InnoDB', 'mysql_charset': 'utf8'},
+    # belongs_to('ns_device', of_kind='NsDevice', colname='deviceID')
+    has_many('ns_vip_binds', of_kind='NsVipBinds')
+    has_many(
+        'app_definitions',
+        of_kind='AppDefinitions',
+        through='ns_vip_binds',
+        via='app_definition'
     )
-
-    def __init__(self, vserver, device_id):
-        """ """
-
-        self.vserver = vserver
-        self.device_id = device_id
+    has_many(
+        'environments',
+        of_kind='Environments',
+        through='ns_vip_binds',
+        via='environment'
+    )
+    has_many(
+        'ns_services',
+        of_kind='NsService',
+        through='ns_vip_binds',
+        via='ns_service'
+    )
