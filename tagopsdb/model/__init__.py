@@ -54,12 +54,6 @@ from .subnet import Subnet
 from .vlans import Vlans
 from .zones import Zones
 
-
-def setup():
-    import elixir
-    elixir.setup_all()
-
-
 __all__ = [
     'Base',
     'AppDefinitions', 'AppDeployments', 'AppHipchatRooms',
@@ -76,5 +70,5 @@ __all__ = [
     'NsVipBinds', 'NsWeight', 'PackageNames', 'Packages',
     'PackageDefinitions', 'PackageLocations', 'Ports',
     'ProjectPackage', 'Projects', 'ServiceEvent', 'Subnet', 'Vlans',
-    'Zones', 'setup'
+    'Zones'
 ]
