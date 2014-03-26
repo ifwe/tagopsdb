@@ -8,11 +8,13 @@ class NagServicesContacts(Base):
         'service',
         of_kind='NagServices',
         colname='service_id',
-        primary_key=True
+        primary_key=True,
+        ondelete='cascade',
     )
     belongs_to(
         'contact',
         of_kind='NagContacts',
         colname='contact_id',
-        primary_key=True
+        primary_key=True,
+        ondelete='cascade',
     )

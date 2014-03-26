@@ -10,13 +10,15 @@ class NagApptypesServices(Base):
         'app',
         of_kind='AppDefinitions',
         colname='app_id',
-        primary_key=True
+        primary_key=True,
+        ondelete='cascade'
     )
     belongs_to(
         'service',
         of_kind='NagServices',
         colname='service_id',
-        primary_key=True
+        primary_key=True,
+        ondelete='cascade'
     )
     belongs_to(
         'server_app',
@@ -28,5 +30,6 @@ class NagApptypesServices(Base):
         'environment',
         of_kind='Environments',
         colname='environment_id',
-        primary_key=True
+        primary_key=True,
+        ondelete='cascade'
     )

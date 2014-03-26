@@ -9,7 +9,7 @@ class DefaultSpecs(Base):
     using_options(tablename='default_specs')
     priority = Field(
         Integer,
-        nullable=False,
+        required=True,
         default=10,
         server_default='10'
     )
@@ -18,17 +18,20 @@ class DefaultSpecs(Base):
         'spec',
         of_kind='HostSpecs',
         colname='specID',
+        ondelete='cascade',
         primary_key=True
     )
     belongs_to(
         'app',
         of_kind='AppDefinitions',
         colname='AppID',
+        ondelete='cascade',
         primary_key=True
     )
     belongs_to(
         'environment',
         of_kind='Environments',
         colname='environmentID',
+        ondelete='cascade',
         primary_key=True
     )

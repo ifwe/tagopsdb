@@ -9,4 +9,4 @@ class Hipchat(Base):
     using_options(tablename='hipchat')
 
     id = Field(Integer, colname='roomID', primary_key=True)
-    room_name = Field(String(length=50), nullable=False, unique=True)
+    room_name = Field(String(length=50), required=True, unique=True)

@@ -16,13 +16,15 @@ class NagCommandArguments(Base):
     )
 
     id = Field(Integer, primary_key=True)
-    label = Field(String(length=32), nullable=False)
-    description = Field(String(length=255), nullable=False)
-    arg_order = Field(Integer, nullable=False)
+    label = Field(String(length=32), required=True)
+    description = Field(String(length=255), required=True)
+    arg_order = Field(Integer, required=True)
     default_value = Field(String(length=80))
 
     belongs_to(
         'check_command',
         of_kind='NagCheckCommands',
-        colname='check_command_id'
+        colname='check_command_id',
+        required=True,
+        ondelete='cascade',
     )

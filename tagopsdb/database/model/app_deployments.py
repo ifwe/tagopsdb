@@ -10,7 +10,7 @@ class AppDeployments(Base):
     using_options(tablename='app_deployments')
 
     id = Field(Integer, colname='AppDeploymentID', primary_key=True)
-    user = Field(String(length=32), nullable=False)
+    user = Field(String(length=32), required=True)
     status = Field(
         Enum(
             'complete',
@@ -19,16 +19,26 @@ class AppDeployments(Base):
             'invalidated',
             'validated'
         ),
-        nullable=False
+        required=True,
     )
-    environment = Field(String(length=15), nullable=False)
+    environment = Field(String(length=15), required=True)
 
     realized = Field(
         DateTime,
-        nullable=False,
+        required=True,
         default=func.current_timestamp(),
         server_default=func.current_timestamp(),
     )
 
-    belongs_to('deployment', of_kind='Deployments', colname='DeploymentID')
-    belongs_to('app', of_kind='AppDefinitions', colname='AppID')
+    belongs_to(
+        'deployment',
+        of_kind='Deployments',
+        colname='DeploymentID',
+        required=True
+    )
+    belongs_to(
+        'app',
+        of_kind='AppDefinitions',
+        colname='AppID',
+        required=True
+    )

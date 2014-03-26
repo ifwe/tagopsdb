@@ -9,7 +9,7 @@ class NagContacts(Base):
     using_options(tablename='nag_contacts')
 
     id = Field(Integer, primary_key=True)
-    name = Field(String(length=32), nullable=False, unique=True)
+    name = Field(String(length=32), required=True, unique=True)
     alias = Field(String(length=80))
     email = Field(String(length=80))
     pager = Field(String(length=80))

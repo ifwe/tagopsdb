@@ -23,7 +23,7 @@ class Hosts(Base):
             'reserved',
             'escrow'
         ),
-        nullable=False
+        required=True,
     )
     hostname = Field(String(length=30))
     arch = Field(String(length=10))
@@ -39,5 +39,10 @@ class Hosts(Base):
     power_circuit = Field(String(length=10), colname='powerCircuit')
     environment = Field(String(length=15))
 
-    belongs_to('app', of_kind='AppDefinitions', colname='AppID')
+    belongs_to(
+        'app',
+        of_kind='AppDefinitions',
+        colname='AppID',
+        required=True
+    )
     belongs_to('spec', of_kind='HostSpecs', colname='SpecID')

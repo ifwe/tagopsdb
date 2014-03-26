@@ -12,7 +12,7 @@ class Ganglia(Base):
     cluster_name = Field(String(length=50))
     port = Field(
         Integer,
-        nullable=False,
+        required=True,
         default='8649',
         server_default='8649'
     )

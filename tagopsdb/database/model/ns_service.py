@@ -1,7 +1,7 @@
 from elixir import Field
-from elixir import Integer, String
+from elixir import String
 from elixir import using_options
-from sqlalchemy.dialects.mysql import SMALLINT
+from sqlalchemy.dialects.mysql import SMALLINT, INTEGER
 
 from .base import Base
 
@@ -9,12 +9,12 @@ from .base import Base
 class NsService(Base):
     using_options(tablename='ns_service')
 
-    id = Field(Integer, colname='serviceID', primary_key=True)
+    id = Field(INTEGER(unsigned=True), colname='serviceID', primary_key=True)
     service_name = Field(
         String(length=64),
         colname='serviceName',
-        nullable=False,
+        required=True,
         unique=True
     )
-    proto = Field(String(length=16), nullable=False)
-    port = Field(SMALLINT(display_width=5, unsigned=True), nullable=False)
+    proto = Field(String(length=16), required=True)
+    port = Field(SMALLINT(display_width=5, unsigned=True), required=True)

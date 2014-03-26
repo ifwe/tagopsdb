@@ -9,7 +9,7 @@ class Projects(Base):
     using_options(tablename='projects')
 
     id = Field(Integer, colname='project_id', primary_key=True)
-    name = Field(String(length=255), nullable=False, unique=True)
+    name = Field(String(length=255), required=True, unique=True)
     has_and_belongs_to_many(
         'package_definitions',
         of_kind='PackageDefinitions',

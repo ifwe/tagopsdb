@@ -13,6 +13,22 @@ class Iloms(Base):
     a_record = Field(String(length=200), colname='ARecord')
     comments = Field(String(length=200))
 
-    belongs_to('host', of_kind='Hosts', colname='HostID')
-    belongs_to('subnet', of_kind='Subnet', colname='SubnetID')
-    belongs_to('port', of_kind='Ports', colname='PortID')
+    belongs_to(
+        'host',
+        of_kind='Hosts',
+        colname='HostID',
+        ondelete='cascade',
+    )
+    belongs_to(
+        'subnet',
+        of_kind='Subnet',
+        colname='SubnetID',
+        ondelete='cascade',
+        required=True
+    )
+    belongs_to(
+        'port',
+        of_kind='Ports',
+        colname='PortID',
+        ondelete='cascade',
+    )

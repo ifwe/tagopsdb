@@ -13,5 +13,5 @@ class NsDevice(Base):
     )
 
     id = Field(Integer, colname='deviceID', primary_key=True)
-    proto = Field(String(length=6), nullable=False)
-    host = Field(String(length=32), nullable=False)
+    proto = Field(String(length=6), required=True)
+    host = Field(String(length=32), required=True)

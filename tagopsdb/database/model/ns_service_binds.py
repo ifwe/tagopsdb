@@ -10,11 +10,13 @@ class NsServiceBinds(Base):
         'ns_service',
         of_kind='NsService',
         colname='serviceID',
-        primary_key=True
+        primary_key=True,
+        ondelete='cascade',
     )
     belongs_to(
         'ns_monitor',
         of_kind='NsMonitor',
         colname='monitorID',
-        primary_key=True
+        primary_key=True,
+        ondelete='cascade',
     )

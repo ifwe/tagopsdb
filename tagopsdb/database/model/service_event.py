@@ -18,10 +18,10 @@ class ServiceEvent(Base):
     service_date = Field(
         DateTime,
         colname='serviceDate',
-        nullable=False,
+        required=True,
         default=func.current_timestamp(),
         onupdate=func.current_timestamp(),
         server_onupdate=func.current_timestamp()
     )
 
-    # belongs_to('host', of_kind='Hosts', colname='HostID')
+    belongs_to('host', of_kind='Hosts', colname='HostID', ondelete='cascade')
