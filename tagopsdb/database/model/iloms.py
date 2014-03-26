@@ -19,6 +19,7 @@ class Iloms(Base):
         colname='HostID',
         ondelete='cascade',
     )
+
     belongs_to(
         'subnet',
         of_kind='Subnet',
@@ -26,6 +27,7 @@ class Iloms(Base):
         ondelete='cascade',
         required=True
     )
+
     belongs_to(
         'port',
         of_kind='Ports',

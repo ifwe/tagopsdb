@@ -1,4 +1,5 @@
-from elixir import EntityBase, EntityMeta, using_table_options, using_options_defaults
+from elixir import EntityBase, EntityMeta
+from elixir import using_table_options, using_options_defaults
 from sqlalchemy.orm import object_mapper
 
 
@@ -12,11 +13,19 @@ class TagOpsDBBase(EntityBase):
 
     @classmethod
     def all(cls, *args, **kwargs):
-        return cls.query.all(*args, **kwargs)
+        q = cls.query
+        if 'limit' in kwargs:
+            q = q.limit(kwargs.pop('limit'))
+
+        return q.all(*args, **kwargs)
 
     @classmethod
     def first(cls, *args, **kwargs):
         return cls.query.first(*args, **kwargs)
+
+    @classmethod
+    def find(cls, *args, **kwargs):
+        return cls.query.filter_by(*args, **kwargs)
 
     def __repr__(self):
         mapper = object_mapper(self)
@@ -31,7 +40,7 @@ class TagOpsDBBase(EntityBase):
                 if isinstance(val, TagOpsDBBase):
                     v_str = object.__repr__(getattr(self, attr))
                 elif isinstance(val, list):
-                    seq_str = ', '.join(map(object.__repr__, val[:10]))
+                    seq_str = 'List of %d %s' % (len(val), attr)
                     v_str = '[' + seq_str + ']'
                 else:
                     v_str = repr(val)

@@ -1,6 +1,6 @@
 from elixir import Field
 from elixir import Integer, String
-from elixir import using_options
+from elixir import using_options, has_many
 
 from .base import Base
 
@@ -16,3 +16,5 @@ class Ganglia(Base):
         default='8649',
         server_default='8649'
     )
+
+    has_many('apps', of_kind='AppDefinitions')

@@ -1,6 +1,6 @@
 from elixir import Field
 from elixir import String
-from elixir import using_options
+from elixir import using_options, has_many
 from sqlalchemy.dialects.mysql import SMALLINT, INTEGER
 
 from .base import Base
@@ -18,3 +18,9 @@ class NsService(Base):
     )
     proto = Field(String(length=16), required=True)
     port = Field(SMALLINT(display_width=5, unsigned=True), required=True)
+
+    has_many(
+        'params',
+        of_kind='NsServiceParams',
+        inverse='service'
+    )

@@ -12,7 +12,7 @@ class NsServiceParams(Base):
     value = Field(String(length=128), nullable=False)
 
     belongs_to(
-        'ns_service',
+        'service',
         of_kind='NsService',
         colname='serviceID',
         primary_key=True,

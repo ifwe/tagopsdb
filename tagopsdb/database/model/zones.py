@@ -1,6 +1,6 @@
 from elixir import Field
 from elixir import String, Integer
-from elixir import using_options
+from elixir import using_options, has_many
 
 from .base import Base
 
@@ -15,3 +15,15 @@ class Zones(Base):
     mx_host_id = Field(String(length=30), colname='mxHostID')
     ns_priority = Field(Integer, colname='nsPriority')
     nameserver = Field(String(length=30))
+
+    has_many(
+        'cnames',
+        of_kind='Cname',
+        inverse='zone'
+    )
+
+    has_many(
+        'subnets',
+        of_kind='Subnet',
+        inverse='zone'
+    )

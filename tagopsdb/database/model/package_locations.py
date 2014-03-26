@@ -1,6 +1,6 @@
 from elixir import Field
 from elixir import String, Integer, Boolean, Enum
-from elixir import using_options
+from elixir import using_options, has_and_belongs_to_many
 
 from .base import Base
 
@@ -29,6 +29,16 @@ class PackageLocations(Base):
         required=True,
         default='application',
         server_default='application'
+    )
+
+    has_and_belongs_to_many(
+        'apps',
+        of_kind='AppDefinitions',
+        inverse='package_locations',
+        tablename='app_packages',
+        local_colname='pkgLocationID',
+        remote_colname='AppID',
+        table_kwargs=dict(extend_existing=True),
     )
 
     # TODO: should this be has_one?

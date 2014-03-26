@@ -1,6 +1,6 @@
 from elixir import Field
 from elixir import String, Integer
-from elixir import using_options, belongs_to
+from elixir import using_options, belongs_to, has_one
 
 from .base import Base
 
@@ -18,3 +18,15 @@ class Subnet(Base):
 
     belongs_to('vlan', of_kind='Vlans', colname='VlanID', ondelete='cascade')
     belongs_to('zone', of_kind='Zones', colname='ZoneID')
+
+    has_one(
+        'ip',
+        of_kind='HostIps',
+        inverse='subnet'
+    )
+
+    has_one(
+        'ilom',
+        of_kind='Iloms',
+        inverse='subnet'
+    )

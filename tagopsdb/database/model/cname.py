@@ -15,7 +15,7 @@ class Cname(Base):
     name = Field(String(length=40))
 
     belongs_to(
-        'host',
+        'host_ip',
         of_kind='HostIps',
         colname='IpID',
         onupdate='cascade',

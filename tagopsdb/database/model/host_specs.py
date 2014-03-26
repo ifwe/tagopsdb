@@ -1,6 +1,6 @@
 from elixir import Field
 from elixir import String, Integer, Boolean, Enum
-from elixir import using_options
+from elixir import using_options, has_many
 from sqlalchemy.dialects.mysql import SMALLINT, INTEGER, MEDIUMTEXT
 
 from .base import Base
@@ -20,3 +20,15 @@ class HostSpecs(Base):
     control = Field(Enum(u'digi', u'ipmi', u'libvirt', u'vmware'))
     virtual = Field(Boolean, required=True, default=0, server_default='0')
     expansions = Field(MEDIUMTEXT())
+
+    has_many(
+        'defaults',
+        of_kind="DefaultSpecs",
+        inverse='spec'
+    )
+
+    has_many(
+        'hosts',
+        of_kind='Hosts',
+        inverse='spec',
+    )
