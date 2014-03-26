@@ -13,25 +13,30 @@ class AppDefinitions(Base):
 
     distribution = Field(
         Enum('co54', 'co62', 'co64', 'co65', 'rh53', 'rh62', 'rh63', 'rh64'),
+        required=True,
         default='co64',
         server_default='co64'
     )
 
-    app_type = Field(String(length=100), colname='appType', nullable=False)
+    app_type = Field(String(length=100), colname='appType', required=True)
     host_base = Field(String(length=100), colname='hostBase')
     puppet_class = Field(
         String(length=100),
         colname='puppetClass',
-        nullable=False,
+        required=True,
         default='baseclass',
         server_default='baseclass'
     )
 
-    ganglia_group_name = Field(String(length=25), colname='GgroupName')
+    ganglia_group_name = Field(
+        String(length=25),
+        colname='GgroupName',
+        required=True
+    )
     description = Field(String(length=100))
     status = Field(
         Enum('active', 'inactive'),
-        nullable=False,
+        required=True,
         default='active',
         server_default='active'
     )
@@ -40,21 +45,25 @@ class AppDefinitions(Base):
         'ganglia',
         of_kind='Ganglia',
         colname='GangliaID',
+        required=True,
     )
     belongs_to(
         'production_vlan',
         of_kind='Vlans',
-        colname='Production_VlanID'
+        colname='Production_VlanID',
+        required=True
     )
     belongs_to(
         'staging_vlan',
         of_kind='Vlans',
-        colname='Staging_VlanID'
+        colname='Staging_VlanID',
+        required=True,
     )
     belongs_to(
         'development_vlan',
         of_kind='Vlans',
-        colname='Development_VlanID'
+        colname='Development_VlanID',
+        required=True
     )
 
     has_and_belongs_to_many(

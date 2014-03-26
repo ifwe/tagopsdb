@@ -11,15 +11,15 @@ class PackageDefinitions(Base):
     using_options(tablename='package_definitions')
 
     id = Field(Integer, colname='pkg_def_id', primary_key=True)
-    deploy_type = Field(String(length=30), nullable=False)
-    validation_type = Field(String(length=15), nullable=False)
-    pkg_name = Field(String(length=255), nullable=False)
+    deploy_type = Field(String(length=30), required=True)
+    validation_type = Field(String(length=15), required=True)
+    pkg_name = Field(String(length=255), required=True)
 
-    path = Field(String(length=255), nullable=False)
+    path = Field(String(length=255), required=True)
     arch = Field(
         String(length=6),
         Enum(u'i386', u'x86_64', u'noarch'),
-        nullable=False,
+        required=True,
         default='noarch',
         server_default='noarch'
     )
@@ -27,31 +27,28 @@ class PackageDefinitions(Base):
     build_type = Field(
         String(length=9),
         Enum('developer', 'hudson', 'jenkins'),
-        nullable=False,
+        required=True,
         default='developer',
         server_default='developer'
     )
 
-    build_host = Field(String(length=255), nullable=False)
+    build_host = Field(String(length=255), required=True)
     env_specific = Field(
         Boolean,
-        nullable=False,
+        required=True,
         default=0,
         server_default='0'
     )
 
     created = Field(
         DateTime,
-        nullable=False,
+        required=True,
         default=func.current_timestamp(),
         server_default=func.current_timestamp(),
     )
 
     has_many('packages', of_kind='Packages')
-    # has_many(
-    #     'package_name',
-    #     of_kind='PackageNames',
-    # )
+
     has_and_belongs_to_many(
         'projects',
         of_kind='Projects',

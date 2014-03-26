@@ -25,4 +25,4 @@ class Asset(Base):
     warranty_id = Field(String(length=20), colname='warrantyID')
     vendor_contact = Field(String(length=20), colname='vendorContact')
 
-    belongs_to('host', of_kind='Hosts', colname='HostID')
+    belongs_to('host', of_kind='Hosts', colname='HostID', required=True)

@@ -9,12 +9,14 @@ class NagServicesContactGroups(Base):
         'service',
         of_kind='NagServices',
         colname='service_id',
-        primary_key=True
+        primary_key=True,
+        ondelete='cascade',
     )
 
     belongs_to(
         'contact_group',
         of_kind='NagContactGroups',
         colname='contact_group_id',
-        primary_key=True
+        primary_key=True,
+        ondelete='cascade',
     )

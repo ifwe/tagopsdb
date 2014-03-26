@@ -10,15 +10,15 @@ class Deployments(Base):
     using_options(tablename='deployments')
 
     id = Field(Integer, colname='DeploymentID', primary_key=True)
-    user = Field(String(length=32), nullable=False)
+    user = Field(String(length=32), required=True)
     dep_type = Field(
         Enum('deploy', 'rollback'),
-        nullable=False,
+        required=True,
     )
 
     declared = Field(
         DateTime,
-        nullable=False,
+        required=True,
         default=func.current_timestamp(),
         server_default=func.current_timestamp(),
     )
@@ -28,5 +28,7 @@ class Deployments(Base):
         of_kind='Packages',
         colname='package_id',
         target_column='package_id',
+        ondelete='cascade',
+        required=True,
         inverse='deployments'
     )

@@ -9,13 +9,15 @@ class NagHostsServices(Base):
         'host',
         of_kind='Hosts',
         colname='host_id',
-        primary_key=True
+        primary_key=True,
+        ondelete='cascade',
     )
     belongs_to(
         'service',
         of_kind='NagServices',
         colname='service_id',
-        primary_key=True
+        primary_key=True,
+        ondelete='cascade',
     )
     belongs_to(
         'server_app',
