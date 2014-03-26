@@ -1,12 +1,14 @@
 from elixir import Field
 from elixir import String, Integer
-from elixir import using_options, belongs_to
+from elixir import using_options, using_table_options
+from elixir import belongs_to, has_and_belongs_to_many
 
 from .base import Base
 
 
 class NagServices(Base):
     using_options(tablename='nag_services')
+    using_table_options(extend_existing=True)
 
     id = Field(Integer, primary_key=True)
     description = Field(String(length=255), required=True)
@@ -22,6 +24,7 @@ class NagServices(Base):
         ondelete='cascade',
         required=True,
     )
+
     belongs_to(
         'check_period',
         of_kind='NagTimePeriods',
@@ -29,6 +32,7 @@ class NagServices(Base):
         ondelete='cascade',
         required=True,
     )
+
     belongs_to(
         'notification_period',
         of_kind='NagTimePeriods',

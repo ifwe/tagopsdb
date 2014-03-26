@@ -1,6 +1,6 @@
 from elixir import Field
 from elixir import String, Integer
-from elixir import using_options
+from elixir import using_options, has_many
 
 from .base import Base
 
@@ -13,3 +13,15 @@ class NetworkDevice(Base):
     model = Field(String(length=50))
     hardware_code = Field(String(length=20), colname='hardwareCode')
     software_code = Field(String(length=20), colname='softwareCode')
+
+    has_many(
+        'host_interfaces',
+        of_kind='HostInterfaces',
+        inverse='network',
+    )
+
+    has_many(
+        'ports',
+        of_kind='Ports',
+        inverse='network',
+    )

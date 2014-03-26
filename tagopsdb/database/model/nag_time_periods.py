@@ -1,6 +1,6 @@
 from elixir import Field
 from elixir import String, Integer
-from elixir import using_options
+from elixir import using_options, has_many
 
 from .base import Base
 

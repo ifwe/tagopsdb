@@ -1,4 +1,4 @@
-from elixir import using_options, belongs_to
+from elixir import using_options, belongs_to, has_and_belongs_to_many
 from .base import Base
 
 

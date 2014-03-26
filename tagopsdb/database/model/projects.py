@@ -21,7 +21,7 @@ class Projects(Base):
     )
 
     has_and_belongs_to_many(
-        'app_definitions',
+        'apps',
         of_kind='AppDefinitions',
         inverse='projects',
         tablename='project_package',

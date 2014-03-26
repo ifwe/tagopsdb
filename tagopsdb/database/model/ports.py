@@ -1,6 +1,6 @@
 from elixir import Field
 from elixir import String, Integer
-from elixir import using_options, belongs_to, using_table_options
+from elixir import using_options, using_table_options, belongs_to, has_one
 from sqlalchemy import UniqueConstraint
 
 from .base import Base
@@ -27,4 +27,16 @@ class Ports(Base):
         of_kind='NetworkDevice',
         colname='NetworkID',
         ondelete='cascade',
+    )
+
+    has_one(
+        'host_interface',
+        of_kind='HostInterfaces',
+        inverse='port',
+    )
+
+    has_one(
+        'ilom',
+        of_kind='Iloms',
+        inverse='port',
     )

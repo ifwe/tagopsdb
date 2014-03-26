@@ -47,7 +47,7 @@ class PackageDefinitions(Base):
         server_default=func.current_timestamp(),
     )
 
-    has_many('packages', of_kind='Packages')
+    has_many('versions', of_kind='Packages', inverse='definition')
 
     has_and_belongs_to_many(
         'projects',
@@ -60,11 +60,17 @@ class PackageDefinitions(Base):
     )
 
     has_and_belongs_to_many(
-        'app_definitions',
+        'apps',
         of_kind='AppDefinitions',
         inverse='package_definitions',
         tablename='project_package',
         local_colname='pkg_def_id',
         remote_colname='app_id',
         table_kwargs=dict(extend_existing=True)
+    )
+
+    has_many(
+        'package_names',
+        of_kind='PackageNames',
+        inverse='package_definition'
     )

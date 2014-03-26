@@ -1,6 +1,6 @@
 from elixir import Field
 from elixir import String, Integer
-from elixir import using_options, belongs_to
+from elixir import using_options, belongs_to, has_many
 
 from .base import Base
 
@@ -20,10 +20,17 @@ class HostIps(Base):
         ondelete='cascade',
         required=True,
     )
+
     belongs_to(
         'subnet',
         of_kind='Subnet',
         colname='SubnetID',
         ondelete='cascade',
         required=True,
+    )
+
+    has_many(
+        'cnames',
+        of_kind='Cname',
+        inverse='host_ip',
     )

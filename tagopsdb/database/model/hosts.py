@@ -1,6 +1,6 @@
-from elixir import Field
-from elixir import String, Integer, Enum
-from elixir import using_options, using_table_options, belongs_to
+from elixir import Field, String, Integer, Enum
+from elixir import using_options, using_table_options
+from elixir import belongs_to, has_one, has_many
 from sqlalchemy import UniqueConstraint
 
 from .base import Base
@@ -45,4 +45,35 @@ class Hosts(Base):
         colname='AppID',
         required=True
     )
+
     belongs_to('spec', of_kind='HostSpecs', colname='SpecID')
+
+    has_one(
+        'asset',
+        of_kind='Asset',
+        inverse='host',
+    )
+
+    has_many(
+        'host_deployments',
+        of_kind='HostDeployments',
+        inverse='host'
+    )
+
+    has_many(
+        'interfaces',
+        of_kind='HostInterfaces',
+        inverse='host'
+    )
+
+    has_one(
+        'ilom',
+        of_kind='Iloms',
+        inverse='host',
+    )
+
+    has_many(
+        'service_events',
+        of_kind='ServiceEvent',
+        inverse='host',
+    )
