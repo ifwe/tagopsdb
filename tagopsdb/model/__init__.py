@@ -1,12 +1,12 @@
 from .base import Base
 
-from .app_deployments import AppDeployments
+from .app_deployment import AppDeployment
 from .app_hipchat_rooms import AppHipchatRooms
 from .app_jmx_attributes import AppJmxAttributes
 from .app_packages import AppPackages
 from .asset import Asset
 from .cname import Cname
-from .default_specs import DefaultSpecs
+from .default_spec import DefaultSpec
 from .deployments import Deployments
 from .environments import Environments
 from .ganglia import Ganglia
@@ -56,9 +56,9 @@ from .zones import Zones
 
 __all__ = [
     'Base',
-    'Application', 'AppDeployments', 'AppHipchatRooms',
+    'Application', 'AppDeployment', 'AppHipchatRooms',
     'AppJmxAttributes', 'AppPackages', 'Asset', 'Cname',
-    'DefaultSpecs', 'Deployments', 'Environments', 'Ganglia',
+    'DefaultSpec', 'Deployments', 'Environments', 'Ganglia',
     'Hipchat', 'HostDeployments', 'HostInterfaces', 'HostIps',
     'HostSpecs', 'Hosts', 'Iloms', 'JmxAttributes', 'Locks',
     'NagApptypesServices', 'NagCheckCommands', 'NagCommandArguments',

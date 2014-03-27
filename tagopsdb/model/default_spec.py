@@ -5,7 +5,7 @@ from elixir import using_options, belongs_to
 from .base import Base
 
 
-class DefaultSpecs(Base):
+class DefaultSpec(Base):
     using_options(tablename='default_specs')
     priority = Field(
         Integer,
