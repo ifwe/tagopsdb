@@ -8,7 +8,7 @@ import tagopsdb.deploy.repo as repo
 from tagopsdb.database.meta import Session
 from tagopsdb.database.model import Application, AppDeployment, \
                                     Deployment, Hipchat, HostDeployment, \
-                                    Hosts, Packages
+                                    Host, Packages
 from tagopsdb.exceptions import DeployException
 
 
@@ -56,11 +56,11 @@ def delete_host_deployment(hostname, package_name):
     """ """
 
     host_deps = (Session.query(HostDeployment)
-                        .join(Hosts)
+                        .join(Host)
                         .join(Deployment)
                         .join(Packages)
                         .filter(Packages.pkg_name==package_name)
-                        .filter(Hosts.hostname==hostname)
+                        .filter(Host.hostname==hostname)
                         .all())
 
     # Allow this to silently do nothing if there are no matching rows
@@ -74,12 +74,12 @@ def delete_host_deployments(package_name, app_id, environment):
     """ """
 
     host_deps = (Session.query(HostDeployment)
-                        .join(Hosts)
+                        .join(Host)
                         .join(Deployment)
                         .join(Packages)
                         .filter(Packages.pkg_name==package_name)
-                        .filter(Hosts.app_id==app_id)
-                        .filter(Hosts.environment==environment)
+                        .filter(Host.app_id==app_id)
+                        .filter(Host.environment==environment)
                         .all())
 
     for host_dep in host_deps:
@@ -207,14 +207,14 @@ def find_deployed_version(package_name, env, version=None, revision=None,
                            .group_by(subq.c.appType, subq.c.environment)
                            .all())
     else:
-        hostsq = (Session.query(Hosts.hostname, Hosts.app_id,
+        hostsq = (Session.query(Host.hostname, Host.app_id,
                                 Packages.version, Packages.revision)
                          .join(Application)
                          .join(HostDeployment)
                          .join(Deployment)
                          .join(Packages)
                          .filter(Packages.pkg_name==package_name)
-                         .filter(Hosts.environment==env))
+                         .filter(Host.environment==env))
 
         if apptypes is not None:
             hostsq = hostsq.filter(Application.name.in_(apptypes))
@@ -249,7 +249,7 @@ def find_host_by_hostname(hostname):
     """Find host for a given hostname"""
 
     try:
-        return (Session.query(Hosts)
+        return (Session.query(Host)
                        .filter_by(hostname=hostname)
                        .one())
     except sqlalchemy.orm.exc.NoResultFound:
@@ -262,9 +262,9 @@ def find_host_deployment_by_depid(dep_id, dep_host):
 
     try:
         return (Session.query(HostDeployment)
-                       .join(Hosts)
+                       .join(Host)
                        .filter(HostDeployment.deployment_id==dep_id)
-                       .filter(Hosts.hostname==dep_host)
+                       .filter(Host.hostname==dep_host)
                        .one())
     except sqlalchemy.orm.exc.NoResultFound:
         # Currently this shouldn't be a fatal error
@@ -276,13 +276,13 @@ def find_host_deployments_by_pkgid(pkg_id, dep_hosts):
        set of hosts
     """
 
-    return (Session.query(HostDeployment, Hosts.hostname, Hosts.app_id,
+    return (Session.query(HostDeployment, Host.hostname, Host.app_id,
                           Deployment.dep_type)
-                   .join(Hosts)
+                   .join(Host)
                    .join(Deployment)
                    .join(Packages)
                    .filter(Packages.id==pkg_id)
-                   .filter(Hosts.hostname.in_(dep_hosts))
+                   .filter(Host.hostname.in_(dep_hosts))
                    .all())
 
 
@@ -291,13 +291,13 @@ def find_host_deployments_by_package_name(package_name, dep_hosts):
        set of hosts
     """
 
-    return (Session.query(HostDeployment, Hosts.hostname, Hosts.app_id,
+    return (Session.query(HostDeployment, Host.hostname, Host.app_id,
                           Packages.version)
-                   .join(Hosts)
+                   .join(Host)
                    .join(Deployment)
                    .join(Packages)
                    .filter(Packages.pkg_name==package_name)
-                   .filter(Hosts.hostname.in_(dep_hosts))
+                   .filter(Host.hostname.in_(dep_hosts))
                    .all())
 
 
@@ -306,12 +306,12 @@ def find_host_deployments_not_ok(pkg_id, app_id, environment):
        package ID, app ID and environment (may return none)
     """
 
-    return (Session.query(HostDeployment, Hosts.hostname)
-                   .join(Hosts)
+    return (Session.query(HostDeployment, Host.hostname)
+                   .join(Host)
                    .join(Deployment)
                    .filter(Deployment.package_id==pkg_id)
-                   .filter(Hosts.app_id==app_id)
-                   .filter(Hosts.environment==environment)
+                   .filter(Host.app_id==app_id)
+                   .filter(Host.environment==environment)
                    .filter(HostDeployment.status!='ok')
                    .all())
 
@@ -319,10 +319,10 @@ def find_host_deployments_not_ok(pkg_id, app_id, environment):
 def find_hosts_for_app(app_id, environment):
     """Find the hosts for a given application and environment"""
 
-    hosts = (Session.query(Hosts)
+    hosts = (Session.query(Host)
                     .join(Application)
                     .filter(Application.id==app_id)
-                    .filter(Hosts.environment==environment)
+                    .filter(Host.environment==environment)
                     .all())
 
     if not hosts:
@@ -436,10 +436,10 @@ def find_running_deployment(app_id, env, hosts=None):
         return ('tier', tier)
 
     host = (Session.query(HostDeployment.user, HostDeployment.realized,
-                          Hosts.hostname, Hosts.environment)
-                   .join(Hosts)
-                   .filter(Hosts.environment==env)
-                   .filter(Hosts.app_id==app_id)
+                          Host.hostname, Host.environment)
+                   .join(Host)
+                   .filter(Host.environment==env)
+                   .filter(Host.app_id==app_id)
                    .filter(HostDeployment.status=='inprogress')
                    .all())
 
@@ -503,11 +503,11 @@ def list_host_deployment_info(package_name, env, version=None, revision=None,
        and in given environment
     """
 
-    dep_info = (Session.query(Deployment, HostDeployment, Hosts.hostname,
+    dep_info = (Session.query(Deployment, HostDeployment, Host.hostname,
                               Packages)
                        .join(Packages)
                        .join(HostDeployment)
-                       .join(Hosts)
+                       .join(Host)
                        .join(Application))
 
     if version is not None:
@@ -520,7 +520,7 @@ def list_host_deployment_info(package_name, env, version=None, revision=None,
         dep_info = dep_info.filter(Application.name.in_(apptypes))
 
     return (dep_info.filter(Packages.pkg_name==package_name)
-                    .filter(Hosts.environment==env)
-                    .order_by(Hosts.hostname,
+                    .filter(Host.environment==env)
+                    .order_by(Host.hostname,
                               HostDeployment.realized.asc())
                     .all())

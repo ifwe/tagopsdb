@@ -2,12 +2,12 @@ from elixir import using_options, belongs_to
 from .base import Base
 
 
-class NagHostsServices(Base):
+class NagHostServices(Base):
     using_options(tablename='nag_hosts_services')
 
     belongs_to(
         'host',
-        of_kind='Hosts',
+        of_kind='Host',
         colname='host_id',
         primary_key=True,
         ondelete='cascade',

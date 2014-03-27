@@ -24,4 +24,4 @@ class ServiceEvent(Base):
         server_onupdate=func.current_timestamp()
     )
 
-    belongs_to('host', of_kind='Hosts', colname='HostID', ondelete='cascade')
+    belongs_to('host', of_kind='Host', colname='HostID', ondelete='cascade')

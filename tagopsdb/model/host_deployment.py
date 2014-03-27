@@ -21,7 +21,7 @@ class HostDeployment(Base):
 
     belongs_to(
         'host',
-        of_kind='Hosts',
+        of_kind='Host',
         colname='HostID',
         required=True
     )
