@@ -12,7 +12,7 @@ class PackageDefinition(Base):
     id = Field(Integer, colname='pkg_def_id', primary_key=True)
     deploy_type = Field(String(length=30), required=True)
     validation_type = Field(String(length=15), required=True)
-    pkg_name = Field(String(length=255), required=True)
+    name = Field(String(length=255), colname='pkg_name', required=True)
 
     path = Field(String(length=255), required=True)
     arch = Field(
