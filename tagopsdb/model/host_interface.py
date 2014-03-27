@@ -6,7 +6,7 @@ from sqlalchemy import UniqueConstraint
 from .base import Base
 
 
-class HostInterfaces(Base):
+class HostInterface(Base):
     using_options(tablename='host_interfaces')
     using_table_options(
         UniqueConstraint(u'HostID', u'interfaceName')

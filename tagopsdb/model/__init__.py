@@ -12,7 +12,7 @@ from .environments import Environments
 from .ganglia import Ganglia
 from .hipchat import Hipchat
 from .host_deployment import HostDeployment
-from .host_interfaces import HostInterfaces
+from .host_interface import HostInterface
 from .host_ips import HostIps
 from .host_specs import HostSpecs
 from .hosts import Hosts
@@ -59,7 +59,7 @@ __all__ = [
     'Application', 'AppDeployment', 'AppHipchatRooms',
     'AppJmxAttributes', 'AppPackages', 'Asset', 'Cname',
     'DefaultSpec', 'Deployment', 'Environments', 'Ganglia',
-    'Hipchat', 'HostDeployment', 'HostInterfaces', 'HostIps',
+    'Hipchat', 'HostDeployment', 'HostInterface', 'HostIps',
     'HostSpecs', 'Hosts', 'Iloms', 'JmxAttributes', 'Locks',
     'NagApptypesServices', 'NagCheckCommands', 'NagCommandArguments',
     'NagContactGroups', 'NagContacts', 'NagContactGroupsMembers',

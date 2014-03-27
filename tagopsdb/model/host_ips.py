@@ -15,7 +15,7 @@ class HostIps(Base):
 
     belongs_to(
         'interface',
-        of_kind='HostInterfaces',
+        of_kind='HostInterface',
         colname='InterfaceID',
         ondelete='cascade',
         required=True,
