@@ -36,7 +36,7 @@ from .network_device import NetworkDevice
 from .ns_device import NsDevice
 from .ns_monitor import NsMonitor
 from .ns_service import NsService
-from .ns_service_binds import NsServiceBinds
+from .ns_service_bind import NsServiceBind
 from .ns_service_max import NsServiceMax
 from .ns_service_param import NsServiceParam
 from .ns_vip import NsVip
@@ -66,7 +66,7 @@ __all__ = [
     'NagHostServices', 'NagServicesContactGroups', 'NagServices',
     'NagServicesArguments', 'NagServicesContacts', 'NagTimePeriods',
     'NetworkDevice', 'NsDevice', 'NsMonitor', 'NsService',
-    'NsServiceBinds', 'NsServiceMax', 'NsServiceParam', 'NsVip',
+    'NsServiceBind', 'NsServiceMax', 'NsServiceParam', 'NsVip',
     'NsVipBinds', 'NsWeight', 'PackageNames', 'Packages',
     'PackageDefinition', 'PackageLocations', 'Ports',
     'ProjectPackage', 'Project', 'ServiceEvent', 'Subnet', 'Vlan',
