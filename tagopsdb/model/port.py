@@ -6,7 +6,7 @@ from sqlalchemy import UniqueConstraint
 from .base import Base
 
 
-class Ports(Base):
+class Port(Base):
     using_options(tablename='ports')
     using_table_options(
         UniqueConstraint(

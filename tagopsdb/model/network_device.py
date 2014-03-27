@@ -22,6 +22,6 @@ class NetworkDevice(Base):
 
     has_many(
         'ports',
-        of_kind='Ports',
+        of_kind='Port',
         inverse='network',
     )
