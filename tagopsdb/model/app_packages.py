@@ -18,7 +18,7 @@ class AppPackage(Base):
     # )
     # belongs_to(
     #     'package_location',
-    #     of_kind='PackageLocations',
+    #     of_kind='PackageLocation',
     #     colname='pkgLocationID',
     #     primary_key=True
     # )

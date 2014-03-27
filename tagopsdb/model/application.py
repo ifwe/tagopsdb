@@ -120,7 +120,7 @@ class Application(Base):
 
     has_and_belongs_to_many(
         'package_locations',
-        of_kind='PackageLocations',
+        of_kind='PackageLocation',
         inverse='apps',
         tablename='app_packages',
         local_colname='AppID',

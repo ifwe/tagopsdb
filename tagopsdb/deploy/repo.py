@@ -4,7 +4,7 @@ from sqlalchemy import func
 
 from tagopsdb.database.meta import Session
 from tagopsdb.database.model import (
-    Application, PackageDefinition, PackageLocations, PackageName,
+    Application, PackageDefinition, PackageLocation, PackageName,
     ProjectPackage, Project
 )
 from tagopsdb.exceptions import RepoException
@@ -20,7 +20,7 @@ def add_app_location(project_type, pkg_type, pkg_name, app_name, path, arch,
     else:
         environment = False
 
-    project = PackageLocations(project_type, pkg_type, pkg_name, app_name,
+    project = PackageLocation(project_type, pkg_type, pkg_name, app_name,
                                path, arch, build_host, environment)
     Session.add(project)
     Session.flush()   # Needed to get pkgLocationID generated
@@ -94,7 +94,7 @@ def delete_app_location(app_name):
         pkg_loc = find_app_location(app_name)
     except sqlalchemy.orm.exc.NoResultFound:
         raise RepoException('No application "%s" to remove from '
-                            'PackageLocations table' % app_name)
+                            'PackageLocation table' % app_name)
 
     Session.delete(pkg_loc)
 
@@ -118,12 +118,12 @@ def find_app_location(app_name):
     """Find a given project"""
 
     try:
-        return (Session.query(PackageLocations)
+        return (Session.query(PackageLocation)
                        .filter_by(app_name=app_name)
                        .one())
     except sqlalchemy.orm.exc.NoResultFound:
         raise RepoException('No entry found for project "%s" in '
-                            'the PackageLocations table' % app_name)
+                            'the PackageLocation table' % app_name)
 
 
 def find_app_package(project, app_id):
@@ -174,7 +174,7 @@ def find_project_type(project):
     """Determine the project type for a given project"""
 
     try:
-        return (Session.query(PackageLocations.project_type)
+        return (Session.query(PackageLocation.project_type)
                        .filter_by(app_name=project)
                        .one())
     except sqlalchemy.orm.exc.NoResultFound:
@@ -185,10 +185,10 @@ def find_project_type(project):
 def list_app_locations(app_names):
     """ """
 
-    list_query = Session.query(PackageLocations)
+    list_query = Session.query(PackageLocation)
 
     if app_names is not None:
         list_query = \
-            list_query.filter(PackageLocations.app_name.in_(app_names))
+            list_query.filter(PackageLocation.app_name.in_(app_names))
 
-    return list_query.order_by(PackageLocations.app_name).all()
+    return list_query.order_by(PackageLocation.app_name).all()

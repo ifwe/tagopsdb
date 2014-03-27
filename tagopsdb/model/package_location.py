@@ -5,7 +5,7 @@ from elixir import using_options, has_and_belongs_to_many
 from .base import Base
 
 
-class PackageLocations(Base):
+class PackageLocation(Base):
     using_options(tablename='package_locations')
 
     id = Field(Integer, colname='pkgLocationID', primary_key=True)
