@@ -26,7 +26,7 @@ class ProjectPackage(Base):
     # )
     # belongs_to(
     #     'package_definition',
-    #     of_kind='PackageDefinitions',
+    #     of_kind='PackageDefinition',
     #     colname='pkg_def_id',
     #     ondelete='cascade',
     #     primary_key=True

@@ -1,13 +1,12 @@
 from elixir import Field
 from elixir import String, Integer, Boolean, DateTime, Enum
-from elixir import using_options, has_many, belongs_to, has_and_belongs_to_many
-from sqlalchemy import ForeignKey
+from elixir import using_options, has_many, has_and_belongs_to_many
 from sqlalchemy.sql.expression import func
 
 from .base import Base
 
 
-class PackageDefinitions(Base):
+class PackageDefinition(Base):
     using_options(tablename='package_definitions')
 
     id = Field(Integer, colname='pkg_def_id', primary_key=True)

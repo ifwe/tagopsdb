@@ -5,7 +5,7 @@ from sqlalchemy.sql.expression import func
 import tagopsdb.deploy.repo as repo
 
 from tagopsdb.database.meta import Session
-from tagopsdb.database.model import PackageDefinitions, PackageLocations, \
+from tagopsdb.database.model import PackageDefinition, PackageLocations, \
                                     Packages, ProjectPackage
 from tagopsdb.exceptions import PackageException
 
@@ -73,7 +73,7 @@ def find_package_definition(project_id):
     """
 
     try:
-        pkg_def = (Session.query(PackageDefinitions)
+        pkg_def = (Session.query(PackageDefinition)
                           .join(ProjectPackage)
                           .filter(ProjectPackage.project_id==project_id)
                           .first())

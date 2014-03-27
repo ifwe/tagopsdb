@@ -44,7 +44,7 @@ from .ns_vip_binds import NsVipBinds
 from .ns_weight import NsWeight
 from .package_names import PackageNames
 from .packages import Packages
-from .package_definitions import PackageDefinitions
+from .package_definition import PackageDefinition
 from .package_locations import PackageLocations
 from .ports import Ports
 from .project_package import ProjectPackage
@@ -68,7 +68,7 @@ __all__ = [
     'NetworkDevice', 'NsDevice', 'NsMonitor', 'NsService',
     'NsServiceBinds', 'NsServiceMax', 'NsServiceParam', 'NsVip',
     'NsVipBinds', 'NsWeight', 'PackageNames', 'Packages',
-    'PackageDefinitions', 'PackageLocations', 'Ports',
+    'PackageDefinition', 'PackageLocations', 'Ports',
     'ProjectPackage', 'Projects', 'ServiceEvent', 'Subnet', 'Vlans',
     'Zone'
 ]
