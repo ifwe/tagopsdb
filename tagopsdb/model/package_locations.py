@@ -44,7 +44,7 @@ class PackageLocations(Base):
     # TODO: should this be has_one?
     # has_many(
     #     'app_packages',
-    #     of_kind='AppPackages',
+    #     of_kind='AppPackage',
     #     colname='pkgLocationID'
     # )
     # has_many(

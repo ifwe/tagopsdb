@@ -3,7 +3,7 @@ from .base import Base
 from .app_deployment import AppDeployment
 from .app_hipchat_rooms import AppHipchatRooms
 from .app_jmx_attribute import AppJmxAttribute
-from .app_packages import AppPackages
+from .app_packages import AppPackage
 from .asset import Asset
 from .cname import Cname
 from .default_spec import DefaultSpec
@@ -43,7 +43,7 @@ from .ns_vip import NsVip
 from .ns_vip_binds import NsVipBinds
 from .ns_weight import NsWeight
 from .package_name import PackageName
-from .packages import Packages
+from .package import Package
 from .package_definition import PackageDefinition
 from .package_locations import PackageLocations
 from .ports import Ports
@@ -57,7 +57,7 @@ from .zone import Zone
 __all__ = [
     'Base',
     'Application', 'AppDeployment', 'AppHipchatRooms',
-    'AppJmxAttribute', 'AppPackages', 'Asset', 'Cname',
+    'AppJmxAttribute', 'AppPackage', 'Asset', 'Cname',
     'DefaultSpec', 'Deployment', 'Environment', 'Ganglia',
     'Hipchat', 'HostDeployment', 'HostInterface', 'HostIp',
     'HostSpec', 'Host', 'Iloms', 'JmxAttribute', 'Lock',
@@ -67,7 +67,7 @@ __all__ = [
     'NagServicesArguments', 'NagServicesContacts', 'NagTimePeriods',
     'NetworkDevice', 'NsDevice', 'NsMonitor', 'NsService',
     'NsServiceBind', 'NsServiceMax', 'NsServiceParam', 'NsVip',
-    'NsVipBinds', 'NsWeight', 'PackageName', 'Packages',
+    'NsVipBinds', 'NsWeight', 'PackageName', 'Package',
     'PackageDefinition', 'PackageLocations', 'Ports',
     'ProjectPackage', 'Project', 'ServiceEvent', 'Subnet', 'Vlan',
     'Zone'

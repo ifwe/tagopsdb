@@ -7,7 +7,7 @@ from sqlalchemy import UniqueConstraint
 from .base import Base
 
 
-class Packages(Base):
+class Package(Base):
     using_options(tablename='packages')
     using_table_options(
         UniqueConstraint(

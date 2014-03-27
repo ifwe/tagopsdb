@@ -25,7 +25,7 @@ class Deployment(Base):
 
     belongs_to(
         'package',
-        of_kind='Packages',
+        of_kind='Package',
         colname='package_id',
         target_column='package_id',
         ondelete='cascade',

@@ -6,7 +6,7 @@ import tagopsdb.deploy.repo as repo
 
 from tagopsdb.database.meta import Session
 from tagopsdb.database.model import PackageDefinition, PackageLocations, \
-                                    Packages, ProjectPackage
+                                    Package, ProjectPackage
 from tagopsdb.exceptions import PackageException
 
 
@@ -19,9 +19,9 @@ def add_package(app_name, version, revision, user):
 
     if find_package(app_name, version, revision):
         raise PackageException('Current version of application "%s" '
-                               'already found in Packages table' % app_name)
+                               'already found in Package table' % app_name)
 
-    pkg = Packages(pkg_def.id, app.pkg_name, version, revision, 'pending',
+    pkg = Package(pkg_def.id, app.pkg_name, version, revision, 'pending',
                    func.current_timestamp(), user, app.pkg_type,
                    app.project_type)
     Session.add(pkg)
@@ -55,7 +55,7 @@ def find_package(app_name, version, revision):
     app = find_app_by_name(app_name)
 
     try:
-        return (Session.query(Packages)
+        return (Session.query(Package)
                        .filter_by(pkg_name=app.pkg_name)
                        .filter_by(version=version)
                        .filter_by(revision=revision)
@@ -79,7 +79,7 @@ def find_package_definition(project_id):
                           .first())
     except sqlalchemy.orm.exc.NoResultFound:
         raise PackageException('Entry for project ID "%s" not found in '
-                               'ProjectPackages table' % project_id)
+                               'ProjectPackage table' % project_id)
 
     return pkg_def
 
@@ -87,14 +87,14 @@ def find_package_definition(project_id):
 def list_packages(app_names):
     """Return all available packages in the repository"""
 
-    list_query = Session.query(Packages)
+    list_query = Session.query(Package)
 
     if app_names is not None:
         list_query = \
             (list_query.join(PackageLocations,
-                             PackageLocations.pkg_name==Packages.pkg_name)
+                             PackageLocations.pkg_name==Package.pkg_name)
                        .filter(PackageLocations.app_name.in_(app_names)))
 
-    return (list_query.order_by(Packages.pkg_name, Packages.version,
-                                Packages.revision)
+    return (list_query.order_by(Package.pkg_name, Package.version,
+                                Package.revision)
                       .all())

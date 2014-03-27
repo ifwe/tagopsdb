@@ -46,7 +46,7 @@ class PackageDefinition(Base):
         server_default=func.current_timestamp(),
     )
 
-    has_many('versions', of_kind='Packages', inverse='definition')
+    has_many('versions', of_kind='Package', inverse='definition')
 
     has_and_belongs_to_many(
         'projects',
