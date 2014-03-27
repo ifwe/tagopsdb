@@ -19,7 +19,7 @@ from .host import Host
 from .application import Application
 from .iloms import Iloms
 from .jmx_attribute import JmxAttribute
-from .locks import Locks
+from .lock import Lock
 from .nag_apptypes_services import NagApptypesServices
 from .nag_check_commands import NagCheckCommands
 from .nag_command_arguments import NagCommandArguments
@@ -60,7 +60,7 @@ __all__ = [
     'AppJmxAttribute', 'AppPackages', 'Asset', 'Cname',
     'DefaultSpec', 'Deployment', 'Environment', 'Ganglia',
     'Hipchat', 'HostDeployment', 'HostInterface', 'HostIp',
-    'HostSpec', 'Host', 'Iloms', 'JmxAttribute', 'Locks',
+    'HostSpec', 'Host', 'Iloms', 'JmxAttribute', 'Lock',
     'NagApptypesServices', 'NagCheckCommands', 'NagCommandArguments',
     'NagContactGroups', 'NagContacts', 'NagContactGroupsMembers',
     'NagHostServices', 'NagServicesContactGroups', 'NagServices',
