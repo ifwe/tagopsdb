@@ -3,8 +3,8 @@ import elixir
 from sqlalchemy.engine.url import URL
 
 
-def init(config):
-    url = config.pop('url', {}).copy()
+def init(**config):
+    url = config.pop('url', {})
     url.setdefault('drivername', 'mysql+oursql')
     url.setdefault('database', 'TagOpsDB')
 
