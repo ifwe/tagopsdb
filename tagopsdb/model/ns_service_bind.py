@@ -3,7 +3,7 @@ from elixir import using_options, belongs_to
 from .base import Base
 
 
-class NsServiceBinds(Base):
+class NsServiceBind(Base):
     using_options(tablename='ns_service_binds')
 
     belongs_to(
