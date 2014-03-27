@@ -2,7 +2,7 @@ from elixir import Field, Integer, using_options, using_table_options
 from .base import Base
 
 
-class AppPackages(Base):
+class AppPackage(Base):
     using_options(tablename='app_packages')
     using_table_options(extend_existing=True)
 

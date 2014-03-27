@@ -132,7 +132,7 @@ def find_app_package(project, app_id):
 
     # This is no longer valid
     # try:
-    #     return (Session.query(AppPackages)
+    #     return (Session.query(AppPackage)
     #                    .filter_by(pkgLocationID=pkg_location_id)
     #                    .filter_by(AppID=app_id)
     #                    .one())
