@@ -5,7 +5,7 @@ from elixir import using_options, has_and_belongs_to_many
 from .base import Base
 
 
-class JmxAttributes(Base):
+class JmxAttribute(Base):
     using_options(tablename='jmx_attributes')
 
     id = Field(Integer, colname='jmx_attribute_id', primary_key=True)

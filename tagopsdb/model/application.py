@@ -110,7 +110,7 @@ class Application(Base):
 
     has_and_belongs_to_many(
         'jmx_attributes',
-        of_kind='JmxAttributes',
+        of_kind='JmxAttribute',
         inverse='apps',
         tablename='app_jmx_attributes',
         local_colname='AppID',
