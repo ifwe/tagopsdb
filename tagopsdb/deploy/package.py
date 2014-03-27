@@ -6,7 +6,7 @@ import tagopsdb.deploy.repo as repo
 
 from tagopsdb.database.meta import Session
 from tagopsdb.database.model import (
-    PackageDefinition, PackageLocations, Package, ProjectPackage
+    PackageDefinition, PackageLocation, Package, ProjectPackage
 )
 from tagopsdb.exceptions import PackageException
 
@@ -80,9 +80,9 @@ def list_packages(app_names):
 
     if app_names is not None:
         list_query = \
-            (list_query.join(PackageLocations,
-                             PackageLocations.name == Package.name)
-                       .filter(PackageLocations.app_name.in_(app_names)))
+            (list_query.join(PackageLocation,
+                             PackageLocation.name == Package.name)
+                       .filter(PackageLocation.app_name.in_(app_names)))
 
     return (list_query.order_by(Package.name, Package.version,
                                 Package.revision)
