@@ -2,7 +2,7 @@ from .base import Base
 
 from .app_deployment import AppDeployment
 from .app_hipchat_rooms import AppHipchatRooms
-from .app_jmx_attributes import AppJmxAttributes
+from .app_jmx_attribute import AppJmxAttribute
 from .app_packages import AppPackages
 from .asset import Asset
 from .cname import Cname
@@ -18,7 +18,7 @@ from .host_spec import HostSpec
 from .host import Host
 from .application import Application
 from .iloms import Iloms
-from .jmx_attributes import JmxAttributes
+from .jmx_attribute import JmxAttribute
 from .locks import Locks
 from .nag_apptypes_services import NagApptypesServices
 from .nag_check_commands import NagCheckCommands
@@ -57,10 +57,10 @@ from .zones import Zones
 __all__ = [
     'Base',
     'Application', 'AppDeployment', 'AppHipchatRooms',
-    'AppJmxAttributes', 'AppPackages', 'Asset', 'Cname',
+    'AppJmxAttribute', 'AppPackages', 'Asset', 'Cname',
     'DefaultSpec', 'Deployment', 'Environment', 'Ganglia',
     'Hipchat', 'HostDeployment', 'HostInterface', 'HostIp',
-    'HostSpec', 'Host', 'Iloms', 'JmxAttributes', 'Locks',
+    'HostSpec', 'Host', 'Iloms', 'JmxAttribute', 'Locks',
     'NagApptypesServices', 'NagCheckCommands', 'NagCommandArguments',
     'NagContactGroups', 'NagContacts', 'NagContactGroupsMembers',
     'NagHostServices', 'NagServicesContactGroups', 'NagServices',
