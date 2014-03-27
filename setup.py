@@ -54,8 +54,9 @@ setup_args = dict(
     license='Apache License, Version 2.0',
     packages=[
         'tagopsdb',
+        'tagopsdb.deploy',
         'tagopsdb.database',
-        'tagopsdb.deploy'
+        'tagopsdb.database.model',
     ],
     entry_points={},
     install_requires=REQUIREMENTS,
