@@ -62,7 +62,7 @@ class Hosts(Base):
 
     has_many(
         'interfaces',
-        of_kind='HostInterfaces',
+        of_kind='HostInterface',
         inverse='host'
     )
 

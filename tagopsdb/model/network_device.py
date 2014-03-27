@@ -16,7 +16,7 @@ class NetworkDevice(Base):
 
     has_many(
         'host_interfaces',
-        of_kind='HostInterfaces',
+        of_kind='HostInterface',
         inverse='network',
     )
 

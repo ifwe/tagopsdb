@@ -31,7 +31,7 @@ class Ports(Base):
 
     has_one(
         'host_interface',
-        of_kind='HostInterfaces',
+        of_kind='HostInterface',
         inverse='port',
     )
 
