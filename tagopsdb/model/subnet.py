@@ -17,7 +17,7 @@ class Subnet(Base):
     gateway = Field(String(length=15))
 
     belongs_to('vlan', of_kind='Vlans', colname='VlanID', ondelete='cascade')
-    belongs_to('zone', of_kind='Zones', colname='ZoneID')
+    belongs_to('zone', of_kind='Zone', colname='ZoneID')
 
     has_one(
         'ip',
