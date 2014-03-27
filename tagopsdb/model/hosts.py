@@ -46,7 +46,7 @@ class Hosts(Base):
         required=True
     )
 
-    belongs_to('spec', of_kind='HostSpecs', colname='SpecID')
+    belongs_to('spec', of_kind='HostSpec', colname='SpecID')
 
     has_one(
         'asset',

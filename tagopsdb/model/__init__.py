@@ -14,7 +14,7 @@ from .hipchat import Hipchat
 from .host_deployment import HostDeployment
 from .host_interface import HostInterface
 from .host_ip import HostIp
-from .host_specs import HostSpecs
+from .host_spec import HostSpec
 from .hosts import Hosts
 from .application import Application
 from .iloms import Iloms
@@ -60,7 +60,7 @@ __all__ = [
     'AppJmxAttributes', 'AppPackages', 'Asset', 'Cname',
     'DefaultSpec', 'Deployment', 'Environment', 'Ganglia',
     'Hipchat', 'HostDeployment', 'HostInterface', 'HostIp',
-    'HostSpecs', 'Hosts', 'Iloms', 'JmxAttributes', 'Locks',
+    'HostSpec', 'Hosts', 'Iloms', 'JmxAttributes', 'Locks',
     'NagApptypesServices', 'NagCheckCommands', 'NagCommandArguments',
     'NagContactGroups', 'NagContacts', 'NagContactGroupsMembers',
     'NagHostsServices', 'NagServicesContactGroups', 'NagServices',

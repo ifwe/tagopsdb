@@ -16,7 +16,7 @@ class DefaultSpec(Base):
 
     belongs_to(
         'spec',
-        of_kind='HostSpecs',
+        of_kind='HostSpec',
         colname='specID',
         ondelete='cascade',
         primary_key=True
@@ -30,7 +30,7 @@ class DefaultSpec(Base):
     )
     belongs_to(
         'environment',
-        of_kind='Environments',
+        of_kind='Environment',
         colname='environmentID',
         ondelete='cascade',
         primary_key=True
