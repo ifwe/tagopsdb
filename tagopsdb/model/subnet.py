@@ -21,7 +21,7 @@ class Subnet(Base):
 
     has_one(
         'ip',
-        of_kind='HostIps',
+        of_kind='HostIp',
         inverse='subnet'
     )
 

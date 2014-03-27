@@ -5,7 +5,7 @@ from elixir import using_options, belongs_to, has_many
 from .base import Base
 
 
-class HostIps(Base):
+class HostIp(Base):
     using_options(tablename='host_ips')
 
     id = Field(Integer, colname='IpID', primary_key=True)
