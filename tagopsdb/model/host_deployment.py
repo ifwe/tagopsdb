@@ -27,7 +27,7 @@ class HostDeployment(Base):
     )
     belongs_to(
         'deployment',
-        of_kind='Deployments',
+        of_kind='Deployment',
         colname='DeploymentID',
         required=True
     )

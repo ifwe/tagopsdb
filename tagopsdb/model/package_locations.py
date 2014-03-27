@@ -53,4 +53,4 @@ class PackageLocations(Base):
     #     through='app_package',
     #     via='app_definition'
     # )
-    # has_many('deployments', of_kind='Deployments', colname='package_id')
+    # has_many('deployments', of_kind='Deployment', colname='package_id')

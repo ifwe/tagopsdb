@@ -7,7 +7,7 @@ from .app_packages import AppPackages
 from .asset import Asset
 from .cname import Cname
 from .default_spec import DefaultSpec
-from .deployments import Deployments
+from .deployment import Deployment
 from .environments import Environments
 from .ganglia import Ganglia
 from .hipchat import Hipchat
@@ -58,7 +58,7 @@ __all__ = [
     'Base',
     'Application', 'AppDeployment', 'AppHipchatRooms',
     'AppJmxAttributes', 'AppPackages', 'Asset', 'Cname',
-    'DefaultSpec', 'Deployments', 'Environments', 'Ganglia',
+    'DefaultSpec', 'Deployment', 'Environments', 'Ganglia',
     'Hipchat', 'HostDeployment', 'HostInterfaces', 'HostIps',
     'HostSpecs', 'Hosts', 'Iloms', 'JmxAttributes', 'Locks',
     'NagApptypesServices', 'NagCheckCommands', 'NagCommandArguments',
