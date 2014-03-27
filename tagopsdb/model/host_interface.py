@@ -39,6 +39,6 @@ class HostInterface(Base):
 
     has_many(
         'ips',
-        of_kind='HostIps',
+        of_kind='HostIp',
         inverse='interface',
     )
