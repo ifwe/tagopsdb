@@ -10,7 +10,12 @@ class PackageLocations(Base):
 
     id = Field(Integer, colname='pkgLocationID', primary_key=True)
     pkg_type = Field(String(length=255), required=True)
-    pkg_name = Field(String(length=255), required=True, unique=True)
+    name = Field(
+        String(length=255),
+        colname='pkg_name',
+        required=True,
+        unique=True
+    )
     app_name = Field(String(length=255), required=True, unique=True)
     path = Field(String(length=255), required=True, unique=True)
     build_host = Field(String(length=30), required=True)

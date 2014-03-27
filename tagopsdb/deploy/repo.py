@@ -3,9 +3,10 @@ import sqlalchemy.orm.exc
 from sqlalchemy import func
 
 from tagopsdb.database.meta import Session
-from tagopsdb.database.model import Application, PackageDefinition, \
-                                    PackageLocations, PackageName, \
-                                    ProjectPackage, Project
+from tagopsdb.database.model import (
+    Application, PackageDefinition, PackageLocations, PackageName,
+    ProjectPackage, Project
+)
 from tagopsdb.exceptions import RepoException
 
 
@@ -61,13 +62,13 @@ def add_app_packages_mapping(project, project_new, pkg_def, app_types):
         Session.add(proj_pkg)
 
 
-def add_package_definition(deploy_type, validation_type, pkg_name, path,
+def add_package_definition(deploy_type, validation_type, name, path,
                            arch, build_type, build_host, env_specific):
     """Add base definition for a package"""
 
-    pkg_def = PackageDefinition(deploy_type, validation_type, pkg_name,
-                                 path, arch, build_type, build_host,
-                                 env_specific, func.current_timestamp())
+    pkg_def = PackageDefinition(deploy_type, validation_type, name,
+                                path, arch, build_type, build_host,
+                                env_specific, func.current_timestamp())
     Session.add(pkg_def)
 
     Session.flush()   # Needed to get pkg_ef_id generated
@@ -90,12 +91,12 @@ def delete_app_location(app_name):
     """Delete the location of a given application"""
 
     try:
-        app = find_app_location(app_name)
+        pkg_loc = find_app_location(app_name)
     except sqlalchemy.orm.exc.NoResultFound:
         raise RepoException('No application "%s" to remove from '
                             'PackageLocations table' % app_name)
 
-    Session.delete(app)
+    Session.delete(pkg_loc)
 
 
 def delete_app_packages_mapping(project, app_types):
@@ -147,7 +148,7 @@ def find_app_packages_mapping(app_name):
 
     app_defs = (Session.query(Application)
                        .filter(Application.package_locations.any(
-                               pkg_name=app_name))
+                               name=app_name))
                        .all())
 
     if not app_defs:
