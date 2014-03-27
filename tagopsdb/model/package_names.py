@@ -15,7 +15,7 @@ class PackageNames(Base):
     name = Field(String(length=255), required=True)
     belongs_to(
         'package_definition',
-        of_kind='PackageDefinitions',
+        of_kind='PackageDefinition',
         colname='pkg_def_id',
         required=True,
         ondelete='cascade'

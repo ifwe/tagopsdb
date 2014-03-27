@@ -58,7 +58,7 @@ class Packages(Base):
 
     belongs_to(
         'definition',
-        of_kind='PackageDefinitions',
+        of_kind='PackageDefinition',
         colname='pkg_def_id',
         required=True,
         ondelete='cascade'

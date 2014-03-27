@@ -12,7 +12,7 @@ class Projects(Base):
     name = Field(String(length=255), required=True, unique=True)
     has_and_belongs_to_many(
         'package_definitions',
-        of_kind='PackageDefinitions',
+        of_kind='PackageDefinition',
         inverse='projects',
         tablename='project_package',
         local_colname='project_id',

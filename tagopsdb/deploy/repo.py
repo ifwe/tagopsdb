@@ -3,7 +3,7 @@ import sqlalchemy.orm.exc
 from sqlalchemy import func
 
 from tagopsdb.database.meta import Session
-from tagopsdb.database.model import Application, PackageDefinitions, \
+from tagopsdb.database.model import Application, PackageDefinition, \
                                     PackageLocations, PackageNames, \
                                     ProjectPackage, Projects
 from tagopsdb.exceptions import RepoException
@@ -65,7 +65,7 @@ def add_package_definition(deploy_type, validation_type, pkg_name, path,
                            arch, build_type, build_host, env_specific):
     """Add base definition for a package"""
 
-    pkg_def = PackageDefinitions(deploy_type, validation_type, pkg_name,
+    pkg_def = PackageDefinition(deploy_type, validation_type, pkg_name,
                                  path, arch, build_type, build_host,
                                  env_specific, func.current_timestamp())
     Session.add(pkg_def)
