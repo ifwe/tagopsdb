@@ -5,12 +5,12 @@ from elixir import using_options, has_many
 from .base import Base
 
 
-class Zones(Base):
+class Zone(Base):
     using_options(tablename='zones')
 
     id = Field(Integer, colname='ZoneID', primary_key=True)
 
-    zone_name = Field(String(length=30), colname='zoneName', synonym='name')
+    zone = Field(String(length=30), colname='zoneName', synonym='name')
     mx_priority = Field(Integer, colname='mxPriority')
     mx_host_id = Field(String(length=30), colname='mxHostID')
     ns_priority = Field(Integer, colname='nsPriority')

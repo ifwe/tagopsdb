@@ -52,7 +52,7 @@ from .projects import Projects
 from .service_event import ServiceEvent
 from .subnet import Subnet
 from .vlans import Vlans
-from .zones import Zones
+from .zone import Zone
 
 __all__ = [
     'Base',
@@ -70,5 +70,5 @@ __all__ = [
     'NsVipBinds', 'NsWeight', 'PackageNames', 'Packages',
     'PackageDefinitions', 'PackageLocations', 'Ports',
     'ProjectPackage', 'Projects', 'ServiceEvent', 'Subnet', 'Vlans',
-    'Zones'
+    'Zone'
 ]

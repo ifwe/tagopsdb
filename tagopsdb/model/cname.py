@@ -23,7 +23,7 @@ class Cname(Base):
     )
     belongs_to(
         'zone',
-        of_kind='Zones',
+        of_kind='Zone',
         colname='ZoneID',
         onupdate='cascade',
         ondelete='cascade',
