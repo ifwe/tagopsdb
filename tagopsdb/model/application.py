@@ -136,7 +136,7 @@ class Application(Base):
 
     has_many(
         'hosts',
-        of_kind='Hosts',
+        of_kind='Host',
         inverse='app',
     )
 
@@ -146,12 +146,12 @@ class Application(Base):
     #     secondary='app_hipchat_rooms',
     #     backref='app_definitions'
     # )
-    # hosts = relationship('Hosts')
+    # hosts = relationship('Host')
     # host_specs = relationship('DefaultSpec')
     # ns_services = relationship('NsVipBinds')
     # nag_app_services = relationship(
     #     'NagApptypesServices',
     #     primaryjoin='NagApptypesServices.app_id == Application.id'
     # )
-    # nag_host_services = relationship('NagHostsServices')
+    # nag_host_services = relationship('NagHostServices')
     # proj_pkg = relationship('ProjectPackage')

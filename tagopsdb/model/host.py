@@ -6,7 +6,7 @@ from sqlalchemy import UniqueConstraint
 from .base import Base
 
 
-class Hosts(Base):
+class Host(Base):
     using_options(tablename='hosts')
     using_table_options(
         UniqueConstraint('cageLocation', 'cabLocation', 'consolePort'),

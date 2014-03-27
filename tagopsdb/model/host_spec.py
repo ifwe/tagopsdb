@@ -29,6 +29,6 @@ class HostSpec(Base):
 
     has_many(
         'hosts',
-        of_kind='Hosts',
+        of_kind='Host',
         inverse='spec',
     )

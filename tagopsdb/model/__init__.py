@@ -15,7 +15,7 @@ from .host_deployment import HostDeployment
 from .host_interface import HostInterface
 from .host_ip import HostIp
 from .host_spec import HostSpec
-from .hosts import Hosts
+from .host import Host
 from .application import Application
 from .iloms import Iloms
 from .jmx_attributes import JmxAttributes
@@ -26,7 +26,7 @@ from .nag_command_arguments import NagCommandArguments
 from .nag_contact_groups import NagContactGroups
 from .nag_contacts import NagContacts
 from .nag_contact_groups_members import NagContactGroupsMembers
-from .nag_hosts_services import NagHostsServices
+from .nag_hosts_services import NagHostServices
 from .nag_services_contact_groups import NagServicesContactGroups
 from .nag_services import NagServices
 from .nag_services_arguments import NagServicesArguments
@@ -60,10 +60,10 @@ __all__ = [
     'AppJmxAttributes', 'AppPackages', 'Asset', 'Cname',
     'DefaultSpec', 'Deployment', 'Environment', 'Ganglia',
     'Hipchat', 'HostDeployment', 'HostInterface', 'HostIp',
-    'HostSpec', 'Hosts', 'Iloms', 'JmxAttributes', 'Locks',
+    'HostSpec', 'Host', 'Iloms', 'JmxAttributes', 'Locks',
     'NagApptypesServices', 'NagCheckCommands', 'NagCommandArguments',
     'NagContactGroups', 'NagContacts', 'NagContactGroupsMembers',
-    'NagHostsServices', 'NagServicesContactGroups', 'NagServices',
+    'NagHostServices', 'NagServicesContactGroups', 'NagServices',
     'NagServicesArguments', 'NagServicesContacts', 'NagTimePeriods',
     'NetworkDevice', 'NsDevice', 'NsMonitor', 'NsService',
     'NsServiceBinds', 'NsServiceMax', 'NsServiceParams', 'NsVip',
