@@ -19,7 +19,7 @@ class ProjectPackage(Base):
     ## TODO: correctly define class with these relationships:
     # belongs_to(
     #     'project',
-    #     of_kind='Projects',
+    #     of_kind='Project',
     #     colname='project_id',
     #     ondelete='cascade',
     #     primary_key=True

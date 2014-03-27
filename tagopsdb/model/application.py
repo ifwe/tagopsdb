@@ -74,7 +74,7 @@ class Application(Base):
 
     has_and_belongs_to_many(
         'projects',
-        of_kind='Projects',
+        of_kind='Project',
         inverse='apps',
         tablename='project_package',
         local_colname='app_id',

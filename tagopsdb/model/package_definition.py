@@ -50,7 +50,7 @@ class PackageDefinition(Base):
 
     has_and_belongs_to_many(
         'projects',
-        of_kind='Projects',
+        of_kind='Project',
         inverse='package_definitions',
         tablename='project_package',
         local_colname='pkg_def_id',

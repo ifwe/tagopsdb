@@ -5,7 +5,7 @@ from elixir import using_options, has_and_belongs_to_many
 from .base import Base
 
 
-class Projects(Base):
+class Project(Base):
     using_options(tablename='projects')
 
     id = Field(Integer, colname='project_id', primary_key=True)
