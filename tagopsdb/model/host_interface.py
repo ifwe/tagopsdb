@@ -32,7 +32,7 @@ class HostInterface(Base):
 
     belongs_to(
         'port',
-        of_kind='Ports',
+        of_kind='Port',
         colname='PortID',
         ondelete='cascade',
     )
