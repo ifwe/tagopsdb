@@ -22,6 +22,6 @@ class Environment(Base):
 
     has_many(
         'vlans',
-        of_kind='Vlans',
+        of_kind='Vlan',
         inverse='environment',
     )

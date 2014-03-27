@@ -5,7 +5,7 @@ from elixir import using_options, belongs_to, has_many
 from .base import Base
 
 
-class Vlans(Base):
+class Vlan(Base):
     using_options(tablename='vlans')
     id = Field(Integer, colname='VlanID', primary_key=True)
     name = Field(String(length=20))
