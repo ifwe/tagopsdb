@@ -23,7 +23,7 @@ class HostSpecs(Base):
 
     has_many(
         'defaults',
-        of_kind="DefaultSpecs",
+        of_kind="DefaultSpec",
         inverse='spec'
     )
 

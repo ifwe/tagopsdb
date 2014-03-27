@@ -16,7 +16,7 @@ class Environments(Base):
 
     has_many(
         'default_specs',
-        of_kind='DefaultSpecs',
+        of_kind='DefaultSpec',
         inverse='environment'
     )
 

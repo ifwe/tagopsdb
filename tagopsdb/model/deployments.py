@@ -35,7 +35,7 @@ class Deployments(Base):
 
     has_many(
         'app_deployments',
-        of_kind='AppDeployments',
+        of_kind='AppDeployment',
         inverse='deployment',
     )
 

@@ -94,7 +94,7 @@ class Application(Base):
 
     has_many(
         'app_deployments',
-        of_kind='AppDeployments',
+        of_kind='AppDeployment',
         inverse='app'
     )
 
@@ -130,7 +130,7 @@ class Application(Base):
 
     has_many(
         'default_specs',
-        of_kind='DefaultSpecs',
+        of_kind='DefaultSpec',
         inverse='app'
     )
 
@@ -140,14 +140,14 @@ class Application(Base):
         inverse='app',
     )
 
-    # app_deployments = relationship('AppDeployments')
+    # app_deployments = relationship('AppDeployment')
     # hipchats = relationship(
     #     'Hipchat',
     #     secondary='app_hipchat_rooms',
     #     backref='app_definitions'
     # )
     # hosts = relationship('Hosts')
-    # host_specs = relationship('DefaultSpecs')
+    # host_specs = relationship('DefaultSpec')
     # ns_services = relationship('NsVipBinds')
     # nag_app_services = relationship(
     #     'NagApptypesServices',
