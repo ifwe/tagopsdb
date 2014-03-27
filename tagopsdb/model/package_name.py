@@ -6,7 +6,7 @@ from sqlalchemy import UniqueConstraint
 from .base import Base
 
 
-class PackageNames(Base):
+class PackageName(Base):
     using_options(tablename='package_names')
     using_table_options(
         UniqueConstraint(u'name', u'pkg_def_id', name='name_pkg_def_id'),

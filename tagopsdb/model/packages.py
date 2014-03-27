@@ -50,7 +50,7 @@ class Packages(Base):
 
     belongs_to(
         'name',
-        of_kind='PackageNames',
+        of_kind='PackageName',
         colname='pkg_name',
         target_column='name',
         required=True,

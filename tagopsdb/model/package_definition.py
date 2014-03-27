@@ -70,6 +70,6 @@ class PackageDefinition(Base):
 
     has_many(
         'package_names',
-        of_kind='PackageNames',
+        of_kind='PackageName',
         inverse='package_definition'
     )
