@@ -8,7 +8,7 @@ def discover_models():
         cls = getattr(tagopsdb, clsname)
         if not isinstance(cls, type):
             continue
-        if not issubclass(cls, tagopsdb.Base):
+        if not issubclass(cls, tagopsdb.Base) or cls is tagopsdb.Base:
             continue
 
         classes.append(cls)
