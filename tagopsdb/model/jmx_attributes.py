@@ -15,7 +15,7 @@ class JmxAttributes(Base):
 
     has_and_belongs_to_many(
         'apps',
-        of_kind='AppDefinitions',
+        of_kind='Application',
         inverse='apps',
         tablename='app_jmx_attributes',
         local_colname='jmx_attribute_id',

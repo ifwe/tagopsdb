@@ -12,7 +12,7 @@ class AppJmxAttributes(Base):
     ## TODO: correctly define class with these relationships:
     # belongs_to(
     #     'app',
-    #     of_kind='AppDefinitions',
+    #     of_kind='Application',
     #     colname='AppID',
     #     primary_key=True
     # )

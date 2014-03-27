@@ -19,19 +19,19 @@ class Vlans(Base):
 
     has_many(
         'production_apps',
-        of_kind='AppDefinitions',
+        of_kind='Application',
         inverse='production_vlan'
     )
 
     has_many(
         'staging_apps',
-        of_kind='AppDefinitions',
+        of_kind='Application',
         inverse='staging_vlan'
     )
 
     has_many(
         'development_apps',
-        of_kind='AppDefinitions',
+        of_kind='Application',
         inverse='development_vlan'
     )
 

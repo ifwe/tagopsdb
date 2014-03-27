@@ -61,7 +61,7 @@ class PackageDefinitions(Base):
 
     has_and_belongs_to_many(
         'apps',
-        of_kind='AppDefinitions',
+        of_kind='Application',
         inverse='package_definitions',
         tablename='project_package',
         local_colname='pkg_def_id',

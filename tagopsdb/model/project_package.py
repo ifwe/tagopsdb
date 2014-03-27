@@ -33,7 +33,7 @@ class ProjectPackage(Base):
     # )
     # belongs_to(
     #     'app',
-    #     of_kind='AppDefinitions',
+    #     of_kind='Application',
     #     colname='app_id',
     #     ondelete='cascade',
     #     primary_key=True

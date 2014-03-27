@@ -33,7 +33,7 @@ class PackageLocations(Base):
 
     has_and_belongs_to_many(
         'apps',
-        of_kind='AppDefinitions',
+        of_kind='Application',
         inverse='package_locations',
         tablename='app_packages',
         local_colname='pkgLocationID',
@@ -49,7 +49,7 @@ class PackageLocations(Base):
     # )
     # has_many(
     #     'app_definitions',
-    #     of_kind='AppDefinitions',
+    #     of_kind='Application',
     #     through='app_package',
     #     via='app_definition'
     # )

@@ -23,7 +23,7 @@ class DefaultSpecs(Base):
     )
     belongs_to(
         'app',
-        of_kind='AppDefinitions',
+        of_kind='Application',
         colname='AppID',
         ondelete='cascade',
         primary_key=True

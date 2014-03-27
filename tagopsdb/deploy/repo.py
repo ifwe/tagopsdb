@@ -3,7 +3,7 @@ import sqlalchemy.orm.exc
 from sqlalchemy import func
 
 from tagopsdb.database.meta import Session
-from tagopsdb.database.model import AppDefinitions, PackageDefinitions, \
+from tagopsdb.database.model import Application, PackageDefinitions, \
                                     PackageLocations, PackageNames, \
                                     ProjectPackage, Projects
 from tagopsdb.exceptions import RepoException
@@ -44,12 +44,12 @@ def add_app_packages_mapping(project, project_new, pkg_def, app_types):
 
     for app_type in app_types:
         try:
-            app_def = (Session.query(AppDefinitions)
-                              .filter_by(app_type=app_type)
+            app_def = (Session.query(Application)
+                              .filter_by(name=app_type)
                               .one())
         except sqlalchemy.orm.exc.NoResultFound:
             raise RepoException('App type "%s" is not found in the '
-                                'AppDefinitions table' % app_type)
+                                'Application table' % app_type)
 
         project.app_definitions.append(app_def)
 
@@ -103,12 +103,12 @@ def delete_app_packages_mapping(project, app_types):
 
     for app_type in app_types:
         try:
-            app_def = (Session.query(AppDefinitions)
-                              .filter_by(app_type=app_type)
+            app_def = (Session.query(Application)
+                              .filter_by(name=app_type)
                               .one())
         except sqlalchemy.orm.exc.NoResultFound:
             raise RepoException('App type "%s" is not found in the '
-                                'AppDefinitions table' % app_type)
+                                'Application table' % app_type)
 
         project.app_definitions.remove(app_def)
 
@@ -145,8 +145,8 @@ def find_app_package(project, app_id):
 def find_app_packages_mapping(app_name):
     """Find all app types related to a given package"""
 
-    app_defs = (Session.query(AppDefinitions)
-                       .filter(AppDefinitions.package_locations.any(
+    app_defs = (Session.query(Application)
+                       .filter(Application.package_locations.any(
                                pkg_name=app_name))
                        .all())
 

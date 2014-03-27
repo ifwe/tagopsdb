@@ -22,7 +22,7 @@ class Projects(Base):
 
     has_and_belongs_to_many(
         'apps',
-        of_kind='AppDefinitions',
+        of_kind='Application',
         inverse='projects',
         tablename='project_package',
         local_colname='project_id',
