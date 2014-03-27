@@ -7,7 +7,7 @@ from sqlalchemy.dialects.mysql import SMALLINT
 from .base import Base
 
 
-class AppDefinitions(Base):
+class Application(Base):
     using_options(tablename='app_definitions')
     using_table_options(extend_existing=True)
 
@@ -20,7 +20,11 @@ class AppDefinitions(Base):
         server_default='co64'
     )
 
-    app_type = Field(String(length=100), colname='appType', required=True)
+    name = Field(
+        String(length=100),
+        colname='appType',
+        required=True
+    )
     host_base = Field(String(length=100), colname='hostBase')
     puppet_class = Field(
         String(length=100),
@@ -147,7 +151,7 @@ class AppDefinitions(Base):
     # ns_services = relationship('NsVipBinds')
     # nag_app_services = relationship(
     #     'NagApptypesServices',
-    #     primaryjoin='NagApptypesServices.app_id == AppDefinitions.id'
+    #     primaryjoin='NagApptypesServices.app_id == Application.id'
     # )
     # nag_host_services = relationship('NagHostsServices')
     # proj_pkg = relationship('ProjectPackage')

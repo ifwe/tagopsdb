@@ -8,7 +8,7 @@ class NsVipBinds(Base):
 
     belongs_to(
         'app',
-        of_kind='AppDefinitions',
+        of_kind='Application',
         colname='appID',
         primary_key=True,
         ondelete='cascade',

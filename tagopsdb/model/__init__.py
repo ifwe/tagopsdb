@@ -16,7 +16,7 @@ from .host_interfaces import HostInterfaces
 from .host_ips import HostIps
 from .host_specs import HostSpecs
 from .hosts import Hosts
-from .app_definitions import AppDefinitions
+from .application import Application
 from .iloms import Iloms
 from .jmx_attributes import JmxAttributes
 from .locks import Locks
@@ -56,7 +56,7 @@ from .zones import Zones
 
 __all__ = [
     'Base',
-    'AppDefinitions', 'AppDeployments', 'AppHipchatRooms',
+    'Application', 'AppDeployments', 'AppHipchatRooms',
     'AppJmxAttributes', 'AppPackages', 'Asset', 'Cname',
     'DefaultSpecs', 'Deployments', 'Environments', 'Ganglia',
     'Hipchat', 'HostDeployments', 'HostInterfaces', 'HostIps',

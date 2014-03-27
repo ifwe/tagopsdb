@@ -41,7 +41,7 @@ class Hosts(Base):
 
     belongs_to(
         'app',
-        of_kind='AppDefinitions',
+        of_kind='Application',
         colname='AppID',
         required=True
     )

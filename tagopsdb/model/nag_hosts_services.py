@@ -21,7 +21,7 @@ class NagHostsServices(Base):
     )
     belongs_to(
         'server_app',
-        of_kind='AppDefinitions',
+        of_kind='Application',
         colname='server_app_id',
         primary_key=True
     )
