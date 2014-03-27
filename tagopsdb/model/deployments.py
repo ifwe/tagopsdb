@@ -41,6 +41,6 @@ class Deployments(Base):
 
     has_many(
         'host_deployments',
-        of_kind='HostDeployments',
+        of_kind='HostDeployment',
         inverse='deployment',
     )
