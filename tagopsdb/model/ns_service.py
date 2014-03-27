@@ -21,6 +21,6 @@ class NsService(Base):
 
     has_many(
         'params',
-        of_kind='NsServiceParams',
+        of_kind='NsServiceParam',
         inverse='service'
     )
