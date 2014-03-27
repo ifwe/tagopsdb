@@ -44,13 +44,13 @@ def test_model_and_direct_relationships(cls):
 
 
 if __name__ == '__main__':
-    tagopsdb.init(dict(
+    tagopsdb.init(
         url=dict(
             username='tagopsdb_reader',
             password='removed',
             host='opsdb.tagged.com',
         ),
-        pool_recycle=3600)
+        pool_recycle=3600
     )
 
     classes = discover_models()
