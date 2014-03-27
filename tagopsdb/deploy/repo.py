@@ -5,7 +5,7 @@ from sqlalchemy import func
 from tagopsdb.database.meta import Session
 from tagopsdb.database.model import Application, PackageDefinition, \
                                     PackageLocations, PackageNames, \
-                                    ProjectPackage, Projects
+                                    ProjectPackage, Project
 from tagopsdb.exceptions import RepoException
 
 
@@ -78,7 +78,7 @@ def add_package_definition(deploy_type, validation_type, pkg_name, path,
 def add_project(name):
     """Add a new project to the database"""
 
-    project = Projects(name)
+    project = Project(name)
     Session.add(project)
 
     Session.flush()   # Needed to get project_id generated
@@ -161,12 +161,12 @@ def find_project(name):
     """Find a given project"""
 
     try:
-        return (Session.query(Projects)
+        return (Session.query(Project)
                        .filter_by(name=name)
                        .one())
     except sqlalchemy.orm.exc.NoResultFound:
         raise RepoException('No entry found for project "%s" in '
-                            'the Projects table' % name)
+                            'the Project table' % name)
 
 
 def find_project_type(project):
