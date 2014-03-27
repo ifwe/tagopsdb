@@ -19,7 +19,7 @@ class NsWeight(Base):
     )
     belongs_to(
         'host_spec',
-        of_kind='HostSpecs',
+        of_kind='HostSpec',
         colname='specID',
         primary_key=True,
         ondelete='cascade',

@@ -6,7 +6,7 @@ from sqlalchemy.dialects.mysql import SMALLINT, INTEGER, MEDIUMTEXT
 from .base import Base
 
 
-class HostSpecs(Base):
+class HostSpec(Base):
     using_options(tablename='host_specs')
 
     id = Field(Integer, colname='specID', primary_key=True)
