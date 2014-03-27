@@ -51,7 +51,7 @@ from .project_package import ProjectPackage
 from .projects import Projects
 from .service_event import ServiceEvent
 from .subnet import Subnet
-from .vlans import Vlans
+from .vlan import Vlan
 from .zone import Zone
 
 __all__ = [
@@ -69,6 +69,6 @@ __all__ = [
     'NsServiceBinds', 'NsServiceMax', 'NsServiceParam', 'NsVip',
     'NsVipBinds', 'NsWeight', 'PackageNames', 'Packages',
     'PackageDefinition', 'PackageLocations', 'Ports',
-    'ProjectPackage', 'Projects', 'ServiceEvent', 'Subnet', 'Vlans',
+    'ProjectPackage', 'Projects', 'ServiceEvent', 'Subnet', 'Vlan',
     'Zone'
 ]

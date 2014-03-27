@@ -55,19 +55,19 @@ class Application(Base):
     )
     belongs_to(
         'production_vlan',
-        of_kind='Vlans',
+        of_kind='Vlan',
         colname='Production_VlanID',
         required=True
     )
     belongs_to(
         'staging_vlan',
-        of_kind='Vlans',
+        of_kind='Vlan',
         colname='Staging_VlanID',
         required=True,
     )
     belongs_to(
         'development_vlan',
-        of_kind='Vlans',
+        of_kind='Vlan',
         colname='Development_VlanID',
         required=True
     )
