@@ -35,7 +35,7 @@ class NagApptypesServices(Base):
     # )
     # belongs_to(
     #     'environment',
-    #     of_kind='Environments',
+    #     of_kind='Environment',
     #     colname='environment_id',
     #     primary_key=True,
     #     ondelete='cascade'

@@ -32,7 +32,7 @@ class NsVip(Base):
     )
     has_many(
         'environments',
-        of_kind='Environments',
+        of_kind='Environment',
         through='ns_vip_binds',
         via='environment'
     )

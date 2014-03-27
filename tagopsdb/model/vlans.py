@@ -12,7 +12,7 @@ class Vlans(Base):
     description = Field(String(length=50))
     belongs_to(
         'environment',
-        of_kind='Environments',
+        of_kind='Environment',
         colname='environmentID',
         ondelete='cascade',
     )
