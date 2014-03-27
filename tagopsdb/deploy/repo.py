@@ -4,7 +4,7 @@ from sqlalchemy import func
 
 from tagopsdb.database.meta import Session
 from tagopsdb.database.model import Application, PackageDefinition, \
-                                    PackageLocations, PackageNames, \
+                                    PackageLocations, PackageName, \
                                     ProjectPackage, Project
 from tagopsdb.exceptions import RepoException
 
@@ -32,7 +32,7 @@ def add_app_location(project_type, pkg_type, pkg_name, app_name, path, arch,
     Session.add(pkg_def)
     Session.flush()   # Needed to get pkg_def_id generated
 
-    package_name = PackageNames(pkg_name, pkg_def.id)
+    package_name = PackageName(pkg_name, pkg_def.id)
     Session.add(package_name)
     pkg_def.package_names.append(package_name)
 
