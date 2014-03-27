@@ -64,4 +64,4 @@ class Packages(Base):
         ondelete='cascade'
     )
 
-    has_many('deployments', of_kind='Deployments', inverse='package')
+    has_many('deployments', of_kind='Deployment', inverse='package')

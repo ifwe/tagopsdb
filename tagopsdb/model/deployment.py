@@ -6,7 +6,7 @@ from sqlalchemy.sql.expression import func
 from .base import Base
 
 
-class Deployments(Base):
+class Deployment(Base):
     using_options(tablename='deployments')
 
     id = Field(Integer, colname='DeploymentID', primary_key=True)
