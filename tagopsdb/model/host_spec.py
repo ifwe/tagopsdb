@@ -1,7 +1,7 @@
 from elixir import Field
 from elixir import String, Integer, Boolean, Enum
 from elixir import using_options, has_many
-from sqlalchemy.dialects.mysql import SMALLINT, INTEGER, MEDIUMTEXT
+from sqlalchemy.dialects.mysql import SMALLINT, INTEGER, MEDIUMTEXT, TINYINT
 
 from .base import Base
 
@@ -17,8 +17,8 @@ class HostSpec(Base):
     disk_size = Field(INTEGER(display_width=6), colname='diskSize')
     vendor = Field(String(length=20))
     model = Field(String(length=20))
-    control = Field(Enum(u'digi', u'ipmi', u'libvirt', u'vmware'))
-    virtual = Field(Boolean, required=True, default='0', server_default='0')
+    control = Field(Enum(u'digi', u'ipmi', u'vmware', u'libvirt'))
+    virtual = Field(TINYINT(1), required=True, default='0', server_default='0')
     expansions = Field(MEDIUMTEXT)
 
     has_many(

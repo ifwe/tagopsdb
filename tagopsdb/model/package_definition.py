@@ -1,6 +1,7 @@
 from elixir import Field
-from elixir import String, Integer, Boolean, DateTime, Enum
+from elixir import String, Integer, Enum
 from elixir import using_options, has_many, has_and_belongs_to_many
+from sqlalchemy.dialects.mysql import TINYINT, TIMESTAMP
 from sqlalchemy.sql.expression import func
 
 from .base import Base
@@ -24,7 +25,6 @@ class PackageDefinition(Base):
     )
 
     build_type = Field(
-        String(length=9),
         Enum('developer', 'hudson', 'jenkins'),
         required=True,
         default='developer',
@@ -33,14 +33,14 @@ class PackageDefinition(Base):
 
     build_host = Field(String(length=255), required=True)
     env_specific = Field(
-        Boolean,
+        TINYINT(1),
         required=True,
         default=0,
         server_default='0'
     )
 
     created = Field(
-        DateTime,
+        TIMESTAMP,
         required=True,
         default=func.current_timestamp(),
         server_default=func.current_timestamp(),
