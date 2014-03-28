@@ -18,8 +18,8 @@ class HostSpec(Base):
     vendor = Field(String(length=20))
     model = Field(String(length=20))
     control = Field(Enum(u'digi', u'ipmi', u'libvirt', u'vmware'))
-    virtual = Field(Boolean, required=True, default=0, server_default='0')
-    expansions = Field(MEDIUMTEXT())
+    virtual = Field(Boolean, required=True, default='0', server_default='0')
+    expansions = Field(MEDIUMTEXT)
 
     has_many(
         'defaults',
