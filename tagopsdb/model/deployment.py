@@ -1,7 +1,8 @@
 from elixir import Field
-from elixir import String, Integer, Enum, DateTime
+from elixir import String, Integer, Enum
 from elixir import using_options, belongs_to, has_many
 from sqlalchemy.sql.expression import func
+from sqlalchemy.dialects.mysql import TIMESTAMP
 
 from .base import Base
 
@@ -17,7 +18,7 @@ class Deployment(Base):
     )
 
     declared = Field(
-        DateTime,
+        TIMESTAMP,
         required=True,
         default=func.current_timestamp(),
         server_default=func.current_timestamp(),

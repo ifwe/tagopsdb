@@ -6,8 +6,8 @@ class AppPackage(Base):
     using_options(tablename='app_packages')
     using_table_options(extend_existing=True)
 
-    AppID = Field(Integer, primary_key=True)
     pkgLocationID = Field(Integer, primary_key=True)
+    AppID = Field(Integer, primary_key=True)
 
     ## TODO: correctly define class with these relationships:
     # belongs_to(
