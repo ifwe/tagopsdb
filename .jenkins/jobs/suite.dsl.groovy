@@ -44,11 +44,6 @@ def build = project.pythonFPMMatrixJob {
     name 'build'
     logRotator(-1, 50)
 
-    environmentVariables([
-        'FPM_PYPREFIX_PREFIX': 'TAG',
-        'FPM_EXTRAS': '--no-python-downcase-name',
-    ])
-
     triggers {
         githubPush()
     }
