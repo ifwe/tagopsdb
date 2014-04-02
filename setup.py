@@ -55,8 +55,7 @@ setup_args = dict(
     packages=[
         'tagopsdb',
         'tagopsdb.deploy',
-        'tagopsdb.database',
-        'tagopsdb.database.model',
+        'tagopsdb.model',
     ],
     entry_points={},
     install_requires=REQUIREMENTS,

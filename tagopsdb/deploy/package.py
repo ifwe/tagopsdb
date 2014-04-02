@@ -7,7 +7,7 @@ import tagopsdb.deploy.repo as repo
 from tagopsdb.database.meta import Session
 from tagopsdb.database.model import PackageDefinitions, PackageLocations, \
                                     Packages, ProjectPackage
-from tagopsdb.exceptions import NotImplementedException, PackageException
+from tagopsdb.exceptions import PackageException
 
 
 def add_package(app_name, version, revision, user):
@@ -30,7 +30,7 @@ def add_package(app_name, version, revision, user):
 def delete_package(app_name, version, revision):
     """Delete the requested version for the package of a given application"""
 
-    raise NotImplementedException('This command is not implemented yet')
+    raise NotImplementedError('This command is not implemented yet')
 
 
 def find_app_by_name(app_name):
