@@ -1,6 +1,8 @@
 from elixir import Field
-from elixir import String, Integer, Boolean, Enum
+from elixir import String, Integer, Enum
 from elixir import using_options, has_and_belongs_to_many
+
+from sqlalchemy.dialects.mysql import TINYINT
 
 from .base import Base
 
@@ -19,17 +21,15 @@ class PackageLocation(Base):
     app_name = Field(String(length=255), required=True, unique=True)
     path = Field(String(length=255), required=True, unique=True)
     build_host = Field(String(length=30), required=True)
-    environment = Field(Boolean, required=True)
+    environment = Field(TINYINT(1), required=True)
 
     arch = Field(
-        String(length=6),
         Enum(u'i386', u'x86_64', u'noarch'),
         required=True,
         default='noarch',
         server_default='noarch'
     )
     project_type = Field(
-        String(length=12),
         Enum(u'application', u'kafka-config', u'tagconfig'),
         required=True,
         default='application',

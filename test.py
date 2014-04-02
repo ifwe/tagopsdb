@@ -43,6 +43,27 @@ def test_model_and_direct_relationships(cls):
         print '\t'+rel.key+':', val
 
 
+def write_schema():
+    import sqlalchemy
+    import elixir
+
+    engine = None
+    f = None
+
+    with open('schema.mysql.txt', 'w') as f:
+        def executor(s, p=';'):
+            compiled = s.compile(dialect=engine.dialect)
+            f.write(unicode(compiled).encode('utf8') + p)
+
+        engine = sqlalchemy.create_engine(
+            'mysql+oursql://',
+            strategy='mock',
+            executor=executor
+        )
+        elixir.metadata.bind = engine
+        elixir.setup_all()
+        elixir.create_all()
+
 if __name__ == '__main__':
     tagopsdb.init(
         url=dict(
