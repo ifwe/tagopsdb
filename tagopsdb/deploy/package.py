@@ -4,8 +4,9 @@ from sqlalchemy.sql.expression import func
 
 import tagopsdb.deploy.repo as repo
 
-from tagopsdb.database.meta import Session
-from tagopsdb.database.model import (
+import elixir
+
+from tagopsdb.model import (
     PackageDefinition, PackageLocation, Package, ProjectPackage
 )
 from tagopsdb.exceptions import PackageException
@@ -25,7 +26,7 @@ def add_package(app_name, version, revision, user):
     pkg = Package(pkg_def.id, pkg_loc.name, version, revision, 'pending',
                   func.current_timestamp(), user, pkg_loc.pkg_type,
                   pkg_loc.project_type)
-    Session.add(pkg)
+    elixir.session.add(pkg)
 
 
 def delete_package(app_name, version, revision):
@@ -44,7 +45,7 @@ def find_package(app_name, version, revision):
     pkg_loc = repo.find_app_location(app_name)
 
     try:
-        return (Session.query(Package)
+        return (elixir.session.query(Package)
                        .filter_by(name=pkg_loc.name)
                        .filter_by(version=version)
                        .filter_by(revision=revision)
@@ -62,7 +63,7 @@ def find_package_definition(project_id):
     """
 
     try:
-        pkg_def = (Session.query(PackageDefinition)
+        pkg_def = (elixir.session.query(PackageDefinition)
                           .join(ProjectPackage)
                           .filter(ProjectPackage.project_id == project_id)
                           .first())
@@ -76,7 +77,7 @@ def find_package_definition(project_id):
 def list_packages(app_names):
     """Return all available packages in the repository"""
 
-    list_query = Session.query(Package)
+    list_query = elixir.session.query(Package)
 
     if app_names is not None:
         list_query = \
