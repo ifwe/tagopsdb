@@ -26,13 +26,13 @@ class NsVip(Base):
     has_many('ns_vip_binds', of_kind='NsVipBinds')
     has_many(
         'app_definitions',
-        of_kind='AppDefinitions',
+        of_kind='Application',
         through='ns_vip_binds',
         via='app_definition'
     )
     has_many(
         'environments',
-        of_kind='Environments',
+        of_kind='Environment',
         through='ns_vip_binds',
         via='environment'
     )

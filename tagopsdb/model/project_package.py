@@ -19,21 +19,21 @@ class ProjectPackage(Base):
     ## TODO: correctly define class with these relationships:
     # belongs_to(
     #     'project',
-    #     of_kind='Projects',
+    #     of_kind='Project',
     #     colname='project_id',
     #     ondelete='cascade',
     #     primary_key=True
     # )
     # belongs_to(
     #     'package_definition',
-    #     of_kind='PackageDefinitions',
+    #     of_kind='PackageDefinition',
     #     colname='pkg_def_id',
     #     ondelete='cascade',
     #     primary_key=True
     # )
     # belongs_to(
     #     'app',
-    #     of_kind='AppDefinitions',
+    #     of_kind='Application',
     #     colname='app_id',
     #     ondelete='cascade',
     #     primary_key=True

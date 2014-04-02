@@ -8,7 +8,7 @@ def discover_models():
         cls = getattr(tagopsdb, clsname)
         if not isinstance(cls, type):
             continue
-        if not issubclass(cls, tagopsdb.Base):
+        if not issubclass(cls, tagopsdb.Base) or cls is tagopsdb.Base:
             continue
 
         classes.append(cls)
@@ -44,13 +44,13 @@ def test_model_and_direct_relationships(cls):
 
 
 if __name__ == '__main__':
-    tagopsdb.init(dict(
+    tagopsdb.init(
         url=dict(
             username='tagopsdb_reader',
             password='kitties',
             host='opsdb.tagged.com',
         ),
-        pool_recycle=3600)
+        pool_recycle=3600
     )
 
     classes = discover_models()

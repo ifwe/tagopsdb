@@ -15,7 +15,7 @@ class Iloms(Base):
 
     belongs_to(
         'host',
-        of_kind='Hosts',
+        of_kind='Host',
         colname='HostID',
         ondelete='cascade',
     )
@@ -30,7 +30,7 @@ class Iloms(Base):
 
     belongs_to(
         'port',
-        of_kind='Ports',
+        of_kind='Port',
         colname='PortID',
         ondelete='cascade',
     )

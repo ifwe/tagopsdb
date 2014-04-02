@@ -16,14 +16,14 @@ class Cname(Base):
 
     belongs_to(
         'host_ip',
-        of_kind='HostIps',
+        of_kind='HostIp',
         colname='IpID',
         onupdate='cascade',
         ondelete='cascade',
     )
     belongs_to(
         'zone',
-        of_kind='Zones',
+        of_kind='Zone',
         colname='ZoneID',
         onupdate='cascade',
         ondelete='cascade',

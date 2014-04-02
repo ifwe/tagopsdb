@@ -5,7 +5,7 @@ from elixir import using_options, belongs_to
 from .base import Base
 
 
-class DefaultSpecs(Base):
+class DefaultSpec(Base):
     using_options(tablename='default_specs')
     priority = Field(
         Integer,
@@ -16,21 +16,21 @@ class DefaultSpecs(Base):
 
     belongs_to(
         'spec',
-        of_kind='HostSpecs',
+        of_kind='HostSpec',
         colname='specID',
         ondelete='cascade',
         primary_key=True
     )
     belongs_to(
         'app',
-        of_kind='AppDefinitions',
+        of_kind='Application',
         colname='AppID',
         ondelete='cascade',
         primary_key=True
     )
     belongs_to(
         'environment',
-        of_kind='Environments',
+        of_kind='Environment',
         colname='environmentID',
         ondelete='cascade',
         primary_key=True

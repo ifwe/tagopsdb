@@ -6,7 +6,7 @@ from sqlalchemy import UniqueConstraint
 from .base import Base
 
 
-class Ports(Base):
+class Port(Base):
     using_options(tablename='ports')
     using_table_options(
         UniqueConstraint(
@@ -31,7 +31,7 @@ class Ports(Base):
 
     has_one(
         'host_interface',
-        of_kind='HostInterfaces',
+        of_kind='HostInterface',
         inverse='port',
     )
 

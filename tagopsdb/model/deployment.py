@@ -6,7 +6,7 @@ from sqlalchemy.sql.expression import func
 from .base import Base
 
 
-class Deployments(Base):
+class Deployment(Base):
     using_options(tablename='deployments')
 
     id = Field(Integer, colname='DeploymentID', primary_key=True)
@@ -25,7 +25,7 @@ class Deployments(Base):
 
     belongs_to(
         'package',
-        of_kind='Packages',
+        of_kind='Package',
         colname='package_id',
         target_column='package_id',
         ondelete='cascade',
@@ -35,12 +35,12 @@ class Deployments(Base):
 
     has_many(
         'app_deployments',
-        of_kind='AppDeployments',
+        of_kind='AppDeployment',
         inverse='deployment',
     )
 
     has_many(
         'host_deployments',
-        of_kind='HostDeployments',
+        of_kind='HostDeployment',
         inverse='deployment',
     )

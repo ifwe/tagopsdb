@@ -15,7 +15,7 @@ class NagApptypesServices(Base):
     ## TODO: correctly define class with these relationships:
     # belongs_to(
     #     'app',
-    #     of_kind='AppDefinitions',
+    #     of_kind='Application',
     #     colname='app_id',
     #     primary_key=True,
     #     ondelete='cascade'
@@ -29,13 +29,13 @@ class NagApptypesServices(Base):
     # )
     # belongs_to(
     #     'server_app',
-    #     of_kind='AppDefinitions',
+    #     of_kind='Application',
     #     colname='server_app_id',
     #     primary_key=True
     # )
     # belongs_to(
     #     'environment',
-    #     of_kind='Environments',
+    #     of_kind='Environment',
     #     colname='environment_id',
     #     primary_key=True,
     #     ondelete='cascade'

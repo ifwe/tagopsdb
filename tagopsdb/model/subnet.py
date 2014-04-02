@@ -16,12 +16,12 @@ class Subnet(Base):
     netmask = Field(String(length=15))
     gateway = Field(String(length=15))
 
-    belongs_to('vlan', of_kind='Vlans', colname='VlanID', ondelete='cascade')
-    belongs_to('zone', of_kind='Zones', colname='ZoneID')
+    belongs_to('vlan', of_kind='Vlan', colname='VlanID', ondelete='cascade')
+    belongs_to('zone', of_kind='Zone', colname='ZoneID')
 
     has_one(
         'ip',
-        of_kind='HostIps',
+        of_kind='HostIp',
         inverse='subnet'
     )
 
