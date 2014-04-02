@@ -6,7 +6,7 @@ from sqlalchemy import UniqueConstraint
 from .base import Base
 
 
-class HostInterfaces(Base):
+class HostInterface(Base):
     using_options(tablename='host_interfaces')
     using_table_options(
         UniqueConstraint(u'HostID', u'interfaceName')
@@ -18,7 +18,7 @@ class HostInterfaces(Base):
 
     belongs_to(
         'host',
-        of_kind='Hosts',
+        of_kind='Host',
         colname='HostID',
         ondelete='cascade',
     )
@@ -32,13 +32,13 @@ class HostInterfaces(Base):
 
     belongs_to(
         'port',
-        of_kind='Ports',
+        of_kind='Port',
         colname='PortID',
         ondelete='cascade',
     )
 
     has_many(
         'ips',
-        of_kind='HostIps',
+        of_kind='HostIp',
         inverse='interface',
     )

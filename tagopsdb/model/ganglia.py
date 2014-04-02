@@ -17,4 +17,4 @@ class Ganglia(Base):
         server_default='8649'
     )
 
-    has_many('apps', of_kind='AppDefinitions')
+    has_many('apps', of_kind='Application')

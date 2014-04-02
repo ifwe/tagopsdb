@@ -6,7 +6,7 @@ from sqlalchemy.sql.expression import func
 from .base import Base
 
 
-class HostDeployments(Base):
+class HostDeployment(Base):
     using_options(tablename='host_deployments')
 
     id = Field(Integer, colname='HostDeploymentID', primary_key=True)
@@ -21,13 +21,13 @@ class HostDeployments(Base):
 
     belongs_to(
         'host',
-        of_kind='Hosts',
+        of_kind='Host',
         colname='HostID',
         required=True
     )
     belongs_to(
         'deployment',
-        of_kind='Deployments',
+        of_kind='Deployment',
         colname='DeploymentID',
         required=True
     )

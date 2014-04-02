@@ -7,7 +7,7 @@ from sqlalchemy import UniqueConstraint
 from .base import Base
 
 
-class Packages(Base):
+class Package(Base):
     using_options(tablename='packages')
     using_table_options(
         UniqueConstraint(
@@ -50,7 +50,7 @@ class Packages(Base):
 
     belongs_to(
         'name',
-        of_kind='PackageNames',
+        of_kind='PackageName',
         colname='pkg_name',
         target_column='name',
         required=True,
@@ -58,10 +58,10 @@ class Packages(Base):
 
     belongs_to(
         'definition',
-        of_kind='PackageDefinitions',
+        of_kind='PackageDefinition',
         colname='pkg_def_id',
         required=True,
         ondelete='cascade'
     )
 
-    has_many('deployments', of_kind='Deployments', inverse='package')
+    has_many('deployments', of_kind='Deployment', inverse='package')

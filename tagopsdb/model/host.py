@@ -6,7 +6,7 @@ from sqlalchemy import UniqueConstraint
 from .base import Base
 
 
-class Hosts(Base):
+class Host(Base):
     using_options(tablename='hosts')
     using_table_options(
         UniqueConstraint('cageLocation', 'cabLocation', 'consolePort'),
@@ -41,12 +41,12 @@ class Hosts(Base):
 
     belongs_to(
         'app',
-        of_kind='AppDefinitions',
+        of_kind='Application',
         colname='AppID',
         required=True
     )
 
-    belongs_to('spec', of_kind='HostSpecs', colname='SpecID')
+    belongs_to('spec', of_kind='HostSpec', colname='SpecID')
 
     has_one(
         'asset',
@@ -56,13 +56,13 @@ class Hosts(Base):
 
     has_many(
         'host_deployments',
-        of_kind='HostDeployments',
+        of_kind='HostDeployment',
         inverse='host'
     )
 
     has_many(
         'interfaces',
-        of_kind='HostInterfaces',
+        of_kind='HostInterface',
         inverse='host'
     )
 

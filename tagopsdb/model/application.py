@@ -7,7 +7,7 @@ from sqlalchemy.dialects.mysql import SMALLINT
 from .base import Base
 
 
-class AppDefinitions(Base):
+class Application(Base):
     using_options(tablename='app_definitions')
     using_table_options(extend_existing=True)
 
@@ -20,7 +20,11 @@ class AppDefinitions(Base):
         server_default='co64'
     )
 
-    app_type = Field(String(length=100), colname='appType', required=True)
+    name = Field(
+        String(length=100),
+        colname='appType',
+        required=True
+    )
     host_base = Field(String(length=100), colname='hostBase')
     puppet_class = Field(
         String(length=100),
@@ -51,26 +55,26 @@ class AppDefinitions(Base):
     )
     belongs_to(
         'production_vlan',
-        of_kind='Vlans',
+        of_kind='Vlan',
         colname='Production_VlanID',
         required=True
     )
     belongs_to(
         'staging_vlan',
-        of_kind='Vlans',
+        of_kind='Vlan',
         colname='Staging_VlanID',
         required=True,
     )
     belongs_to(
         'development_vlan',
-        of_kind='Vlans',
+        of_kind='Vlan',
         colname='Development_VlanID',
         required=True
     )
 
     has_and_belongs_to_many(
         'projects',
-        of_kind='Projects',
+        of_kind='Project',
         inverse='apps',
         tablename='project_package',
         local_colname='app_id',
@@ -80,7 +84,7 @@ class AppDefinitions(Base):
 
     has_and_belongs_to_many(
         'packages',
-        of_kind='PackageDefinitions',
+        of_kind='PackageDefinition',
         inverse='apps',
         tablename='project_package',
         local_colname='app_id',
@@ -90,7 +94,7 @@ class AppDefinitions(Base):
 
     has_many(
         'app_deployments',
-        of_kind='AppDeployments',
+        of_kind='AppDeployment',
         inverse='app'
     )
 
@@ -106,7 +110,7 @@ class AppDefinitions(Base):
 
     has_and_belongs_to_many(
         'jmx_attributes',
-        of_kind='JmxAttributes',
+        of_kind='JmxAttribute',
         inverse='apps',
         tablename='app_jmx_attributes',
         local_colname='AppID',
@@ -116,7 +120,7 @@ class AppDefinitions(Base):
 
     has_and_belongs_to_many(
         'package_locations',
-        of_kind='PackageLocations',
+        of_kind='PackageLocation',
         inverse='apps',
         tablename='app_packages',
         local_colname='AppID',
@@ -126,28 +130,28 @@ class AppDefinitions(Base):
 
     has_many(
         'default_specs',
-        of_kind='DefaultSpecs',
+        of_kind='DefaultSpec',
         inverse='app'
     )
 
     has_many(
         'hosts',
-        of_kind='Hosts',
+        of_kind='Host',
         inverse='app',
     )
 
-    # app_deployments = relationship('AppDeployments')
+    # app_deployments = relationship('AppDeployment')
     # hipchats = relationship(
     #     'Hipchat',
     #     secondary='app_hipchat_rooms',
     #     backref='app_definitions'
     # )
-    # hosts = relationship('Hosts')
-    # host_specs = relationship('DefaultSpecs')
+    # hosts = relationship('Host')
+    # host_specs = relationship('DefaultSpec')
     # ns_services = relationship('NsVipBinds')
     # nag_app_services = relationship(
     #     'NagApptypesServices',
-    #     primaryjoin='NagApptypesServices.app_id == AppDefinitions.id'
+    #     primaryjoin='NagApptypesServices.app_id == Application.id'
     # )
-    # nag_host_services = relationship('NagHostsServices')
+    # nag_host_services = relationship('NagHostServices')
     # proj_pkg = relationship('ProjectPackage')

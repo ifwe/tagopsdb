@@ -5,7 +5,7 @@ from elixir import using_options, has_many
 from .base import Base
 
 
-class Environments(Base):
+class Environment(Base):
     using_options(tablename='environments')
 
     id = Field(Integer, colname='environmentID', primary_key=True)
@@ -16,12 +16,12 @@ class Environments(Base):
 
     has_many(
         'default_specs',
-        of_kind='DefaultSpecs',
+        of_kind='DefaultSpec',
         inverse='environment'
     )
 
     has_many(
         'vlans',
-        of_kind='Vlans',
+        of_kind='Vlan',
         inverse='environment',
     )

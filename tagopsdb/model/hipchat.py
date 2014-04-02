@@ -13,7 +13,7 @@ class Hipchat(Base):
 
     has_and_belongs_to_many(
         'apps',
-        of_kind='AppDefinitions',
+        of_kind='Application',
         inverse='hipchat_rooms',
         tablename='app_hipchat_rooms',
         local_colname='roomID',

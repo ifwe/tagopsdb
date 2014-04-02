@@ -6,16 +6,16 @@ from sqlalchemy.sql import and_
 import tagopsdb.deploy.repo as repo
 
 from tagopsdb.database.meta import Session
-from tagopsdb.database.model import AppDefinitions, AppDeployments, \
-                                    Deployments, Hipchat, HostDeployments, \
-                                    Hosts, Packages
+from tagopsdb.database.model import Application, AppDeployment, \
+                                    Deployment, Hipchat, HostDeployment, \
+                                    Host, Package
 from tagopsdb.exceptions import DeployException
 
 
 def add_deployment(pkg_id, user, dep_type):
     """Add deployment for a given package ID"""
 
-    dep = Deployments(pkg_id, user, dep_type, func.current_timestamp())
+    dep = Deployment(pkg_id, user, dep_type, func.current_timestamp())
 
     # Commit to DB immediately
     Session.add(dep)
@@ -29,7 +29,7 @@ def add_deployment(pkg_id, user, dep_type):
 def add_app_deployment(dep_id, app_id, user, status, environment):
     """Add a tier deployment for a given deployment ID"""
 
-    app_dep = AppDeployments(dep_id, app_id, user, status, environment,
+    app_dep = AppDeployment(dep_id, app_id, user, status, environment,
                              func.current_timestamp())
 
     # Commit to DB immediately
@@ -42,7 +42,7 @@ def add_app_deployment(dep_id, app_id, user, status, environment):
 def add_host_deployment(dep_id, host_id, user, status):
     """Add host deployment for a given host and deployment"""
 
-    host_dep = HostDeployments(dep_id, host_id, user, status,
+    host_dep = HostDeployment(dep_id, host_id, user, status,
                                func.current_timestamp())
 
     # Commit to DB immediately
@@ -55,12 +55,12 @@ def add_host_deployment(dep_id, host_id, user, status):
 def delete_host_deployment(hostname, package_name):
     """ """
 
-    host_deps = (Session.query(HostDeployments)
-                        .join(Hosts)
-                        .join(Deployments)
-                        .join(Packages)
-                        .filter(Packages.pkg_name==package_name)
-                        .filter(Hosts.hostname==hostname)
+    host_deps = (Session.query(HostDeployment)
+                        .join(Host)
+                        .join(Deployment)
+                        .join(Package)
+                        .filter(Package.name==package_name)
+                        .filter(Host.hostname==hostname)
                         .all())
 
     # Allow this to silently do nothing if there are no matching rows
@@ -73,13 +73,13 @@ def delete_host_deployment(hostname, package_name):
 def delete_host_deployments(package_name, app_id, environment):
     """ """
 
-    host_deps = (Session.query(HostDeployments)
-                        .join(Hosts)
-                        .join(Deployments)
-                        .join(Packages)
-                        .filter(Packages.pkg_name==package_name)
-                        .filter(Hosts.app_id==app_id)
-                        .filter(Hosts.environment==environment)
+    host_deps = (Session.query(HostDeployment)
+                        .join(Host)
+                        .join(Deployment)
+                        .join(Package)
+                        .filter(Package.name==package_name)
+                        .filter(Host.app_id==app_id)
+                        .filter(Host.environment==environment)
                         .all())
 
     for host_dep in host_deps:
@@ -93,13 +93,13 @@ def find_all_app_deployments_by_apptype(package_name, apptype, environment):
        and specific environment
     """
 
-    return (Session.query(AppDeployments)
-                   .join(Deployments)
-                   .join(Packages)
-                   .join(AppDefinitions)
-                   .filter(Packages.pkg_name==package_name)
-                   .filter(AppDefinitions.app_type==apptype)
-                   .filter(AppDeployments.environment==environment)
+    return (Session.query(AppDeployment)
+                   .join(Deployment)
+                   .join(Package)
+                   .join(Application)
+                   .filter(Package.name==package_name)
+                   .filter(Application.name==apptype)
+                   .filter(AppDeployment.environment==environment)
                    .all())
 
 
@@ -108,23 +108,23 @@ def find_app_deployment(pkg_id, app_ids, environment):
        application ID(s)
     """
 
-    subq = (Session.query(AppDeployments.app_id, AppDefinitions.app_type,
-                          AppDeployments.id, Deployments.dep_type)
-                   .join(Deployments)
-                   .join(Packages)
-                   .join(AppDefinitions)
-                   .filter(Packages.id==pkg_id)
-                   .filter(AppDeployments.app_id.in_(app_ids))
-                   .filter(AppDeployments.environment==environment)
-                   .order_by(AppDeployments.realized.desc())
+    subq = (Session.query(AppDeployment.app_id, Application.name,
+                          AppDeployment.id, Deployment.dep_type)
+                   .join(Deployment)
+                   .join(Package)
+                   .join(Application)
+                   .filter(Package.id==pkg_id)
+                   .filter(AppDeployment.app_id.in_(app_ids))
+                   .filter(AppDeployment.environment==environment)
+                   .order_by(AppDeployment.realized.desc())
                    .subquery(name='t_ordered'))
 
-    return (Session.query(AppDeployments, AppDefinitions.app_type,
-                          Deployments.dep_type, Packages)
-                   .join(AppDefinitions)
-                   .join(Deployments)
-                   .join(Packages)
-                   .join(subq, AppDeployments.id == subq.c.AppDeploymentID)
+    return (Session.query(AppDeployment, Application.name,
+                          Deployment.dep_type, Package)
+                   .join(Application)
+                   .join(Deployment)
+                   .join(Package)
+                   .join(subq, AppDeployment.id == subq.c.AppDeploymentID)
                    .group_by(subq.c.AppID)
                    .all())
 
@@ -133,8 +133,8 @@ def find_app_by_apptype(apptype):
     """Find a given application by app type"""
 
     try:
-        return (Session.query(AppDefinitions)
-                       .filter_by(app_type=apptype)
+        return (Session.query(Application)
+                       .filter_by(name=apptype)
                        .one())
     except sqlalchemy.orm.exc.NoResultFound:
         raise DeployException('App type "%s" not found in the '
@@ -145,9 +145,9 @@ def find_app_by_depid(dep_id):
     """Find a given application and version by deployment ID"""
 
     try:
-        return (Session.query(Packages)
-                       .join(Deployments)
-                       .filter(Deployments.id==dep_id)
+        return (Session.query(Package)
+                       .join(Deployment)
+                       .filter(Deployment.id==dep_id)
                        .one())
     except sqlalchemy.orm.exc.NoResultFound:
         raise DeployException('No deployment with deploy ID "%s" found '
@@ -158,10 +158,10 @@ def find_apptype_by_appid(app_id):
     """Find the app type for a given ID"""
 
     try:
-        app_def = (Session.query(AppDefinitions)
+        app_def = (Session.query(Application)
                           .filter_by(id=app_id)
                           .one())
-        return app_def.app_type
+        return app_def.name
     except sqlalchemy.orm.exc.NoResultFound:
         raise DeployException('No app type with AppID "%s" was found '
                               'in the app_definitions table' % app_id)
@@ -175,28 +175,28 @@ def find_deployed_version(package_name, env, version=None, revision=None,
     """
 
     if apptier:
-        subq = (Session.query(Packages.pkg_name,
-                              Packages.version,
-                              Packages.revision,
-                              AppDefinitions.app_type,
-                              AppDeployments.environment)
-                       .join(Deployments)
-                       .join(AppDeployments)
-                       .join(AppDefinitions)
-                       .filter(Packages.pkg_name==package_name)
-                       .filter(AppDeployments.environment==env)
-                       .filter(AppDeployments.status!='invalidated'))
+        subq = (Session.query(Package.name,
+                              Package.version,
+                              Package.revision,
+                              Application.name,
+                              AppDeployment.environment)
+                       .join(Deployment)
+                       .join(AppDeployment)
+                       .join(Application)
+                       .filter(Package.name==package_name)
+                       .filter(AppDeployment.environment==env)
+                       .filter(AppDeployment.status!='invalidated'))
 
         if apptypes is not None:
-            subq = subq.filter(AppDefinitions.app_type.in_(apptypes))
+            subq = subq.filter(Application.name.in_(apptypes))
 
         if version is not None:
-            subq = subq.filter(Packages.version==version)
+            subq = subq.filter(Package.version==version)
 
         if revision is not None:
-            subq = subq.filter(Packages.revision==revision)
+            subq = subq.filter(Package.revision==revision)
 
-        subq = (subq.order_by(AppDeployments.realized.desc())
+        subq = (subq.order_by(AppDeployment.realized.desc())
                     .subquery(name='t_ordered'))
 
         # The actual column name must be used in the subquery
@@ -207,17 +207,17 @@ def find_deployed_version(package_name, env, version=None, revision=None,
                            .group_by(subq.c.appType, subq.c.environment)
                            .all())
     else:
-        hostsq = (Session.query(Hosts.hostname, Hosts.app_id,
-                                Packages.version, Packages.revision)
-                         .join(AppDefinitions)
-                         .join(HostDeployments)
-                         .join(Deployments)
-                         .join(Packages)
-                         .filter(Packages.pkg_name==package_name)
-                         .filter(Hosts.environment==env))
+        hostsq = (Session.query(Host.hostname, Host.app_id,
+                                Package.version, Package.revision)
+                         .join(Application)
+                         .join(HostDeployment)
+                         .join(Deployment)
+                         .join(Package)
+                         .filter(Package.name==package_name)
+                         .filter(Host.environment==env))
 
         if apptypes is not None:
-            hostsq = hostsq.filter(AppDefinitions.app_type.in_(apptypes))
+            hostsq = hostsq.filter(Application.name.in_(apptypes))
 
         versions = (hostsq.all())
 
@@ -228,7 +228,7 @@ def find_deployment_by_id(dep_id):
     """Find deployment for a given ID"""
 
     try:
-        return (Session.query(Deployments)
+        return (Session.query(Deployment)
                        .filter_by(id=dep_id)
                        .one())
     except sqlalchemy.orm.exc.NoResultFound:
@@ -239,9 +239,9 @@ def find_deployment_by_id(dep_id):
 def find_deployment_by_pkgid(pkg_id):
     """Find deployment(s) for a given package ID"""
 
-    return (Session.query(Deployments)
+    return (Session.query(Deployment)
                    .filter_by(package_id=pkg_id)
-                   .order_by(Deployments.declared.desc())
+                   .order_by(Deployment.declared.desc())
                    .all())
 
 
@@ -249,7 +249,7 @@ def find_host_by_hostname(hostname):
     """Find host for a given hostname"""
 
     try:
-        return (Session.query(Hosts)
+        return (Session.query(Host)
                        .filter_by(hostname=hostname)
                        .one())
     except sqlalchemy.orm.exc.NoResultFound:
@@ -261,10 +261,10 @@ def find_host_deployment_by_depid(dep_id, dep_host):
     """Find host deployment (if exists) for a given deployment ID"""
 
     try:
-        return (Session.query(HostDeployments)
-                       .join(Hosts)
-                       .filter(HostDeployments.deployment_id==dep_id)
-                       .filter(Hosts.hostname==dep_host)
+        return (Session.query(HostDeployment)
+                       .join(Host)
+                       .filter(HostDeployment.deployment_id==dep_id)
+                       .filter(Host.hostname==dep_host)
                        .one())
     except sqlalchemy.orm.exc.NoResultFound:
         # Currently this shouldn't be a fatal error
@@ -276,13 +276,13 @@ def find_host_deployments_by_pkgid(pkg_id, dep_hosts):
        set of hosts
     """
 
-    return (Session.query(HostDeployments, Hosts.hostname, Hosts.app_id,
-                          Deployments.dep_type)
-                   .join(Hosts)
-                   .join(Deployments)
-                   .join(Packages)
-                   .filter(Packages.id==pkg_id)
-                   .filter(Hosts.hostname.in_(dep_hosts))
+    return (Session.query(HostDeployment, Host.hostname, Host.app_id,
+                          Deployment.dep_type)
+                   .join(Host)
+                   .join(Deployment)
+                   .join(Package)
+                   .filter(Package.id==pkg_id)
+                   .filter(Host.hostname.in_(dep_hosts))
                    .all())
 
 
@@ -291,13 +291,13 @@ def find_host_deployments_by_package_name(package_name, dep_hosts):
        set of hosts
     """
 
-    return (Session.query(HostDeployments, Hosts.hostname, Hosts.app_id,
-                          Packages.version)
-                   .join(Hosts)
-                   .join(Deployments)
-                   .join(Packages)
-                   .filter(Packages.pkg_name==package_name)
-                   .filter(Hosts.hostname.in_(dep_hosts))
+    return (Session.query(HostDeployment, Host.hostname, Host.app_id,
+                          Package.version)
+                   .join(Host)
+                   .join(Deployment)
+                   .join(Package)
+                   .filter(Package.name==package_name)
+                   .filter(Host.hostname.in_(dep_hosts))
                    .all())
 
 
@@ -306,23 +306,23 @@ def find_host_deployments_not_ok(pkg_id, app_id, environment):
        package ID, app ID and environment (may return none)
     """
 
-    return (Session.query(HostDeployments, Hosts.hostname)
-                   .join(Hosts)
-                   .join(Deployments)
-                   .filter(Deployments.package_id==pkg_id)
-                   .filter(Hosts.app_id==app_id)
-                   .filter(Hosts.environment==environment)
-                   .filter(HostDeployments.status!='ok')
+    return (Session.query(HostDeployment, Host.hostname)
+                   .join(Host)
+                   .join(Deployment)
+                   .filter(Deployment.package_id==pkg_id)
+                   .filter(Host.app_id==app_id)
+                   .filter(Host.environment==environment)
+                   .filter(HostDeployment.status!='ok')
                    .all())
 
 
 def find_hosts_for_app(app_id, environment):
     """Find the hosts for a given application and environment"""
 
-    hosts = (Session.query(Hosts)
-                    .join(AppDefinitions)
-                    .filter(AppDefinitions.id==app_id)
-                    .filter(Hosts.environment==environment)
+    hosts = (Session.query(Host)
+                    .join(Application)
+                    .filter(Application.id==app_id)
+                    .filter(Host.environment==environment)
                     .all())
 
     if not hosts:
@@ -346,11 +346,11 @@ def find_hipchat_rooms_for_app(project, apptypes=None):
             return []
 
         app_defs = repo.find_app_packages_mapping(project)
-        apptypes = [ x.app_type for x in app_defs ]
+        apptypes = [ x.name for x in app_defs ]
 
     rooms_query = (Session.query(Hipchat.room_name)
                           .filter(Hipchat.app_definitions.any(
-                                  AppDefinitions.app_type.in_(apptypes)))
+                                  Application.name.in_(apptypes)))
                           .all())
 
     return [ x[0] for x in rooms_query ]
@@ -372,14 +372,14 @@ def find_latest_deployment(package_name, app_id, env):
        environment for the given application ID
     """
 
-    return (Session.query(AppDeployments, Packages)
-                   .join(Deployments)
-                   .join(Packages)
-                   .filter(Packages.pkg_name==package_name)
-                   .filter(AppDeployments.app_id==app_id)
-                   .filter(AppDeployments.environment==env)
-                   .filter(AppDeployments.status!='invalidated')
-                   .order_by(AppDeployments.realized.desc())
+    return (Session.query(AppDeployment, Package)
+                   .join(Deployment)
+                   .join(Package)
+                   .filter(Package.name==package_name)
+                   .filter(AppDeployment.app_id==app_id)
+                   .filter(AppDeployment.environment==env)
+                   .filter(AppDeployment.status!='invalidated')
+                   .order_by(AppDeployment.realized.desc())
                    .first())
 
 
@@ -388,13 +388,13 @@ def find_latest_validated_deployment(package_name, app_id, env):
        package, application type and environment.
     """
 
-    return (Session.query(AppDeployments, Packages.id)
-                   .join(Deployments)
-                   .join(Packages)
-                   .filter(Packages.pkg_name==package_name)
-                   .filter(AppDeployments.environment==env)
-                   .filter(AppDeployments.status=='validated')
-                   .order_by(AppDeployments.realized.desc())
+    return (Session.query(AppDeployment, Package.id)
+                   .join(Deployment)
+                   .join(Package)
+                   .filter(Package.name==package_name)
+                   .filter(AppDeployment.environment==env)
+                   .filter(AppDeployment.status=='validated')
+                   .order_by(AppDeployment.realized.desc())
                    .first())
 
 
@@ -407,14 +407,14 @@ def find_previous_validated_deployment(package_name, app_id, env):
     # Get current deployment
     app_dep, pkg = find_latest_deployment(package_name, app_id, env)
 
-    return (Session.query(AppDeployments, Packages.id)
-                   .join(Deployments)
-                   .join(Packages)
-                   .filter(AppDeployments.id!=app_dep.id)
-                   .filter(Packages.pkg_name==package_name)
-                   .filter(AppDeployments.app_id==app_id)
-                   .filter(AppDeployments.environment==env)
-                   .order_by(AppDeployments.realized.desc())
+    return (Session.query(AppDeployment, Package.id)
+                   .join(Deployment)
+                   .join(Package)
+                   .filter(AppDeployment.id!=app_dep.id)
+                   .filter(Package.name==package_name)
+                   .filter(AppDeployment.app_id==app_id)
+                   .filter(AppDeployment.environment==env)
+                   .order_by(AppDeployment.realized.desc())
                    .first())
 
 
@@ -423,24 +423,24 @@ def find_running_deployment(app_id, env, hosts=None):
        for a given application type and environment
     """
 
-    tier = (Session.query(AppDeployments.user, AppDeployments.realized,
-                          AppDeployments.environment, AppDefinitions.app_type)
-                   .join(AppDefinitions)
-                   .filter(AppDeployments.app_id==app_id)
-                   .filter(AppDeployments.environment==env)
-                   .filter(AppDeployments.status=='inprogress')
-                   .order_by(AppDeployments.realized.desc())
+    tier = (Session.query(AppDeployment.user, AppDeployment.realized,
+                          AppDeployment.environment, Application.name)
+                   .join(Application)
+                   .filter(AppDeployment.app_id==app_id)
+                   .filter(AppDeployment.environment==env)
+                   .filter(AppDeployment.status=='inprogress')
+                   .order_by(AppDeployment.realized.desc())
                    .first())
 
     if tier:
         return ('tier', tier)
 
-    host = (Session.query(HostDeployments.user, HostDeployments.realized,
-                          Hosts.hostname, Hosts.environment)
-                   .join(Hosts)
-                   .filter(Hosts.environment==env)
-                   .filter(Hosts.app_id==app_id)
-                   .filter(HostDeployments.status=='inprogress')
+    host = (Session.query(HostDeployment.user, HostDeployment.realized,
+                          Host.hostname, Host.environment)
+                   .join(Host)
+                   .filter(Host.environment==env)
+                   .filter(Host.app_id==app_id)
+                   .filter(HostDeployment.status=='inprogress')
                    .all())
 
     if host:
@@ -455,44 +455,44 @@ def find_unvalidated_versions(time_delta, environment):
        environment for a given amount of time
     """
 
-    subq = (Session.query(Packages.pkg_name, Packages.version,
-                          Packages.revision, AppDefinitions.app_type,
-                          AppDeployments.environment, AppDeployments.realized,
-                          AppDeployments.user, AppDeployments.status)
-                   .join(Deployments)
-                   .join(AppDeployments)
-                   .join(AppDefinitions)
-                   .filter(AppDeployments.status!='invalidated')
-                   .filter(AppDeployments.environment==environment)
-                   .order_by(AppDeployments.realized.desc())
+    subq = (Session.query(Package.name, Package.version,
+                          Package.revision, Application.name,
+                          AppDeployment.environment, AppDeployment.realized,
+                          AppDeployment.user, AppDeployment.status)
+                   .join(Deployment)
+                   .join(AppDeployment)
+                   .join(Application)
+                   .filter(AppDeployment.status!='invalidated')
+                   .filter(AppDeployment.environment==environment)
+                   .order_by(AppDeployment.realized.desc())
                    .subquery(name='t_ordered'))
 
-    return (Session.query(subq.c.pkg_name, subq.c.version, subq.c.revision,
+    return (Session.query(subq.c.name, subq.c.version, subq.c.revision,
                           subq.c.appType, subq.c.environment,
                           subq.c.realized, subq.c.user, subq.c.status)
                    .group_by(subq.c.appType, subq.c.environment,
-                             subq.c.pkg_name)
+                             subq.c.name)
                    .having(and_(subq.c.status.like('%complete'),
                                 func.unix_timestamp(subq.c.realized) <
                                 func.unix_timestamp(func.now()) - time_delta))
                    .all())
 
 
-def list_app_deployment_info(package_name, env, app_type, version, revision):
+def list_app_deployment_info(package_name, env, name, version, revision):
     """Give all deployment information for a given package and version
        deployed to a given application tier and environment
     """
 
-    return (Session.query(Deployments, AppDeployments, Packages)
-                   .join(Packages)
-                   .join(AppDeployments)
-                   .join(AppDefinitions)
-                   .filter(Packages.pkg_name==package_name)
-                   .filter(Packages.version==version)
-                   .filter(Packages.revision==revision)
-                   .filter(AppDefinitions.app_type==app_type)
-                   .filter(AppDeployments.environment==env)
-                   .order_by(AppDeployments.realized.desc())
+    return (Session.query(Deployment, AppDeployment, Package)
+                   .join(Package)
+                   .join(AppDeployment)
+                   .join(Application)
+                   .filter(Package.name==package_name)
+                   .filter(Package.version==version)
+                   .filter(Package.revision==revision)
+                   .filter(Application.name==name)
+                   .filter(AppDeployment.environment==env)
+                   .order_by(AppDeployment.realized.desc())
                    .first())
 
 
@@ -503,24 +503,24 @@ def list_host_deployment_info(package_name, env, version=None, revision=None,
        and in given environment
     """
 
-    dep_info = (Session.query(Deployments, HostDeployments, Hosts.hostname,
-                              Packages)
-                       .join(Packages)
-                       .join(HostDeployments)
-                       .join(Hosts)
-                       .join(AppDefinitions))
+    dep_info = (Session.query(Deployment, HostDeployment, Host.hostname,
+                              Package)
+                       .join(Package)
+                       .join(HostDeployment)
+                       .join(Host)
+                       .join(Application))
 
     if version is not None:
-        dep_info = dep_info.filter(Packages.version==version)
+        dep_info = dep_info.filter(Package.version==version)
 
     if revision is not None:
-        dep_info = dep_info.filter(Packages.revision==revision)
+        dep_info = dep_info.filter(Package.revision==revision)
 
     if apptypes is not None:
-        dep_info = dep_info.filter(AppDefinitions.app_type.in_(apptypes))
+        dep_info = dep_info.filter(Application.name.in_(apptypes))
 
-    return (dep_info.filter(Packages.pkg_name==package_name)
-                    .filter(Hosts.environment==env)
-                    .order_by(Hosts.hostname,
-                              HostDeployments.realized.asc())
+    return (dep_info.filter(Package.name==package_name)
+                    .filter(Host.environment==env)
+                    .order_by(Host.hostname,
+                              HostDeployment.realized.asc())
                     .all())

@@ -5,14 +5,14 @@ from elixir import using_options, has_and_belongs_to_many
 from .base import Base
 
 
-class Projects(Base):
+class Project(Base):
     using_options(tablename='projects')
 
     id = Field(Integer, colname='project_id', primary_key=True)
     name = Field(String(length=255), required=True, unique=True)
     has_and_belongs_to_many(
         'package_definitions',
-        of_kind='PackageDefinitions',
+        of_kind='PackageDefinition',
         inverse='projects',
         tablename='project_package',
         local_colname='project_id',
@@ -22,7 +22,7 @@ class Projects(Base):
 
     has_and_belongs_to_many(
         'apps',
-        of_kind='AppDefinitions',
+        of_kind='Application',
         inverse='projects',
         tablename='project_package',
         local_colname='project_id',

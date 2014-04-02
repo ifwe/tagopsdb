@@ -6,7 +6,7 @@ from sqlalchemy.sql.expression import func
 from .base import Base
 
 
-class AppDeployments(Base):
+class AppDeployment(Base):
     using_options(tablename='app_deployments')
 
     id = Field(Integer, colname='AppDeploymentID', primary_key=True)
@@ -32,13 +32,13 @@ class AppDeployments(Base):
 
     belongs_to(
         'deployment',
-        of_kind='Deployments',
+        of_kind='Deployment',
         colname='DeploymentID',
         required=True
     )
     belongs_to(
         'app',
-        of_kind='AppDefinitions',
+        of_kind='Application',
         colname='AppID',
         required=True
     )
