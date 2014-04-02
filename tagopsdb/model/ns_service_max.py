@@ -24,16 +24,16 @@ class NsServiceMax(Base):
     )
 
     belongs_to(
-        'ns_service',
-        of_kind='NsService',
-        colname='serviceID',
-        primary_key=True,
-        ondelete='cascade'
-    )
-    belongs_to(
         'host_spec',
         of_kind='HostSpec',
         colname='specID',
         primary_key=True,
         ondelete='cascade',
+    )
+    belongs_to(
+        'ns_service',
+        of_kind='NsService',
+        colname='serviceID',
+        primary_key=True,
+        ondelete='cascade'
     )

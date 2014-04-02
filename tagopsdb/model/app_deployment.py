@@ -1,6 +1,7 @@
 from elixir import Field
-from elixir import String, Integer, Enum, DateTime
+from elixir import String, Integer, Enum
 from elixir import using_options, belongs_to
+from sqlalchemy.dialects.mysql import TIMESTAMP
 from sqlalchemy.sql.expression import func
 
 from .base import Base
@@ -24,7 +25,7 @@ class AppDeployment(Base):
     environment = Field(String(length=15), required=True)
 
     realized = Field(
-        DateTime,
+        TIMESTAMP,
         required=True,
         default=func.current_timestamp(),
         server_default=func.current_timestamp(),

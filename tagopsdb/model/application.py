@@ -14,7 +14,17 @@ class Application(Base):
     id = Field(SMALLINT(display_width=2), colname='AppID', primary_key=True)
 
     distribution = Field(
-        Enum('co54', 'co62', 'co64', 'co65', 'rh53', 'rh62', 'rh63', 'rh64'),
+        Enum(
+            'centos5.4',
+            'centos6.2',
+            'centos6.4',
+            'centos6.5',
+            'rhel5.3',
+            'rhel6.2',
+            'rhel6.3',
+            'rhel6.4',
+            'rhel6.5'
+        ),
         required=True,
         default='co64',
         server_default='co64'
