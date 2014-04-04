@@ -21,6 +21,7 @@ class Package(Base):
     )
 
     id = Field(Integer, colname='package_id', primary_key=True)
+    name = Field(String(length=255), required=True, colname='pkg_name')
     version = Field(String(length=63), required=True)
     revision = Field(String(length=63), required=True)
     creator = Field(String(length=255), required=True)
@@ -49,12 +50,11 @@ class Package(Base):
         server_default='application'
     )
 
-    belongs_to(
-        'name',
+    has_many(
+        'names',
         of_kind='PackageName',
-        colname='pkg_name',
-        target_column='name',
-        required=True,
+        through='definition',
+        via='package_names'
     )
 
     belongs_to(
