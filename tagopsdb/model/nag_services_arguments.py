@@ -12,7 +12,7 @@ class NagServicesArguments(Base):
         of_kind='NagServices',
         colname='service_id',
         primary_key=True,
-        ondelete='cascade,'
+        ondelete='cascade',
     )
 
     belongs_to(
@@ -20,5 +20,5 @@ class NagServicesArguments(Base):
         of_kind='NagCommandArguments',
         colname='command_argument_id',
         primary_key=True,
-        ondelete='cascade,'
+        ondelete='cascade',
     )
