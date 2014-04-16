@@ -32,6 +32,9 @@ from .nag_services import NagServices
 from .nag_services_arguments import NagServicesArguments
 from .nag_services_contacts import NagServicesContacts
 from .nag_time_periods import NagTimePeriods
+from .net_default_ips import NetDefaultIP
+from .net_default_maps import NetDefaultMap
+from .net_default_trunks import NetDefaultTrunk
 from .network_device import NetworkDevice
 from .ns_device import NsDevice
 from .ns_monitor import NsMonitor
@@ -65,6 +68,7 @@ __all__ = [
     'NagContactGroups', 'NagContacts', 'NagContactGroupsMembers',
     'NagHostServices', 'NagServicesContactGroups', 'NagServices',
     'NagServicesArguments', 'NagServicesContacts', 'NagTimePeriods',
+    'NetDefaultIP', 'NetDefaultMap', 'NetDefaultTrunk',
     'NetworkDevice', 'NsDevice', 'NsMonitor', 'NsService',
     'NsServiceBind', 'NsServiceMax', 'NsServiceParam', 'NsVip',
     'NsVipBinds', 'NsWeight', 'PackageName', 'Package',
