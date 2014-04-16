@@ -7,6 +7,14 @@ class NsVipBinds(Base):
     using_options(tablename='ns_vip_binds')
 
     belongs_to(
+        'net_default_ip_id',
+        of_kind='NetDefaultIP',
+        colname='net_default_ip_id',
+        target_column='net_default_ip_id',
+        required=True,
+        ondelete='cascade'
+    )
+    belongs_to(
         'app',
         of_kind='Application',
         colname='appID',
