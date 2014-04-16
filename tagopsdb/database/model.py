@@ -589,12 +589,6 @@ class AppDefinitions(Base):
     __tablename__ = 'app_definitions'
 
     id = Column(u'AppID', SMALLINT(display_width=2), primary_key=True)
-    production_vlan_id = Column(u'Production_VlanID', INTEGER(),
-                                ForeignKey(Vlans.id), nullable=False)
-    development_vlan_id = Column(u'Development_VlanID', INTEGER(),
-                                 ForeignKey(Vlans.id), nullable=False)
-    staging_vlan_id = Column(u'Staging_VlanID', INTEGER(),
-                             ForeignKey(Vlans.id), nullable=False)
     distribution = Column(Enum(u'co54', u'co62', u'co64', u'co65', u'rh53',
                                u'rh62', u'rh63', u'rh64'), nullable=False,
                           default='co64', server_default='co64')
@@ -610,15 +604,10 @@ class AppDefinitions(Base):
                     default='active', server_default='active')
 
 
-    def __init__(self, production_vlan_id, development_vlan_id,
-                 staging_vlan_id, distribution, app_type, host_base,
-                 puppet_class, ganglia_id, ganglia_group_name,
-                 description, status):
+    def __init__(self, distribution, app_type, host_base, puppet_class,
+                 ganglia_id, ganglia_group_name, description, status):
         """ """
 
-        self.production_vlan_id = production_vlan_id
-        self.development_vlan_id = development_vlan_id
-        self.staging_vlan_id = staging_vlan_id
         self.distribution = distribution
         self.app_type = app_type
         self.host_base = host_base
