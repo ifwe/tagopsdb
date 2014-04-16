@@ -1204,12 +1204,6 @@ AppDefinitions.nag_app_services = \
                  primaryjoin=NagApptypesServices.app_id == AppDefinitions.id)
 AppDefinitions.nag_host_services = relationship(NagHostsServices)
 AppDefinitions.proj_pkg = relationship(ProjectPackage)
-AppDefinitions.development_vlans = \
-    relationship(Vlans, foreign_keys=[ AppDefinitions.development_vlan_id ])
-AppDefinitions.production_vlans = \
-    relationship(Vlans, foreign_keys=[ AppDefinitions.production_vlan_id ])
-AppDefinitions.staging_vlans = \
-    relationship(Vlans, foreign_keys=[ AppDefinitions.staging_vlan_id ])
 
 NagServicesArguments.command_argument = \
     relationship(NagCommandArguments, backref='nag_services_assoc')
