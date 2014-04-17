@@ -1,6 +1,7 @@
 from elixir import Field
 from elixir import String, Integer
-from elixir import using_options, belongs_to, has_many
+from elixir import using_options, belongs_to, has_many, \
+    has_and_belongs_to_many
 
 from .base import Base
 
@@ -18,25 +19,17 @@ class Vlan(Base):
     )
 
     has_many(
-        'production_apps',
-        of_kind='Application',
-        inverse='production_vlan'
-    )
-
-    has_many(
-        'staging_apps',
-        of_kind='Application',
-        inverse='staging_vlan'
-    )
-
-    has_many(
-        'development_apps',
-        of_kind='Application',
-        inverse='development_vlan'
-    )
-
-    has_many(
         'subnets',
         of_kind='Subnet',
         inverse='vlan'
+    )
+
+    has_and_belongs_to_many(
+        'net_default',
+        of_kind='NetDefaultMap',
+        inverse='vlans',
+        tablename='net_default_trunks',
+        local_colname='vlan_id',
+        remote_colname='net_default_id',
+        table_kwargs=dict(extend_existing=True),
     )

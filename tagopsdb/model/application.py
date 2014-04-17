@@ -63,24 +63,6 @@ class Application(Base):
         colname='GangliaID',
         required=True,
     )
-    belongs_to(
-        'production_vlan',
-        of_kind='Vlan',
-        colname='Production_VlanID',
-        required=True
-    )
-    belongs_to(
-        'staging_vlan',
-        of_kind='Vlan',
-        colname='Staging_VlanID',
-        required=True,
-    )
-    belongs_to(
-        'development_vlan',
-        of_kind='Vlan',
-        colname='Development_VlanID',
-        required=True
-    )
 
     has_and_belongs_to_many(
         'projects',
@@ -147,6 +129,12 @@ class Application(Base):
     has_many(
         'hosts',
         of_kind='Host',
+        inverse='app',
+    )
+
+    has_many(
+        'net_default_maps',
+        of_kind='NetDefaultMap',
         inverse='app',
     )
 

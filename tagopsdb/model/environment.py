@@ -17,7 +17,13 @@ class Environment(Base):
     has_many(
         'default_specs',
         of_kind='DefaultSpec',
-        inverse='environment'
+        inverse='environment',
+    )
+
+    has_many(
+        'net_default_maps',
+        of_kind='NetDefaultMap',
+        inverse='environment',
     )
 
     has_many(

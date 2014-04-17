@@ -22,7 +22,7 @@ class NetDefaultIP(Base):
     priority = Field(INTEGER(unsigned=True), required=True)
 
     belongs_to(
-        'net_default_id',
+        'net_default',
         of_kind='NetDefaultMap',
         colname='net_default_id',
         target_column='net_default_id',
