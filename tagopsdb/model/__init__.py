@@ -32,9 +32,9 @@ from .nag_services import NagServices
 from .nag_services_arguments import NagServicesArguments
 from .nag_services_contacts import NagServicesContacts
 from .nag_time_periods import NagTimePeriods
-from .net_default_ips import NetDefaultIP
-from .net_default_maps import NetDefaultMap
-from .net_default_trunks import NetDefaultTrunk
+from .net_default_ip import NetDefaultIP
+from .net_default_map import NetDefaultMap
+from .net_default_trunk import NetDefaultTrunk
 from .network_device import NetworkDevice
 from .ns_device import NsDevice
 from .ns_monitor import NsMonitor

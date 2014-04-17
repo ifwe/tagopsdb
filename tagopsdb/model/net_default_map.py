@@ -1,6 +1,7 @@
 from elixir import Field
 from elixir import String, Integer
-from elixir import using_options, belongs_to, using_table_options
+from elixir import using_options, belongs_to, using_table_options, \
+    has_and_belongs_to_many
 from sqlalchemy import UniqueConstraint
 
 from .base import Base
@@ -36,4 +37,14 @@ class NetDefaultMap(Base):
         target_column='AppID',
         required=True,
         ondelete='cascade'
+    )
+
+    has_and_belongs_to_many(
+        'vlans',
+        of_kind='Vlan',
+        inverse='net_default',
+        tablename='net_default_trunks',
+        local_colname='net_default_id',
+        remote_colname='vlan_id',
+        table_kwargs=dict(extend_existing=True),
     )
