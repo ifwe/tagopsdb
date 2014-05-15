@@ -1,22 +1,21 @@
-from elixir import Field
-from elixir import String, Integer
-from elixir import using_options, belongs_to, using_table_options
-from sqlalchemy import UniqueConstraint
+from sqlalchemy import ForeignKey, UniqueConstraint
+from sqlalchemy.dialects.mysql import INTEGER
 
-from .base import Base
+from .meta import Base, Column, String
 
 
 class PackageName(Base):
-    using_options(tablename='package_names')
-    using_table_options(
-        UniqueConstraint(u'name', u'pkg_def_id', name='name_pkg_def_id'),
+    __tablename__ = 'package_names'
+
+    id = Column(u'pkg_name_id', INTEGER(), primary_key=True)
+    name = Column(String(length=255), nullable=False)
+    pkg_def_id = Column(
+        INTEGER(),
+        ForeignKey('package_definitions.pkg_def_id', ondelete='cascade'),
+        nullable=False
     )
-    id = Field(Integer, colname='pkg_name_id', primary_key=True)
-    name = Field(String(length=255), required=True)
-    belongs_to(
-        'package_definition',
-        of_kind='PackageDefinition',
-        colname='pkg_def_id',
-        required=True,
-        ondelete='cascade'
+
+    __table_args__ = (
+        UniqueConstraint(u'name', u'pkg_def_id', name='name_pkg_def_id'),
+        { 'mysql_engine' : 'InnoDB', 'mysql_charset' : 'utf8', },
     )

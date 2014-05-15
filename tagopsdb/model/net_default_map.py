@@ -1,50 +1,31 @@
-from elixir import Field
-from elixir import String, Integer
-from elixir import using_options, belongs_to, using_table_options, \
-    has_and_belongs_to_many
-from sqlalchemy import UniqueConstraint
+from sqlalchemy import ForeignKey, UniqueConstraint
+from sqlalchemy.dialects.mysql import INTEGER, SMALLINT
 
-from .base import Base
+from .meta import Base, Column, String
 
 
 class NetDefaultMap(Base):
-    using_options(tablename='net_default_maps')
-    using_table_options(
+    __tablename__ = 'net_default_maps'
+
+    id = Column(u'net_default_id', INTEGER(unsigned=True), primary_key=True)
+    environment_id = Column(
+        INTEGER(),
+        ForeignKey('environments.environmentID', ondelete='cascade'),
+        nullable=False
+    )
+    app_id = Column(
+        SMALLINT(),
+        ForeignKey('app_definitions.AppID', ondelete='cascade'),
+        nullable=False
+    )
+    interface_name = Column(String(length=10), nullable=False)
+
+    __table_args__ = (
         UniqueConstraint(
-            'environment_id',
-            'app_id',
-            'interface_name',
+            u'environment_id',
+            u'app_id',
+            u'interface_name',
             name='map_key'
         ),
-    )
-
-    id = Field(Integer, colname='net_default_id', primary_key=True)
-    interface_name = Field(String(length=10), required=True)
-
-    belongs_to(
-        'environment',
-        of_kind='Environment',
-        colname='environment_id',
-        target_column='environmentID',
-        required=True,
-        ondelete='cascade'
-    )
-
-    belongs_to(
-        'app',
-        of_kind='Application',
-        colname='app_id',
-        target_column='AppID',
-        required=True,
-        ondelete='cascade'
-    )
-
-    has_and_belongs_to_many(
-        'vlans',
-        of_kind='Vlan',
-        inverse='net_default',
-        tablename='net_default_trunks',
-        local_colname='net_default_id',
-        remote_colname='vlan_id',
-        table_kwargs=dict(extend_existing=True),
+        { 'mysql_engine' : 'InnoDB', 'mysql_charset' : 'utf8', },
     )

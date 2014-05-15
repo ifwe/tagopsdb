@@ -1,11 +1,15 @@
-from elixir import Field, String, Integer, using_options
+from sqlalchemy.orm import relationship
 
-from .base import Base
+from .meta import Base, Column, String, SurrogatePK
 
 
-class NagContactGroups(Base):
-    using_options(tablename='nag_contact_groups')
+class NagContactGroup(SurrogatePK, Base):
+    __tablename__ = 'nag_contact_groups'
 
-    id = Field(Integer, primary_key=True)
-    name = Field(String(length=32), required=True, unique=True)
-    alias = Field(String(length=80))
+    name = Column(String(length=32), nullable=False, unique=True)
+    alias = Column(String(length=80))
+    nag_contacts = relationship(
+        'NagContact',
+        secondary='nag_contact_groups_members',
+        backref='nag_contact_groups'
+    )

@@ -1,27 +1,27 @@
-from elixir import using_options, belongs_to
-from .base import Base
+from sqlalchemy import ForeignKey
+from sqlalchemy.dialects.mysql import INTEGER, SMALLINT
+from sqlalchemy.orm import relationship
+
+from .meta import Base, Column
 
 
-class NagHostServices(Base):
-    using_options(tablename='nag_hosts_services')
+class NagHostsServices(Base):
+    __tablename__ = 'nag_hosts_services'
 
-    belongs_to(
-        'host',
-        of_kind='Host',
-        colname='host_id',
-        primary_key=True,
-        ondelete='cascade',
-    )
-    belongs_to(
-        'service',
-        of_kind='NagServices',
-        colname='service_id',
-        primary_key=True,
-        ondelete='cascade',
-    )
-    belongs_to(
-        'server_app',
-        of_kind='Application',
-        colname='server_app_id',
+    host_id = Column(
+        INTEGER(),
+        ForeignKey('hosts.HostID', ondelete='cascade'),
         primary_key=True
     )
+    service_id = Column(
+        INTEGER(),
+        ForeignKey('nag_services.id', ondelete='cascade'),
+        primary_key=True
+    )
+    server_app_id = Column(
+        SMALLINT(display_width=6),
+        ForeignKey('app_definitions.AppID'),
+        primary_key=True
+    )
+    host = relationship('Host')
+    service = relationship('NagService')

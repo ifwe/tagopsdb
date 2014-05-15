@@ -1,39 +1,35 @@
-from elixir import Field
-from elixir import using_options, belongs_to
+from sqlalchemy import ForeignKey
 from sqlalchemy.dialects.mysql import INTEGER
+from sqlalchemy.orm import relationship
 
-from .base import Base
+from .meta import Base, Column
 
 
 class NsServiceMax(Base):
-    using_options(tablename='ns_service_max')
+    __tablename__ = 'ns_service_max'
 
-    max_client = Field(
+    spec_id = Column(
+        u'specID',
+        INTEGER(),
+        ForeignKey('host_specs.specID', ondelete='cascade'),
+        primary_key=True
+    )
+    service_id = Column(
+        u'serviceID',
         INTEGER(unsigned=True),
-        colname='maxClient',
+        ForeignKey('ns_service.serviceID', ondelete='cascade'),
+        primary_key=True
+    )
+    max_client = Column(
+        u'maxClient',
+        INTEGER(unsigned=True),
         nullable=False,
-        default=0,
         server_default='0'
     )
-    max_requests = Field(
+    max_requests = Column(
+        u'maxReq',
         INTEGER(unsigned=True),
-        colname='maxReq',
         nullable=False,
-        default=0,
         server_default='0'
     )
-
-    belongs_to(
-        'host_spec',
-        of_kind='HostSpec',
-        colname='specID',
-        primary_key=True,
-        ondelete='cascade',
-    )
-    belongs_to(
-        'ns_service',
-        of_kind='NsService',
-        colname='serviceID',
-        primary_key=True,
-        ondelete='cascade'
-    )
+    service = relationship('NsService', uselist=False)

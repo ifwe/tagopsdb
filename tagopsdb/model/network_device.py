@@ -1,27 +1,16 @@
-from elixir import Field
-from elixir import String, Integer
-from elixir import using_options, has_many
+from sqlalchemy.dialects.mysql import INTEGER
+from sqlalchemy.orm import relationship
 
-from .base import Base
+from .meta import Base, Column, String
 
 
 class NetworkDevice(Base):
-    using_options(tablename='networkDevice')
+    __tablename__ = 'networkDevice'
 
-    id = Field(Integer, colname='NetworkID', primary_key=True)
-    system_name = Field(String(length=20), colname='systemName', unique=True)
-    model = Field(String(length=50))
-    hardware_code = Field(String(length=20), colname='hardwareCode')
-    software_code = Field(String(length=20), colname='softwareCode')
-
-    has_many(
-        'host_interfaces',
-        of_kind='HostInterface',
-        inverse='network',
-    )
-
-    has_many(
-        'ports',
-        of_kind='Port',
-        inverse='network',
-    )
+    id = Column(u'NetworkID', INTEGER(), primary_key=True)
+    system_name = Column(u'systemName', String(length=20), unique=True)
+    model = Column(String(length=50))
+    hardware_code = Column(u'hardwareCode', String(length=20))
+    software_code = Column(u'softwareCode', String(length=20))
+    host_interface = relationship('HostInterface', uselist=False)
+    ports = relationship('Port')
