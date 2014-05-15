@@ -1,40 +1,38 @@
-from elixir import Field
-from elixir import String, Integer
-from elixir import using_options, belongs_to, using_table_options
-from sqlalchemy import UniqueConstraint
+from sqlalchemy import ForeignKey, UniqueConstraint
 from sqlalchemy.dialects.mysql import INTEGER
+from sqlalchemy.orm import relationship
 
-from .base import Base
+from .meta import Base, Column
 
 
 class NetDefaultIP(Base):
-    using_options(tablename='net_default_ips')
-    using_table_options(
+    __tablename__ = 'net_default_ips'
+
+    id = Column(
+        u'net_default_ip_id',
+        INTEGER(unsigned=True),
+        primary_key=True
+    )
+    net_default_id = Column(
+        INTEGER(unsigned=True),
+        ForeignKey('net_default_maps.net_default_id', ondelete='cascade'),
+        nullable=False
+    )
+    vlan_id = Column(
+        INTEGER(),
+        ForeignKey('vlans.VlanID', ondelete='cascade'),
+        nullable=False
+    )
+    priority = Column(INTEGER(unsigned=True), nullable=False)
+    ns_services = relationship('NsVipBinds')
+    ns_vips = relationship('NsVipBinds')
+
+    __table_args__ = (
         UniqueConstraint(
-            'net_default_id',
-            'vlan_id',
-            'priority',
+            u'net_default_id',
+            u'vlan_id',
+            u'priority',
             name='ip_key'
         ),
-    )
-
-    id = Field(Integer, colname='net_default_ip_id', primary_key=True)
-    priority = Field(INTEGER(unsigned=True), required=True)
-
-    belongs_to(
-        'net_default',
-        of_kind='NetDefaultMap',
-        colname='net_default_id',
-        target_column='net_default_id',
-        required=True,
-        ondelete='cascade'
-    )
-
-    belongs_to(
-        'vlan',
-        of_kind='Vlan',
-        colname='vlan_id',
-        target_column='VlanID',
-        required=True,
-        ondelete='cascade'
+        { 'mysql_engine' : 'InnoDB', 'mysql_charset' : 'utf8', },
     )

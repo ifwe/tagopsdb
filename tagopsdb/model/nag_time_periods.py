@@ -1,20 +1,15 @@
-from elixir import Field
-from elixir import String, Integer
-from elixir import using_options, has_many
-
-from .base import Base
+from .meta import Base, Column, String, SurrogatePK
 
 
-class NagTimePeriods(Base):
-    using_options(tablename='nag_time_periods')
+class NagTimePeriod(SurrogatePK, Base):
+    __tablename__ = 'nag_time_periods'
 
-    id = Field(Integer, primary_key=True)
-    name = Field(String(length=32), required=True, unique=True)
-    alias = Field(String(length=80))
-    sunday = Field(String(length=32))
-    monday = Field(String(length=32))
-    tuesday = Field(String(length=32))
-    wednesday = Field(String(length=32))
-    thursday = Field(String(length=32))
-    friday = Field(String(length=32))
-    saturday = Field(String(length=32))
+    name = Column(String(length=32), nullable=False, unique=True)
+    alias = Column(String(length=80))
+    sunday = Column(String(length=32))
+    monday = Column(String(length=32))
+    tuesday = Column(String(length=32))
+    wednesday = Column(String(length=32))
+    thursday = Column(String(length=32))
+    friday = Column(String(length=32))
+    saturday = Column(String(length=32))

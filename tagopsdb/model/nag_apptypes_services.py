@@ -1,42 +1,36 @@
-from elixir import Field, Integer, using_options, using_table_options
+from sqlalchemy import ForeignKey
+from sqlalchemy.dialects.mysql import INTEGER, SMALLINT
+from sqlalchemy.orm import relationship
 
-from .base import Base
+from .meta import Base, Column
 
 
 class NagApptypesServices(Base):
-    using_options(tablename='nag_apptypes_services')
-    using_table_options(extend_existing=True)
+    __tablename__ = 'nag_apptypes_services'
 
-    app_id = Field(Integer, primary_key=True)
-    service_id = Field(Integer, primary_key=True)
-    server_app_id = Field(Integer, primary_key=True)
-    environment_id = Field(Integer, primary_key=True)
-
-    ## TODO: correctly define class with these relationships:
-    # belongs_to(
-    #     'app',
-    #     of_kind='Application',
-    #     colname='app_id',
-    #     primary_key=True,
-    #     ondelete='cascade'
-    # )
-    # belongs_to(
-    #     'service',
-    #     of_kind='NagServices',
-    #     colname='service_id',
-    #     primary_key=True,
-    #     ondelete='cascade'
-    # )
-    # belongs_to(
-    #     'server_app',
-    #     of_kind='Application',
-    #     colname='server_app_id',
-    #     primary_key=True
-    # )
-    # belongs_to(
-    #     'environment',
-    #     of_kind='Environment',
-    #     colname='environment_id',
-    #     primary_key=True,
-    #     ondelete='cascade'
-    # )
+    app_id = Column(
+        SMALLINT(display_width=2),
+        ForeignKey('app_definitions.AppID', ondelete='cascade'),
+        primary_key=True
+    )
+    service_id = Column(
+        INTEGER(),
+        ForeignKey('nag_services.id', ondelete='cascade'),
+        primary_key=True
+    )
+    server_app_id = Column(
+        SMALLINT(display_width=6),
+        ForeignKey('app_definitions.AppID'),
+        primary_key=True
+    )
+    environment_id = Column(
+        INTEGER(),
+        ForeignKey('environments.environmentID', ondelete='cascade'),
+        primary_key=True
+    )
+    application = relationship(
+        'AppDefinition',
+        foreign_keys=[ app_id ]
+    )
+    environment = relationship('Environment')
+    service = relationship('NagService')

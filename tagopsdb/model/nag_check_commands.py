@@ -1,25 +1,11 @@
-from elixir import Field
-from elixir import String, Integer
-from elixir import using_options, has_many
+from sqlalchemy.orm import relationship
 
-from .base import Base
+from .meta import Base, Column, String, SurrogatePK
 
 
-class NagCheckCommands(Base):
-    using_options(tablename='nag_check_commands')
+class NagCheckCommand(SurrogatePK, Base):
+    __tablename__ = 'nag_check_commands'
 
-    id = Field(Integer, primary_key=True)
-    command_name = Field(String(length=32), required=True, unique=True)
-    command_line = Field(String(length=255), required=True)
-
-    has_many(
-        'arguments',
-        of_kind='NagCommandArguments',
-        inverse='check_command',
-    )
-
-    has_many(
-        'services',
-        of_kind='NagServices',
-        inverse='check_command',
-    )
+    command_name = Column(String(length=32), nullable=False, unique=True)
+    command_line = Column(String(length=255), nullable=False)
+    nag_command_arguments = relationship('NagCommandArgument')

@@ -1,32 +1,21 @@
-from elixir import Field
-from elixir import String, Integer
-from elixir import using_options, belongs_to, has_one
+from sqlalchemy import ForeignKey
+from sqlalchemy.dialects.mysql import INTEGER
+from sqlalchemy.orm import relationship
 
-from .base import Base
+from .meta import Base, Column, String
 
 
 class Subnet(Base):
-    using_options(tablename='subnet')
-    id = Field(Integer, colname='SubnetID', primary_key=True)
-    ip_address = Field(
-        String(length=15),
-        colname='ipAddress',
-        unique=True
-    )
-    netmask = Field(String(length=15))
-    gateway = Field(String(length=15))
+    __tablename__ = 'subnet'
 
-    belongs_to('vlan', of_kind='Vlan', colname='VlanID', ondelete='cascade')
-    belongs_to('zone', of_kind='Zone', colname='ZoneID')
-
-    has_one(
-        'ip',
-        of_kind='HostIp',
-        inverse='subnet'
+    id = Column(u'SubnetID', INTEGER(), primary_key=True)
+    vlan_id = Column(
+        u'VlanID',
+        INTEGER(),
+        ForeignKey('vlans.VlanID', ondelete='cascade')
     )
-
-    has_one(
-        'ilom',
-        of_kind='Iloms',
-        inverse='subnet'
-    )
+    ip_address = Column(u'ipAddress', String(length=15), unique=True)
+    netmask = Column(String(length=15))
+    gateway = Column(String(length=15))
+    zone_id = Column(u'ZoneID', INTEGER(), ForeignKey('zones.ZoneID'))
+    zone = relationship('Zone', uselist=False, backref='subnets')

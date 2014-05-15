@@ -1,40 +1,28 @@
-from elixir import Field, Integer
-from elixir import using_options, using_table_options
-from sqlalchemy import UniqueConstraint
+from sqlalchemy import ForeignKey
+from sqlalchemy.dialects.mysql import INTEGER, SMALLINT
+from sqlalchemy.orm import relationship
 
-from .base import Base
+from .meta import Base, Column
 
 
 class ProjectPackage(Base):
-    using_options(tablename='project_package')
-    using_table_options(
-        UniqueConstraint('project_id', 'pkg_def_id', 'app_id'),
-        extend_existing=True
+    __tablename__ = 'project_package'
+
+    project_id = Column(
+        INTEGER(),
+        ForeignKey('projects.project_id', ondelete='cascade'),
+        primary_key=True
     )
-
-    project_id = Field(Integer, primary_key=True)
-    pkg_def_id = Field(Integer, primary_key=True)
-    app_id = Field(Integer, primary_key=True)
-
-    ## TODO: correctly define class with these relationships:
-    # belongs_to(
-    #     'project',
-    #     of_kind='Project',
-    #     colname='project_id',
-    #     ondelete='cascade',
-    #     primary_key=True
-    # )
-    # belongs_to(
-    #     'package_definition',
-    #     of_kind='PackageDefinition',
-    #     colname='pkg_def_id',
-    #     ondelete='cascade',
-    #     primary_key=True
-    # )
-    # belongs_to(
-    #     'app',
-    #     of_kind='Application',
-    #     colname='app_id',
-    #     ondelete='cascade',
-    #     primary_key=True
-    # )
+    pkg_def_id = Column(
+        INTEGER(),
+        ForeignKey('package_definitions.pkg_def_id', ondelete='cascade'),
+        primary_key=True
+    )
+    app_id = Column(
+        SMALLINT(display_width=6),
+        ForeignKey('app_definitions.AppID', ondelete='cascade'),
+        primary_key=True
+    )
+    app_definitions = relationship('AppDefinition')
+    package_definitions = relationship('PackageDefinition')
+    projects = relationship('Project')

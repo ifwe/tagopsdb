@@ -1,79 +1,53 @@
-from elixir import Field, String, Integer, Enum
-from elixir import using_options, using_table_options
-from elixir import belongs_to, has_one, has_many
-from sqlalchemy import UniqueConstraint
+from sqlalchemy import Enum, ForeignKey, UniqueConstraint
+from sqlalchemy.dialects.mysql import INTEGER, SMALLINT
+from sqlalchemy.orm import relationship
 
-from .base import Base
+from .meta import Base, Column, String
 
 
 class Host(Base):
-    using_options(tablename='hosts')
-    using_table_options(
-        UniqueConstraint('cageLocation', 'cabLocation', 'consolePort'),
-        UniqueConstraint('cageLocation', 'cabLocation', 'rackLocation'),
-    )
+    __tablename__ = 'hosts'
 
-    id = Field(Integer, colname='HostID', primary_key=True)
-    state = Field(
+    id = Column(u'HostID', INTEGER(), primary_key=True)
+    spec_id = Column(u'SpecID', INTEGER(), ForeignKey('host_specs.specID'))
+    state = Column(
         Enum(
-            'baremetal',
-            'operational',
-            'repair',
-            'parts',
-            'reserved',
-            'escrow'
+            u'baremetal',
+            u'operational',
+            u'repair',
+            u'parts',
+            u'reserved',
+            u'escrow'
         ),
-        required=True,
+        nullable=False
     )
-    hostname = Field(String(length=30))
-    arch = Field(String(length=10))
-    kernel_version = Field(String(length=20), colname='kernelVersion')
-    distribution = Field(String(length=20))
-    timezone = Field(String(length=10))
-    cage_location = Field(Integer, colname='cageLocation')
-    cab_location = Field(String(length=10), colname='cabLocation')
-    section = Field(String(length=10))
-    rack_location = Field(Integer, colname='rackLocation')
-    console_port = Field(String(length=11), colname='consolePort')
-    power_port = Field(String(length=10), colname='powerPort')
-    power_circuit = Field(String(length=10), colname='powerCircuit')
-    environment = Field(String(length=15))
-
-    belongs_to(
-        'app',
-        of_kind='Application',
-        colname='AppID',
-        required=True
+    hostname = Column(String(length=30))
+    arch = Column(String(length=10))
+    kernel_version = Column(u'kernelVersion', String(length=20))
+    distribution = Column(String(length=20))
+    timezone = Column(String(length=10))
+    app_id = Column(
+        u'AppID',
+        SMALLINT(display_width=6),
+        ForeignKey('app_definitions.AppID'),
+        nullable=False
     )
+    cage_location = Column(u'cageLocation', INTEGER())
+    cab_location = Column(u'cabLocation', String(length=10))
+    section = Column(String(length=10))
+    rack_location = Column(u'rackLocation', INTEGER())
+    console_port = Column(u'consolePort', String(length=11))
+    power_port = Column(u'powerPort', String(length=10))
+    power_circuit = Column(u'powerCircuit', String(length=10))
+    environment = Column(String(length=15))
+    host_deployments = relationship('HostDeployment')
+    host_interfaces = relationship('HostInterface', backref='host')
+    host_spec = relationship('HostSpec', uselist=False, backref='hosts')
+    ilom = relationship('Ilom', uselist=False, backref='host')
+    service_events = relationship('ServiceEvent', backref='host')
 
-    belongs_to('spec', of_kind='HostSpec', colname='SpecID')
-
-    has_one(
-        'asset',
-        of_kind='Asset',
-        inverse='host',
-    )
-
-    has_many(
-        'host_deployments',
-        of_kind='HostDeployment',
-        inverse='host'
-    )
-
-    has_many(
-        'interfaces',
-        of_kind='HostInterface',
-        inverse='host'
-    )
-
-    has_one(
-        'ilom',
-        of_kind='Iloms',
-        inverse='host',
-    )
-
-    has_many(
-        'service_events',
-        of_kind='ServiceEvent',
-        inverse='host',
+    __table_args__ = (
+        UniqueConstraint(u'cageLocation', u'cabLocation', u'consolePort'),
+        UniqueConstraint(u'cageLocation', u'cabLocation', u'rackLocation'),
+        { 'mysql_engine' : 'InnoDB', 'mysql_charset' : 'utf8', },
     )

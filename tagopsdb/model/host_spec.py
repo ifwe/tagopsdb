@@ -1,34 +1,22 @@
-from elixir import Field
-from elixir import String, Integer, Boolean, Enum
-from elixir import using_options, has_many
-from sqlalchemy.dialects.mysql import SMALLINT, INTEGER, MEDIUMTEXT, TINYINT
+from sqlalchemy import Enum
+from sqlalchemy.dialects.mysql import BOOLEAN, INTEGER, MEDIUMTEXT, SMALLINT
+from sqlalchemy.orm import relationship
 
-from .base import Base
+from .meta import Base, Column, String
 
 
 class HostSpec(Base):
-    using_options(tablename='host_specs')
+    __tablename__ = 'host_specs'
 
-    id = Field(Integer, colname='specID', primary_key=True)
-    gen = Field(String(length=4))
-    memory_size = Field(Integer, colname='memorySize')
-    cores = Field(SMALLINT(display_width=2), required=True)
-    cpu_speed = Field(INTEGER(display_width=6), colname='cpuSpeed')
-    disk_size = Field(INTEGER(display_width=6), colname='diskSize')
-    vendor = Field(String(length=20))
-    model = Field(String(length=20))
-    control = Field(Enum(u'digi', u'ipmi', u'vmware', u'libvirt'))
-    virtual = Field(TINYINT(1), required=True, default='0', server_default='0')
-    expansions = Field(MEDIUMTEXT)
-
-    has_many(
-        'defaults',
-        of_kind="DefaultSpec",
-        inverse='spec'
-    )
-
-    has_many(
-        'hosts',
-        of_kind='Host',
-        inverse='spec',
-    )
+    id = Column(u'specID', INTEGER(), primary_key=True)
+    gen = Column(String(length=4))
+    memory_size = Column(u'memorySize', INTEGER(display_width=4))
+    cores = Column(SMALLINT(display_width=2), nullable=False)
+    cpu_speed = Column(u'cpuSpeed', INTEGER(display_width=6))
+    disk_size = Column(u'diskSize', INTEGER(display_width=6))
+    vendor = Column(String(length=20))
+    model = Column(String(length=20))
+    control = Column(Enum(u'digi', u'ipmi', u'libvirt', u'vmware'))
+    virtual = Column(BOOLEAN(), nullable=False, server_default='0')
+    expansions = Column(MEDIUMTEXT())
+    services = relationship('NsServiceMax')
