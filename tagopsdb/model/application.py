@@ -17,7 +17,7 @@ class AppDefinition(Base):
         nullable=False,
         server_default='centos6.4'
     )
-    name = Column(u'appType', String(length=100), nullable=False)
+    app_type = Column(u'appType', String(length=100), nullable=False)
     host_base = Column(u'hostBase', String(length=100))
     puppet_class = Column(
         u'puppetClass',

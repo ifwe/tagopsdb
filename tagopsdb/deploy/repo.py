@@ -46,7 +46,7 @@ def add_app_packages_mapping(project, project_new, pkg_def, app_types):
     for app_type in app_types:
         try:
             app_def = (Session.query(AppDefinition)
-                              .filter_by(name=app_type)
+                              .filter_by(app_type=app_type)
                               .one())
         except sqlalchemy.orm.exc.NoResultFound:
             raise RepoException('App type "%s" is not found in the '
@@ -105,7 +105,7 @@ def delete_app_packages_mapping(project, app_types):
     for app_type in app_types:
         try:
             app_def = (Session.query(AppDefinition)
-                              .filter_by(name=app_type)
+                              .filter_by(app_type=app_type)
                               .one())
         except sqlalchemy.orm.exc.NoResultFound:
             raise RepoException('App type "%s" is not found in the '
@@ -148,7 +148,7 @@ def find_app_packages_mapping(app_name):
 
     app_defs = (Session.query(AppDefinition)
                        .filter(AppDefinition.package_locations.any(
-                               name=app_name))
+                               pkg_name=app_name))
                        .all())
 
     if not app_defs:

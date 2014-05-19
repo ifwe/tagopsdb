@@ -22,7 +22,7 @@ def add_package(app_name, version, revision, user):
         raise PackageException('Current version of application "%s" '
                                'already found in Package table' % app_name)
 
-    pkg = Package(pkg_def.id, pkg_loc.name, version, revision, 'pending',
+    pkg = Package(pkg_def.id, pkg_loc.pkg_name, version, revision, 'pending',
                   func.current_timestamp(), user, pkg_loc.pkg_type,
                   pkg_loc.project_type)
     Session.add(pkg)
@@ -45,7 +45,7 @@ def find_package(app_name, version, revision):
 
     try:
         return (Session.query(Package)
-                       .filter_by(name=pkg_loc.name)
+                       .filter_by(pkg_name=pkg_loc.pkg_name)
                        .filter_by(version=version)
                        .filter_by(revision=revision)
                        .one())
@@ -81,9 +81,9 @@ def list_packages(app_names):
     if app_names is not None:
         list_query = \
             (list_query.join(PackageLocation,
-                             PackageLocation.name == Package.name)
+                             PackageLocation.pkg_name == Package.pkg_name)
                        .filter(PackageLocation.app_name.in_(app_names)))
 
-    return (list_query.order_by(Package.name, Package.version,
+    return (list_query.order_by(Package.pkg_name, Package.version,
                                 Package.revision)
                       .all())
