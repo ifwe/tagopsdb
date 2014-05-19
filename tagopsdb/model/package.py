@@ -15,7 +15,7 @@ class Package(Base):
         ForeignKey('package_definitions.pkg_def_id', ondelete='cascade'),
         nullable=False
     )
-    name = Column(u'pkg_name', String(length=255), nullable=False)
+    pkg_name = Column(String(length=255), nullable=False)
     version = Column(String(length=63), nullable=False)
     revision = Column(String(length=63), nullable=False)
     status = Column(
