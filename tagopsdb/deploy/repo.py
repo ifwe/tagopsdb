@@ -20,8 +20,16 @@ def add_app_location(project_type, pkg_type, pkg_name, app_name, path, arch,
     else:
         environment = False
 
-    project = PackageLocation(project_type, pkg_type, pkg_name, app_name,
-                              path, arch, build_host, environment)
+    project = PackageLocation(
+        project_type=project_type,
+        pkg_type=pkg_type,
+        pkg_name=pkg_name,
+        app_name=app_name,
+        path=path,
+        arch=arch,
+        build_host=build_host,
+        environment=environment
+    )
     Session.add(project)
     Session.flush()   # Needed to get pkgLocationID generated
 
@@ -33,7 +41,7 @@ def add_app_location(project_type, pkg_type, pkg_name, app_name, path, arch,
     Session.add(pkg_def)
     Session.flush()   # Needed to get pkg_def_id generated
 
-    package_name = PackageName(pkg_name, pkg_def.id)
+    package_name = PackageName(name=pkg_name, pkg_def_id=pkg_def.id)
     Session.add(package_name)
     pkg_def.package_names.append(package_name)
 
@@ -66,9 +74,17 @@ def add_package_definition(deploy_type, validation_type, name, path,
                            arch, build_type, build_host, env_specific):
     """Add base definition for a package"""
 
-    pkg_def = PackageDefinition(deploy_type, validation_type, name,
-                                path, arch, build_type, build_host,
-                                env_specific, func.current_timestamp())
+    pkg_def = PackageDefinition(
+        deploy_type=deploy_type,
+        validation_type=validation_type,
+        pkg_name=name,
+        path=path,
+        arch=arch,
+        build_type=build_type,
+        build_host=build_host,
+        env_specific=env_specific,
+        created=func.current_timestamp()
+    )
     Session.add(pkg_def)
 
     Session.flush()   # Needed to get pkg_ef_id generated
@@ -79,7 +95,7 @@ def add_package_definition(deploy_type, validation_type, name, path,
 def add_project(name):
     """Add a new project to the database"""
 
-    project = Project(name)
+    project = Project(name=name)
     Session.add(project)
 
     Session.flush()   # Needed to get project_id generated

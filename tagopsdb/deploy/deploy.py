@@ -14,7 +14,12 @@ from tagopsdb.exceptions import DeployException
 def add_deployment(pkg_id, user, dep_type):
     """Add deployment for a given package ID"""
 
-    dep = Deployment(pkg_id, user, dep_type, func.current_timestamp())
+    dep = Deployment(
+        package_id=pkg_id,
+        user=user,
+        dep_type=dep_type,
+        declared=func.current_timestamp()
+    )
 
     # Commit to DB immediately
     Session.add(dep)
@@ -28,8 +33,14 @@ def add_deployment(pkg_id, user, dep_type):
 def add_app_deployment(dep_id, app_id, user, status, environment):
     """Add a tier deployment for a given deployment ID"""
 
-    app_dep = AppDeployment(dep_id, app_id, user, status, environment,
-                            func.current_timestamp())
+    app_dep = AppDeployment(
+        deployment_id=dep_id,
+        app_id=app_id,
+        user=user,
+        status=status,
+        environment=environment,
+        realized=func.current_timestamp()
+    )
 
     # Commit to DB immediately
     Session.add(app_dep)
@@ -41,8 +52,13 @@ def add_app_deployment(dep_id, app_id, user, status, environment):
 def add_host_deployment(dep_id, host_id, user, status):
     """Add host deployment for a given host and deployment"""
 
-    host_dep = HostDeployment(dep_id, host_id, user, status,
-                              func.current_timestamp())
+    host_dep = HostDeployment(
+        deployment_id=dep_id,
+        host_id=host_id,
+        user=user,
+        status=status,
+        realized=func.current_timestamp()
+    )
 
     # Commit to DB immediately
     Session.add(host_dep)
