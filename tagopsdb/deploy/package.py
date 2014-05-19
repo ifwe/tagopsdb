@@ -22,9 +22,17 @@ def add_package(app_name, version, revision, user):
         raise PackageException('Current version of application "%s" '
                                'already found in Package table' % app_name)
 
-    pkg = Package(pkg_def.id, pkg_loc.pkg_name, version, revision, 'pending',
-                  func.current_timestamp(), user, pkg_loc.pkg_type,
-                  pkg_loc.project_type)
+    pkg = Package(
+        pkg_def_id=pkg_def.id,
+        pkg_name=pkg_loc.pkg_name,
+        version=version,
+        revision=revision,
+        status='pending',
+        created=func.current_timestamp(),
+        creator=user,
+        builder=pkg_loc.pkg_type,
+        project_type=pkg_loc.project_type
+    )
     Session.add(pkg)
 
 
