@@ -431,6 +431,7 @@ def find_previous_validated_deployment(package_name, app_id, env):
                    .filter(Package.pkg_name==package_name)
                    .filter(AppDeployment.app_id==app_id)
                    .filter(AppDeployment.environment==env)
+                   .filter(AppDeployment.status=='validated')
                    .order_by(AppDeployment.realized.desc())
                    .first())
 
