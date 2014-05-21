@@ -1,6 +1,6 @@
 from . import meta
 #from .base import Base
-from .meta.base import Base, Session, init
+from .meta import Base, Session, init, destroy
 
 from .app_deployment import AppDeployment
 from .app_hipchat_rooms import app_hipchat_rooms
@@ -59,8 +59,10 @@ from .subnet import Subnet
 from .vlan import Vlan
 from .zone import Zone
 
+Application = AppDefinition
+
 __all__ = [
-    'Base', 'Session', 'init',
+    'Base', 'Session', 'init', 'destroy', 'Application',
     'AppDefinition', 'AppDeployment', 'app_hipchat_rooms',
     'app_jmx_attribute', 'app_package', 'Asset', 'Cname',
     'DefaultSpec', 'Deployment', 'Environment', 'Ganglia',
