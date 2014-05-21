@@ -1,24 +1,17 @@
-from elixir import Field, Integer, using_options, using_table_options
-from .base import Base
+from sqlalchemy import ForeignKey, Table
+from sqlalchemy.dialects.mysql import INTEGER, SMALLINT
+
+from .meta import Base, Column
 
 
-class AppJmxAttribute(Base):
-    using_options(tablename='app_jmx_attributes')
-    using_table_options(extend_existing=True)
-
-    AppID = Field(Integer, primary_key=True)
-    jmx_attribute_id = Field(Integer, primary_key=True)
-
-    ## TODO: correctly define class with these relationships:
-    # belongs_to(
-    #     'app',
-    #     of_kind='Application',
-    #     colname='AppID',
-    #     primary_key=True
-    # )
-    # belongs_to(
-    #     'jmx_attributes',
-    #     of_kind='JmxAttribute',
-    #     colname='jmx_attribute_id',
-    #     primary_key=True
-    # )
+app_jmx_attribute = Table(
+    u'app_jmx_attributes',
+    Base.metadata,
+    Column(u'AppID', SMALLINT(display_width=6),
+           ForeignKey('app_definitions.AppID', ondelete='cascade'),
+           primary_key=True),
+    Column(u'jmx_attribute_id', INTEGER(),
+           ForeignKey('jmx_attributes.jmx_attribute_id', ondelete='cascade'),
+           primary_key=True),
+    mysql_engine='InnoDB', mysql_charset='utf8',
+)

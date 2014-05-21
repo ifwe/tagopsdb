@@ -4,8 +4,7 @@ from sqlalchemy.sql.expression import func
 
 import tagopsdb.deploy.repo as repo
 
-import elixir
-
+from tagopsdb.model import Session
 from tagopsdb.model import (
     PackageDefinition, PackageLocation, Package, ProjectPackage
 )
@@ -23,10 +22,18 @@ def add_package(app_name, version, revision, user):
         raise PackageException('Current version of application "%s" '
                                'already found in Package table' % app_name)
 
-    pkg = Package(pkg_def.id, pkg_loc.name, version, revision, 'pending',
-                  func.current_timestamp(), user, pkg_loc.pkg_type,
-                  pkg_loc.project_type)
-    elixir.session.add(pkg)
+    pkg = Package(
+        pkg_def_id=pkg_def.id,
+        pkg_name=pkg_loc.pkg_name,
+        version=version,
+        revision=revision,
+        status='pending',
+        created=func.current_timestamp(),
+        creator=user,
+        builder=pkg_loc.pkg_type,
+        project_type=pkg_loc.project_type
+    )
+    Session.add(pkg)
 
 
 def delete_package(app_name, version, revision):
@@ -45,8 +52,8 @@ def find_package(app_name, version, revision):
     pkg_loc = repo.find_app_location(app_name)
 
     try:
-        return (elixir.session.query(Package)
-                       .filter_by(name=pkg_loc.name)
+        return (Session.query(Package)
+                       .filter_by(pkg_name=pkg_loc.pkg_name)
                        .filter_by(version=version)
                        .filter_by(revision=revision)
                        .one())
@@ -63,7 +70,7 @@ def find_package_definition(project_id):
     """
 
     try:
-        pkg_def = (elixir.session.query(PackageDefinition)
+        pkg_def = (Session.query(PackageDefinition)
                           .join(ProjectPackage)
                           .filter(ProjectPackage.project_id == project_id)
                           .first())
@@ -77,14 +84,14 @@ def find_package_definition(project_id):
 def list_packages(app_names):
     """Return all available packages in the repository"""
 
-    list_query = elixir.session.query(Package)
+    list_query = Session.query(Package)
 
     if app_names is not None:
         list_query = \
             (list_query.join(PackageLocation,
-                             PackageLocation.name == Package.name)
+                             PackageLocation.pkg_name == Package.pkg_name)
                        .filter(PackageLocation.app_name.in_(app_names)))
 
-    return (list_query.order_by(Package.name, Package.version,
+    return (list_query.order_by(Package.pkg_name, Package.version,
                                 Package.revision)
                       .all())

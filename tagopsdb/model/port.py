@@ -1,42 +1,27 @@
-from elixir import Field
-from elixir import String, Integer
-from elixir import using_options, using_table_options, belongs_to, has_one
-from sqlalchemy import UniqueConstraint
+from sqlalchemy import ForeignKey, UniqueConstraint
+from sqlalchemy.dialects.mysql import INTEGER
+from sqlalchemy.orm import relationship
 
-from .base import Base
+from .meta import Base, Column, String
 
 
 class Port(Base):
-    using_options(tablename='ports')
-    using_table_options(
-        UniqueConstraint(
-            'NetworkID',
-            'portNumber',
-            name='NetworkID_portNumber'
-        ),
+    __tablename__ = 'ports'
+
+    id = Column(u'PortID', INTEGER(), primary_key=True)
+    network_id = Column(
+        u'NetworkID',
+        INTEGER(),
+        ForeignKey('networkDevice.NetworkID', ondelete='cascade')
     )
+    port_number = Column(u'portNumber', String(length=20))
+    description = Column(String(length=50))
+    speed = Column(String(length=20))
+    duplex = Column(String(length=20))
+    network_interface = relationship('HostInterface', uselist=False)
 
-    id = Field(Integer, colname='PortID', primary_key=True)
-    port_number = Field(String(length=20), colname='portNumber')
-    description = Field(String(length=50))
-    speed = Field(String(length=20))
-    duplex = Field(String(length=20))
-
-    belongs_to(
-        'network',
-        of_kind='NetworkDevice',
-        colname='NetworkID',
-        ondelete='cascade',
-    )
-
-    has_one(
-        'host_interface',
-        of_kind='HostInterface',
-        inverse='port',
-    )
-
-    has_one(
-        'ilom',
-        of_kind='Iloms',
-        inverse='port',
+    __table_args__ = (
+        UniqueConstraint('NetworkID', 'portNumber',
+                         name='NetworkID_portNumber'),
+        { 'mysql_engine' : 'InnoDB', 'mysql_charset' : 'utf8', },
     )

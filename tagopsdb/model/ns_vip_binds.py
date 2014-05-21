@@ -1,44 +1,29 @@
-from elixir import using_options, belongs_to
+from sqlalchemy import ForeignKey
+from sqlalchemy.dialects.mysql import INTEGER, SMALLINT
+from sqlalchemy.orm import relationship
 
-from .base import Base
+from .meta import Base, Column
 
 
 class NsVipBinds(Base):
-    using_options(tablename='ns_vip_binds')
+    __tablename__ = 'ns_vip_binds'
 
-    belongs_to(
-        'net_default_ip',
-        of_kind='NetDefaultIP',
-        colname='net_default_ip_id',
-        target_column='net_default_ip_id',
-        required=True,
-        ondelete='cascade'
+    net_default_ip_id = Column(
+        INTEGER(unsigned=True),
+        ForeignKey('net_default_ips.net_default_ip_id', ondelete='cascade'),
+        primary_key=True
     )
-    belongs_to(
-        'app',
-        of_kind='Application',
-        colname='appID',
-        primary_key=True,
-        ondelete='cascade',
+    vip_id = Column(
+        u'vipID',
+        INTEGER(unsigned=True),
+        ForeignKey('ns_vip.vipID', ondelete='cascade'),
+        primary_key=True
     )
-    belongs_to(
-        'vip',
-        of_kind='NsVip',
-        colname='vipID',
-        primary_key=True,
-        ondelete='cascade',
+    service_id = Column(
+        u'serviceID',
+        INTEGER(unsigned=True),
+        ForeignKey('ns_service.serviceID', ondelete='cascade'),
+        primary_key=True
     )
-    belongs_to(
-        'service',
-        of_kind='NsService',
-        colname='serviceID',
-        primary_key=True,
-        ondelete='cascade',
-    )
-    belongs_to(
-        'environment',
-        of_kind='Environment',
-        colname='environmentID',
-        primary_key=True,
-        ondelete='cascade',
-    )
+    ns_service = relationship('NsService')
+    ns_vip = relationship('NsVip')

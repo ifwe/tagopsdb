@@ -2,10 +2,11 @@ import sqlalchemy.orm.exc
 
 from sqlalchemy import func
 from sqlalchemy.sql import and_
-import elixir
+
 import tagopsdb.deploy.repo as repo
 
-from tagopsdb.model import Application, AppDeployment, \
+from tagopsdb.model import Session
+from tagopsdb.model import AppDefinition, AppDeployment, \
     Deployment, Hipchat, HostDeployment, Host, Package
 from tagopsdb.exceptions import DeployException
 
@@ -13,13 +14,18 @@ from tagopsdb.exceptions import DeployException
 def add_deployment(pkg_id, user, dep_type):
     """Add deployment for a given package ID"""
 
-    dep = Deployment(pkg_id, user, dep_type, func.current_timestamp())
+    dep = Deployment(
+        package_id=pkg_id,
+        user=user,
+        dep_type=dep_type,
+        declared=func.current_timestamp()
+    )
 
     # Commit to DB immediately
-    elixir.session.add(dep)
-    elixir.session.commit()
+    Session.add(dep)
+    Session.commit()
 
-    elixir.session.flush()   # Needed to get DeploymentID generated
+    Session.flush()   # Needed to get DeploymentID generated
 
     return dep
 
@@ -27,12 +33,18 @@ def add_deployment(pkg_id, user, dep_type):
 def add_app_deployment(dep_id, app_id, user, status, environment):
     """Add a tier deployment for a given deployment ID"""
 
-    app_dep = AppDeployment(dep_id, app_id, user, status, environment,
-                            func.current_timestamp())
+    app_dep = AppDeployment(
+        deployment_id=dep_id,
+        app_id=app_id,
+        user=user,
+        status=status,
+        environment=environment,
+        realized=func.current_timestamp()
+    )
 
     # Commit to DB immediately
-    elixir.session.add(app_dep)
-    elixir.session.commit()
+    Session.add(app_dep)
+    Session.commit()
 
     return app_dep
 
@@ -40,12 +52,17 @@ def add_app_deployment(dep_id, app_id, user, status, environment):
 def add_host_deployment(dep_id, host_id, user, status):
     """Add host deployment for a given host and deployment"""
 
-    host_dep = HostDeployment(dep_id, host_id, user, status,
-                              func.current_timestamp())
+    host_dep = HostDeployment(
+        deployment_id=dep_id,
+        host_id=host_id,
+        user=user,
+        status=status,
+        realized=func.current_timestamp()
+    )
 
     # Commit to DB immediately
-    elixir.session.add(host_dep)
-    elixir.session.commit()
+    Session.add(host_dep)
+    Session.commit()
 
     return host_dep
 
@@ -53,37 +70,37 @@ def add_host_deployment(dep_id, host_id, user, status):
 def delete_host_deployment(hostname, package_name):
     """ """
 
-    host_deps = (elixir.session.query(HostDeployment)
+    host_deps = (Session.query(HostDeployment)
                  .join(Host)
                  .join(Deployment)
                  .join(Package)
-                 .filter(Package.name == package_name)
+                 .filter(Package.pkg_name == package_name)
                  .filter(Host.hostname == hostname)
                  .all())
 
     # Allow this to silently do nothing if there are no matching rows
     for host_dep in host_deps:
         # Commit to DB immediately
-        elixir.session.delete(host_dep)
-        elixir.session.commit()
+        Session.delete(host_dep)
+        Session.commit()
 
 
 def delete_host_deployments(package_name, app_id, environment):
     """ """
 
-    host_deps = (elixir.session.query(HostDeployment)
+    host_deps = (Session.query(HostDeployment)
                  .join(Host)
                  .join(Deployment)
                  .join(Package)
-                 .filter(Package.name == package_name)
+                 .filter(Package.pkg_name == package_name)
                  .filter(Host.app_id == app_id)
                  .filter(Host.environment == environment)
                  .all())
 
     for host_dep in host_deps:
         # Commit to DB immediately
-        elixir.session.delete(host_dep)
-        elixir.session.commit()
+        Session.delete(host_dep)
+        Session.commit()
 
 
 def find_all_app_deployments_by_apptype(package_name, apptype, environment):
@@ -91,12 +108,12 @@ def find_all_app_deployments_by_apptype(package_name, apptype, environment):
        and specific environment
     """
 
-    return (elixir.session.query(AppDeployment)
+    return (Session.query(AppDeployment)
             .join(Deployment)
             .join(Package)
-            .join(Application)
-            .filter(Package.name == package_name)
-            .filter(Application.name == apptype)
+            .join(AppDefinition)
+            .filter(Package.pkg_name == package_name)
+            .filter(AppDefinition.app_type == apptype)
             .filter(AppDeployment.environment == environment)
             .all())
 
@@ -106,20 +123,20 @@ def find_app_deployment(pkg_id, app_ids, environment):
        application ID(s)
     """
 
-    subq = (elixir.session.query(AppDeployment.app_id, Application.name,
+    subq = (Session.query(AppDeployment.app_id, AppDefinition.app_type,
             AppDeployment.id, Deployment.dep_type)
             .join(Deployment)
             .join(Package)
-            .join(Application)
+            .join(AppDefinition)
             .filter(Package.id == pkg_id)
             .filter(AppDeployment.app_id.in_(app_ids))
             .filter(AppDeployment.environment == environment)
             .order_by(AppDeployment.realized.desc())
             .subquery(name='t_ordered'))
 
-    return (elixir.session.query(AppDeployment, Application.name,
+    return (Session.query(AppDeployment, AppDefinition.app_type,
             Deployment.dep_type, Package)
-            .join(Application)
+            .join(AppDefinition)
             .join(Deployment)
             .join(Package)
             .join(subq, AppDeployment.id == subq.c.AppDeploymentID)
@@ -131,8 +148,8 @@ def find_app_by_apptype(apptype):
     """Find a given application by app type"""
 
     try:
-        return (elixir.session.query(Application)
-                .filter_by(name=apptype)
+        return (Session.query(AppDefinition)
+                .filter_by(app_type=apptype)
                 .one())
     except sqlalchemy.orm.exc.NoResultFound:
         raise DeployException('App type "%s" not found in the '
@@ -143,7 +160,7 @@ def find_app_by_depid(dep_id):
     """Find a given application and version by deployment ID"""
 
     try:
-        return (elixir.session.query(Package)
+        return (Session.query(Package)
                 .join(Deployment)
                 .filter(Deployment.id == dep_id)
                 .one())
@@ -156,10 +173,10 @@ def find_apptype_by_appid(app_id):
     """Find the app type for a given ID"""
 
     try:
-        app_def = (elixir.session.query(Application)
+        app_def = (Session.query(AppDefinition)
                    .filter_by(id=app_id)
                    .one())
-        return app_def.name
+        return app_def.app_type
     except sqlalchemy.orm.exc.NoResultFound:
         raise DeployException('No app type with AppID "%s" was found '
                               'in the app_definitions table' % app_id)
@@ -174,21 +191,21 @@ def find_deployed_version(package_name, env, version=None, revision=None,
 
     if apptier:
         subq = (
-            elixir.session.query(
-                Package.name,
+            Session.query(
+                Package.pkg_name,
                 Package.version,
                 Package.revision,
-                Application.name,
+                AppDefinition.app_type,
                 AppDeployment.environment
             ).join(Deployment)
              .join(AppDeployment)
-             .join(Application)
-             .filter(Package.name == package_name)
+             .join(AppDefinition)
+             .filter(Package.pkg_name == package_name)
              .filter(AppDeployment.environment == env)
              .filter(AppDeployment.status != 'invalidated'))
 
         if apptypes is not None:
-            subq = subq.filter(Application.name.in_(apptypes))
+            subq = subq.filter(AppDefinition.app_type.in_(apptypes))
 
         if version is not None:
             subq = subq.filter(Package.version == version)
@@ -201,23 +218,23 @@ def find_deployed_version(package_name, env, version=None, revision=None,
 
         # The actual column name must be used in the subquery
         # usage below; DB itself should be corrected
-        versions = (elixir.session.query(subq.c.appType,
+        versions = (Session.query(subq.c.appType,
                     subq.c.version,
                     subq.c.revision)
                     .group_by(subq.c.appType, subq.c.environment)
                     .all())
     else:
-        hostsq = (elixir.session.query(Host.hostname, Host.app_id,
+        hostsq = (Session.query(Host.hostname, Host.app_id,
                   Package.version, Package.revision)
-                  .join(Application)
+                  .join(AppDefinition)
                   .join(HostDeployment)
                   .join(Deployment)
                   .join(Package)
-                  .filter(Package.name == package_name)
+                  .filter(Package.pkg_name == package_name)
                   .filter(Host.environment == env))
 
         if apptypes is not None:
-            hostsq = hostsq.filter(Application.name.in_(apptypes))
+            hostsq = hostsq.filter(AppDefinition.app_type.in_(apptypes))
 
         versions = (hostsq.all())
 
@@ -228,7 +245,7 @@ def find_deployment_by_id(dep_id):
     """Find deployment for a given ID"""
 
     try:
-        return (elixir.session.query(Deployment)
+        return (Session.query(Deployment)
                 .filter_by(id=dep_id)
                 .one())
     except sqlalchemy.orm.exc.NoResultFound:
@@ -239,7 +256,7 @@ def find_deployment_by_id(dep_id):
 def find_deployment_by_pkgid(pkg_id):
     """Find deployment(s) for a given package ID"""
 
-    return (elixir.session.query(Deployment)
+    return (Session.query(Deployment)
                    .filter_by(package_id=pkg_id)
                    .order_by(Deployment.declared.desc())
                    .all())
@@ -249,7 +266,7 @@ def find_host_by_hostname(hostname):
     """Find host for a given hostname"""
 
     try:
-        return (elixir.session.query(Host)
+        return (Session.query(Host)
                        .filter_by(hostname=hostname)
                        .one())
     except sqlalchemy.orm.exc.NoResultFound:
@@ -261,7 +278,7 @@ def find_host_deployment_by_depid(dep_id, dep_host):
     """Find host deployment (if exists) for a given deployment ID"""
 
     try:
-        return (elixir.session.query(HostDeployment)
+        return (Session.query(HostDeployment)
                        .join(Host)
                        .filter(HostDeployment.deployment_id==dep_id)
                        .filter(Host.hostname==dep_host)
@@ -276,7 +293,7 @@ def find_host_deployments_by_pkgid(pkg_id, dep_hosts):
        set of hosts
     """
 
-    return (elixir.session.query(HostDeployment, Host.hostname, Host.app_id,
+    return (Session.query(HostDeployment, Host.hostname, Host.app_id,
                           Deployment.dep_type)
                    .join(Host)
                    .join(Deployment)
@@ -291,12 +308,12 @@ def find_host_deployments_by_package_name(package_name, dep_hosts):
        set of hosts
     """
 
-    return (elixir.session.query(HostDeployment, Host.hostname, Host.app_id,
+    return (Session.query(HostDeployment, Host.hostname, Host.app_id,
                           Package.version)
                    .join(Host)
                    .join(Deployment)
                    .join(Package)
-                   .filter(Package.name==package_name)
+                   .filter(Package.pkg_name==package_name)
                    .filter(Host.hostname.in_(dep_hosts))
                    .all())
 
@@ -306,7 +323,7 @@ def find_host_deployments_not_ok(pkg_id, app_id, environment):
        package ID, app ID and environment (may return none)
     """
 
-    return (elixir.session.query(HostDeployment, Host.hostname)
+    return (Session.query(HostDeployment, Host.hostname)
                    .join(Host)
                    .join(Deployment)
                    .filter(Deployment.package_id==pkg_id)
@@ -319,9 +336,9 @@ def find_host_deployments_not_ok(pkg_id, app_id, environment):
 def find_hosts_for_app(app_id, environment):
     """Find the hosts for a given application and environment"""
 
-    hosts = (elixir.session.query(Host)
-                    .join(Application)
-                    .filter(Application.id==app_id)
+    hosts = (Session.query(Host)
+                    .join(AppDefinition)
+                    .filter(AppDefinition.id==app_id)
                     .filter(Host.environment==environment)
                     .all())
 
@@ -346,11 +363,11 @@ def find_hipchat_rooms_for_app(project, apptypes=None):
             return []
 
         app_defs = repo.find_app_packages_mapping(project)
-        apptypes = [ x.name for x in app_defs ]
+        apptypes = [ x.app_type for x in app_defs ]
 
-    rooms_query = (elixir.session.query(Hipchat.room_name)
+    rooms_query = (Session.query(Hipchat.room_name)
                           .filter(Hipchat.app_definitions.any(
-                                  Application.name.in_(apptypes)))
+                                  AppDefinition.app_type.in_(apptypes)))
                           .all())
 
     return [ x[0] for x in rooms_query ]
@@ -372,10 +389,10 @@ def find_latest_deployment(package_name, app_id, env):
        environment for the given application ID
     """
 
-    return (elixir.session.query(AppDeployment, Package)
+    return (Session.query(AppDeployment, Package)
                    .join(Deployment)
                    .join(Package)
-                   .filter(Package.name==package_name)
+                   .filter(Package.pkg_name==package_name)
                    .filter(AppDeployment.app_id==app_id)
                    .filter(AppDeployment.environment==env)
                    .filter(AppDeployment.status!='invalidated')
@@ -388,10 +405,10 @@ def find_latest_validated_deployment(package_name, app_id, env):
        package, application type and environment.
     """
 
-    return (elixir.session.query(AppDeployment, Package.id)
+    return (Session.query(AppDeployment, Package.id)
                    .join(Deployment)
                    .join(Package)
-                   .filter(Package.name==package_name)
+                   .filter(Package.pkg_name==package_name)
                    .filter(AppDeployment.environment==env)
                    .filter(AppDeployment.status=='validated')
                    .order_by(AppDeployment.realized.desc())
@@ -407,13 +424,14 @@ def find_previous_validated_deployment(package_name, app_id, env):
     # Get current deployment
     app_dep, pkg = find_latest_deployment(package_name, app_id, env)
 
-    return (elixir.session.query(AppDeployment, Package.id)
+    return (Session.query(AppDeployment, Package.id)
                    .join(Deployment)
                    .join(Package)
                    .filter(AppDeployment.id!=app_dep.id)
-                   .filter(Package.name==package_name)
+                   .filter(Package.pkg_name==package_name)
                    .filter(AppDeployment.app_id==app_id)
                    .filter(AppDeployment.environment==env)
+                   .filter(AppDeployment.status=='validated')
                    .order_by(AppDeployment.realized.desc())
                    .first())
 
@@ -423,9 +441,9 @@ def find_running_deployment(app_id, env, hosts=None):
        for a given application type and environment
     """
 
-    tier = (elixir.session.query(AppDeployment.user, AppDeployment.realized,
-                          AppDeployment.environment, Application.name)
-                   .join(Application)
+    tier = (Session.query(AppDeployment.user, AppDeployment.realized,
+                          AppDeployment.environment, AppDefinition.app_type)
+                   .join(AppDefinition)
                    .filter(AppDeployment.app_id==app_id)
                    .filter(AppDeployment.environment==env)
                    .filter(AppDeployment.status=='inprogress')
@@ -435,7 +453,7 @@ def find_running_deployment(app_id, env, hosts=None):
     if tier:
         return ('tier', tier)
 
-    host = (elixir.session.query(HostDeployment.user, HostDeployment.realized,
+    host = (Session.query(HostDeployment.user, HostDeployment.realized,
                           Host.hostname, Host.environment)
                    .join(Host)
                    .filter(Host.environment==env)
@@ -455,23 +473,23 @@ def find_unvalidated_versions(time_delta, environment):
        environment for a given amount of time
     """
 
-    subq = (elixir.session.query(Package.name, Package.version,
-                          Package.revision, Application.name,
+    subq = (Session.query(Package.pkg_name, Package.version,
+                          Package.revision, AppDefinition.app_type,
                           AppDeployment.environment, AppDeployment.realized,
                           AppDeployment.user, AppDeployment.status)
                    .join(Deployment)
                    .join(AppDeployment)
-                   .join(Application)
+                   .join(AppDefinition)
                    .filter(AppDeployment.status!='invalidated')
                    .filter(AppDeployment.environment==environment)
                    .order_by(AppDeployment.realized.desc())
                    .subquery(name='t_ordered'))
 
-    return (elixir.session.query(subq.c.name, subq.c.version, subq.c.revision,
+    return (Session.query(subq.c.pkg_name, subq.c.version, subq.c.revision,
                           subq.c.appType, subq.c.environment,
                           subq.c.realized, subq.c.user, subq.c.status)
                    .group_by(subq.c.appType, subq.c.environment,
-                             subq.c.name)
+                             subq.c.pkg_name)
                    .having(and_(subq.c.status.like('%complete'),
                                 func.unix_timestamp(subq.c.realized) <
                                 func.unix_timestamp(func.now()) - time_delta))
@@ -483,14 +501,14 @@ def list_app_deployment_info(package_name, env, name, version, revision):
        deployed to a given application tier and environment
     """
 
-    return (elixir.session.query(Deployment, AppDeployment, Package)
+    return (Session.query(Deployment, AppDeployment, Package)
                    .join(Package)
                    .join(AppDeployment)
-                   .join(Application)
-                   .filter(Package.name==package_name)
+                   .join(AppDefinition)
+                   .filter(Package.pkg_name==package_name)
                    .filter(Package.version==version)
                    .filter(Package.revision==revision)
-                   .filter(Application.name == name)
+                   .filter(AppDefinition.app_type == name)
                    .filter(AppDeployment.environment == env)
                    .order_by(AppDeployment.realized.desc())
                    .first())
@@ -503,12 +521,12 @@ def list_host_deployment_info(package_name, env, version=None, revision=None,
        and in given environment
     """
 
-    dep_info = (elixir.session.query(Deployment, HostDeployment, Host.hostname,
+    dep_info = (Session.query(Deployment, HostDeployment, Host.hostname,
                 Package)
                 .join(Package)
                 .join(HostDeployment)
                 .join(Host)
-                .join(Application))
+                .join(AppDefinition))
 
     if version is not None:
         dep_info = dep_info.filter(Package.version == version)
@@ -517,9 +535,9 @@ def list_host_deployment_info(package_name, env, version=None, revision=None,
         dep_info = dep_info.filter(Package.revision == revision)
 
     if apptypes is not None:
-        dep_info = dep_info.filter(Application.name.in_(apptypes))
+        dep_info = dep_info.filter(AppDefinition.app_type.in_(apptypes))
 
-    return (dep_info.filter(Package.name == package_name)
+    return (dep_info.filter(Package.pkg_name == package_name)
                     .filter(Host.environment == env)
                     .order_by(Host.hostname,
                               HostDeployment.realized.asc())

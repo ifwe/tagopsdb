@@ -1,26 +1,20 @@
-from elixir import Field
-from elixir import String
-from elixir import using_options, has_many
 from sqlalchemy.dialects.mysql import SMALLINT, INTEGER
+from sqlalchemy.orm import relationship
 
-from .base import Base
+from .meta import Base, Column, String
 
 
 class NsService(Base):
-    using_options(tablename='ns_service')
+    __tablename__ = 'ns_service'
 
-    id = Field(INTEGER(unsigned=True), colname='serviceID', primary_key=True)
-    service_name = Field(
+    id = Column(u'serviceID', INTEGER(unsigned=True), primary_key=True)
+    service_name = Column(
+        u'serviceName',
         String(length=64),
-        colname='serviceName',
-        required=True,
+        nullable=False,
         unique=True
     )
-    proto = Field(String(length=16), required=True)
-    port = Field(SMALLINT(display_width=5, unsigned=True), required=True)
-
-    has_many(
-        'params',
-        of_kind='NsServiceParam',
-        inverse='service'
-    )
+    proto = Column(String(length=16), nullable=False)
+    port = Column(SMALLINT(display_width=5, unsigned=True), nullable=False)
+    ns_monitors = relationship('NsMonitor', secondary='ns_service_binds')
+    service_params = relationship('NsServiceParam')

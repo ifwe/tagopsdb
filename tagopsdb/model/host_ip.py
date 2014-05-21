@@ -1,36 +1,34 @@
-from elixir import Field
-from elixir import String, Integer
-from elixir import using_options, belongs_to, has_many
+from sqlalchemy import ForeignKey
+from sqlalchemy.dialects.mysql import INTEGER
+from sqlalchemy.orm import relationship
 
-from .base import Base
+from .meta import Base, Column, String
 
 
 class HostIp(Base):
-    using_options(tablename='host_ips')
+    __tablename__ = 'host_ips'
 
-    id = Field(Integer, colname='IpID', primary_key=True)
-    priority = Field(Integer, required=True, default=1, server_default='1')
-    a_record = Field(String(length=200), colname='ARecord')
-    comments = Field(String(length=200))
-
-    belongs_to(
-        'interface',
-        of_kind='HostInterface',
-        colname='InterfaceID',
-        ondelete='cascade',
-        required=True,
+    id = Column(u'IpID', INTEGER(), primary_key=True)
+    interface_id = Column(
+        u'InterfaceID',
+        INTEGER(),
+        ForeignKey('host_interfaces.InterfaceID', ondelete='cascade'),
+        nullable=False,
+        index=True
     )
-
-    belongs_to(
-        'subnet',
-        of_kind='Subnet',
-        colname='SubnetID',
-        ondelete='cascade',
-        required=True,
+    subnet_id = Column(
+        u'SubnetID',
+        INTEGER(),
+        ForeignKey('subnet.SubnetID', ondelete='cascade'),
+        nullable=False,
+        unique=True,
+        index=True
     )
-
-    has_many(
-        'cnames',
-        of_kind='Cname',
-        inverse='host_ip',
+    priority = Column(
+        INTEGER(unsigned=True),
+        nullable=False,
+        server_default='1'
     )
+    a_record = Column(u'ARecord', String(length=200))
+    comments = Column(String(length=200))
+    subnet = relationship('Subnet', uselist=False, backref='host_ip')

@@ -1,20 +1,17 @@
-from elixir import Field
-from elixir import Integer, String
-from elixir import using_options, has_many
+from sqlalchemy.dialects.mysql import INTEGER
+from sqlalchemy.orm import relationship
 
-from .base import Base
+from .meta import Base, Column, String
 
 
 class Ganglia(Base):
-    using_options(tablename='ganglia')
+    __tablename__ = 'ganglia'
 
-    id = Field(Integer, colname='GangliaID', primary_key=True)
-    cluster_name = Field(String(length=50))
-    port = Field(
-        Integer,
-        required=True,
-        default='8649',
+    id = Column(u'GangliaID', INTEGER(), primary_key=True)
+    cluster_name = Column(String(length=50))
+    port = Column(
+        INTEGER(display_width=5),
+        nullable=False,
         server_default='8649'
     )
-
-    has_many('apps', of_kind='Application')
+    app_definitions = relationship('AppDefinition')

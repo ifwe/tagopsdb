@@ -1,33 +1,15 @@
-from elixir import Field
-from elixir import String, Integer
-from elixir import using_options, has_many
+from sqlalchemy.dialects.mysql import INTEGER
+from sqlalchemy.orm import relationship
 
-from .base import Base
+from .meta import Base, Column, String
 
 
 class Environment(Base):
-    using_options(tablename='environments')
+    __tablename__ = 'environments'
 
-    id = Field(Integer, colname='environmentID', primary_key=True)
-    environment = Field(String(length=15), required=True, unique=True)
-    env = Field(String(length=12), required=True, unique=True)
-    domain = Field(String(length=32), required=True, unique=True)
-    prefix = Field(String(length=1), required=True)
-
-    has_many(
-        'default_specs',
-        of_kind='DefaultSpec',
-        inverse='environment',
-    )
-
-    has_many(
-        'net_default_maps',
-        of_kind='NetDefaultMap',
-        inverse='environment',
-    )
-
-    has_many(
-        'vlans',
-        of_kind='Vlan',
-        inverse='environment',
-    )
+    id = Column(u'environmentID', INTEGER(), primary_key=True)
+    environment = Column(String(length=15), nullable=False, unique=True)
+    env = Column(String(length=12), nullable=False, unique=True)
+    domain = Column(String(length=32), nullable=False, unique=True)
+    prefix = Column(String(length=1), nullable=False)
+    host_specs = relationship('DefaultSpec')

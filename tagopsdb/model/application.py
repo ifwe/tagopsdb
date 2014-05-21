@@ -1,155 +1,55 @@
-from elixir import Field
-from elixir import String, Enum
-from elixir import using_options, using_table_options
-from elixir import belongs_to, has_and_belongs_to_many, has_many
-from sqlalchemy.dialects.mysql import SMALLINT
+from sqlalchemy import Enum, ForeignKey
+from sqlalchemy.dialects.mysql import INTEGER, SMALLINT
+from sqlalchemy.orm import relationship
 
-from .base import Base
+from .meta import Base, Column, String
 
 
-class Application(Base):
-    using_options(tablename='app_definitions')
-    using_table_options(extend_existing=True)
+class AppDefinition(Base):
+    __tablename__ = 'app_definitions'
 
-    id = Field(SMALLINT(display_width=2), colname='AppID', primary_key=True)
-
-    distribution = Field(
+    id = Column(u'AppID', SMALLINT(display_width=2), primary_key=True)
+    distribution = Column(
         Enum(
-            'centos5.4',
-            'centos6.2',
-            'centos6.4',
-            'centos6.5',
-            'rhel5.3',
-            'rhel6.2',
-            'rhel6.3',
-            'rhel6.4',
-            'rhel6.5'
+            u'centos5.4', u'centos6.2', u'centos6.4', u'centos6.5',
+            u'rhel5.3', u'rhel6.2', u'rhel6.3', u'rhel6.4', u'rhel6.5',
         ),
-        required=True,
-        default='co64',
-        server_default='co64'
+        nullable=False,
+        server_default='centos6.4'
     )
-
-    name = Field(
+    app_type = Column(u'appType', String(length=100), nullable=False)
+    host_base = Column(u'hostBase', String(length=100))
+    puppet_class = Column(
+        u'puppetClass',
         String(length=100),
-        colname='appType',
-        required=True
-    )
-    host_base = Field(String(length=100), colname='hostBase')
-    puppet_class = Field(
-        String(length=100),
-        colname='puppetClass',
-        required=True,
-        default='baseclass',
+        nullable=False,
         server_default='baseclass'
     )
-
-    ganglia_group_name = Field(
-        String(length=25),
-        colname='GgroupName',
-        required=True
+    ganglia_id = Column(
+        u'GangliaID',
+        INTEGER(),
+        ForeignKey('ganglia.GangliaID'),
+        nullable=False,
+        server_default='1'
     )
-    description = Field(String(length=100))
-    status = Field(
+    ganglia_group_name = Column(u'GgroupName', String(length=25))
+    description = Column(String(length=100))
+    status = Column(
         Enum('active', 'inactive'),
-        required=True,
-        default='active',
+        nullable=False,
         server_default='active'
     )
-
-    belongs_to(
-        'ganglia',
-        of_kind='Ganglia',
-        colname='GangliaID',
-        required=True,
+    app_deployments = relationship('AppDeployment')
+    hipchats = relationship(
+        'Hipchat',
+        secondary='app_hipchat_rooms',
+        backref='app_definitions'
     )
-
-    has_and_belongs_to_many(
-        'projects',
-        of_kind='Project',
-        inverse='apps',
-        tablename='project_package',
-        local_colname='app_id',
-        remote_colname='project_id',
-        table_kwargs=dict(extend_existing=True)
+    hosts = relationship('Host')
+    host_specs = relationship('DefaultSpec')
+    nag_app_services = relationship(
+        'NagApptypesServices',
+        primaryjoin='NagApptypesServices.app_id == AppDefinition.id'
     )
-
-    has_and_belongs_to_many(
-        'packages',
-        of_kind='PackageDefinition',
-        inverse='apps',
-        tablename='project_package',
-        local_colname='app_id',
-        remote_colname='pkg_def_id',
-        table_kwargs=dict(extend_existing=True)
-    )
-
-    has_many(
-        'app_deployments',
-        of_kind='AppDeployment',
-        inverse='app'
-    )
-
-    has_and_belongs_to_many(
-        'hipchat_rooms',
-        of_kind='Hipchat',
-        inverse='apps',
-        tablename='app_hipchat_rooms',
-        local_colname='AppID',
-        remote_colname='roomID',
-        table_kwargs=dict(extend_existing=True)
-    )
-
-    has_and_belongs_to_many(
-        'jmx_attributes',
-        of_kind='JmxAttribute',
-        inverse='apps',
-        tablename='app_jmx_attributes',
-        local_colname='AppID',
-        remote_colname='jmx_attribute_id',
-        table_kwargs=dict(extend_existing=True),
-    )
-
-    has_and_belongs_to_many(
-        'package_locations',
-        of_kind='PackageLocation',
-        inverse='apps',
-        tablename='app_packages',
-        local_colname='AppID',
-        remote_colname='pkgLocationID',
-        table_kwargs=dict(extend_existing=True),
-    )
-
-    has_many(
-        'default_specs',
-        of_kind='DefaultSpec',
-        inverse='app'
-    )
-
-    has_many(
-        'hosts',
-        of_kind='Host',
-        inverse='app',
-    )
-
-    has_many(
-        'net_default_maps',
-        of_kind='NetDefaultMap',
-        inverse='app',
-    )
-
-    # app_deployments = relationship('AppDeployment')
-    # hipchats = relationship(
-    #     'Hipchat',
-    #     secondary='app_hipchat_rooms',
-    #     backref='app_definitions'
-    # )
-    # hosts = relationship('Host')
-    # host_specs = relationship('DefaultSpec')
-    # ns_services = relationship('NsVipBinds')
-    # nag_app_services = relationship(
-    #     'NagApptypesServices',
-    #     primaryjoin='NagApptypesServices.app_id == Application.id'
-    # )
-    # nag_host_services = relationship('NagHostServices')
-    # proj_pkg = relationship('ProjectPackage')
+    nag_host_services = relationship('NagHostsServices')
+    proj_pkg = relationship('ProjectPackage')

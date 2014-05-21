@@ -1,12 +1,10 @@
-from elixir import Field
-from elixir import Integer, String
-from elixir import using_options
+from sqlalchemy.dialects.mysql import INTEGER
 
-from .base import Base
+from .meta import Base, Column, String
 
 
 class NsMonitor(Base):
-    using_options(tablename='ns_monitor')
+    __tablename__ = 'ns_monitor'
 
-    id = Field(Integer, colname='monitorID', primary_key=True)
-    monitor = Field(String(length=32), required=True, unique=True)
+    id = Column(u'monitorID', INTEGER(unsigned=True), primary_key=True)
+    monitor = Column(String(length=32), nullable=False, unique=True)
