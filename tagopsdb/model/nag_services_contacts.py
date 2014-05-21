@@ -1,20 +1,17 @@
-from elixir import using_options, belongs_to
-from .base import Base
+from sqlalchemy import ForeignKey, Table
+from sqlalchemy.dialects.mysql import INTEGER
+
+from .meta import Base, Column
 
 
-class NagServicesContacts(Base):
-    using_options(tablename='nag_services_contacts')
-    belongs_to(
-        'service',
-        of_kind='NagServices',
-        colname='service_id',
-        primary_key=True,
-        ondelete='cascade',
-    )
-    belongs_to(
-        'contact',
-        of_kind='NagContacts',
-        colname='contact_id',
-        primary_key=True,
-        ondelete='cascade',
-    )
+nag_services_contacts = Table(
+    u'nag_services_contacts',
+    Base.metadata,
+    Column(u'service_id', INTEGER(),
+           ForeignKey('nag_services.id', ondelete='cascade'),
+           primary_key=True),
+    Column(u'contact_id', INTEGER(),
+           ForeignKey('nag_contacts.id', ondelete='cascade'),
+           primary_key=True),
+    mysql_engine='InnoDB', mysql_charset='utf8',
+)

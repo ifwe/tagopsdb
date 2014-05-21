@@ -1,47 +1,26 @@
-from elixir import Field
-from elixir import String, Integer, Enum
-from elixir import using_options, belongs_to, has_many
+from sqlalchemy import Enum, ForeignKey
+from sqlalchemy.dialects.mysql import INTEGER, TIMESTAMP
+from sqlalchemy.orm import relationship
 from sqlalchemy.sql.expression import func
-from sqlalchemy.dialects.mysql import TIMESTAMP
 
-from .base import Base
+from .meta import Base, Column, String
 
 
 class Deployment(Base):
-    using_options(tablename='deployments')
+    __tablename__ = 'deployments'
 
-    id = Field(Integer, colname='DeploymentID', primary_key=True)
-    user = Field(String(length=32), required=True)
-    dep_type = Field(
-        Enum('deploy', 'rollback'),
-        required=True,
+    id = Column(u'DeploymentID', INTEGER(), primary_key=True)
+    package_id = Column(
+        INTEGER(),
+        ForeignKey('packages.package_id', ondelete='cascade'),
+        nullable=False
     )
-
-    declared = Field(
-        TIMESTAMP,
-        required=True,
-        default=func.current_timestamp(),
-        server_default=func.current_timestamp(),
+    user = Column(String(length=32), nullable=False)
+    dep_type = Column(Enum('deploy', 'rollback'), nullable=False)
+    declared = Column(
+        TIMESTAMP(),
+        nullable=False,
+        server_default=func.current_timestamp()
     )
-
-    belongs_to(
-        'package',
-        of_kind='Package',
-        colname='package_id',
-        target_column='package_id',
-        ondelete='cascade',
-        required=True,
-        inverse='deployments'
-    )
-
-    has_many(
-        'app_deployments',
-        of_kind='AppDeployment',
-        inverse='deployment',
-    )
-
-    has_many(
-        'host_deployments',
-        of_kind='HostDeployment',
-        inverse='deployment',
-    )
+    app_deployments = relationship('AppDeployment')
+    host_deployments = relationship('HostDeployment')

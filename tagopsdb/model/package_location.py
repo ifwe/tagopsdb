@@ -1,61 +1,32 @@
-from elixir import Field
-from elixir import String, Integer, Enum
-from elixir import using_options, has_and_belongs_to_many
+from sqlalchemy import Enum
+from sqlalchemy.dialects.mysql import BOOLEAN, INTEGER
+from sqlalchemy.orm import relationship
 
-from sqlalchemy.dialects.mysql import TINYINT
-
-from .base import Base
+from .meta import Base, Column, String
 
 
 class PackageLocation(Base):
-    using_options(tablename='package_locations')
+    __tablename__ = 'package_locations'
 
-    id = Field(Integer, colname='pkgLocationID', primary_key=True)
-    pkg_type = Field(String(length=255), required=True)
-    name = Field(
-        String(length=255),
-        colname='pkg_name',
-        required=True,
-        unique=True
-    )
-    app_name = Field(String(length=255), required=True, unique=True)
-    path = Field(String(length=255), required=True, unique=True)
-    build_host = Field(String(length=30), required=True)
-    environment = Field(TINYINT(1), required=True)
-
-    arch = Field(
-        Enum(u'i386', u'x86_64', u'noarch'),
-        required=True,
-        default='noarch',
-        server_default='noarch'
-    )
-    project_type = Field(
+    id = Column(u'pkgLocationID', INTEGER(), primary_key=True)
+    project_type = Column(
         Enum(u'application', u'kafka-config', u'tagconfig'),
-        required=True,
-        default='application',
+        nullable=False,
         server_default='application'
     )
-
-    has_and_belongs_to_many(
-        'apps',
-        of_kind='Application',
-        inverse='package_locations',
-        tablename='app_packages',
-        local_colname='pkgLocationID',
-        remote_colname='AppID',
-        table_kwargs=dict(extend_existing=True),
+    pkg_type = Column(String(length=255), nullable=False)
+    pkg_name = Column(String(length=255), nullable=False, unique=True)
+    app_name = Column(String(length=255), nullable=False, unique=True)
+    path = Column(String(length=255), nullable=False, unique=True)
+    arch = Column(
+        Enum(u'i386', u'x86_64', u'noarch'),
+        nullable=False,
+        server_default='noarch'
     )
-
-    # TODO: should this be has_one?
-    # has_many(
-    #     'app_packages',
-    #     of_kind='AppPackage',
-    #     colname='pkgLocationID'
-    # )
-    # has_many(
-    #     'app_definitions',
-    #     of_kind='Application',
-    #     through='app_package',
-    #     via='app_definition'
-    # )
-    # has_many('deployments', of_kind='Deployment', colname='package_id')
+    build_host = Column(String(length=30), nullable=False)
+    environment = Column(BOOLEAN(), nullable=False)
+    app_definitions = relationship(
+        'AppDefinition',
+        secondary='app_packages',
+        backref='package_locations'
+    )

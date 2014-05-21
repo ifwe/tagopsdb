@@ -1,45 +1,40 @@
-from elixir import Field
-from elixir import String, Integer, Enum
-from elixir import using_options, belongs_to
-from sqlalchemy.dialects.mysql import TIMESTAMP
+from sqlalchemy import Enum, ForeignKey
+from sqlalchemy.dialects.mysql import INTEGER, SMALLINT, TIMESTAMP
 from sqlalchemy.sql.expression import func
 
-from .base import Base
+from .meta import Base, Column, String
 
 
 class AppDeployment(Base):
-    using_options(tablename='app_deployments')
+    __tablename__ = 'app_deployments'
 
-    id = Field(Integer, colname='AppDeploymentID', primary_key=True)
-    user = Field(String(length=32), required=True)
-    status = Field(
+    id = Column(u'AppDeploymentID', INTEGER(), primary_key=True)
+    deployment_id = Column(
+        u'DeploymentID',
+        INTEGER(),
+        ForeignKey('deployments.DeploymentID', ondelete='cascade'),
+        nullable=False
+    )
+    app_id = Column(
+        u'AppID',
+        SMALLINT(display_width=6),
+        ForeignKey('app_definitions.AppID', ondelete='cascade'),
+        nullable=False
+    )
+    user = Column(String(length=32), nullable=False)
+    status = Column(
         Enum(
             'complete',
             'incomplete',
             'inprogress',
             'invalidated',
-            'validated'
+            'validated',
         ),
-        required=True,
+        nullable=False
     )
-    environment = Field(String(length=15), required=True)
-
-    realized = Field(
-        TIMESTAMP,
-        required=True,
-        default=func.current_timestamp(),
-        server_default=func.current_timestamp(),
-    )
-
-    belongs_to(
-        'deployment',
-        of_kind='Deployment',
-        colname='DeploymentID',
-        required=True
-    )
-    belongs_to(
-        'app',
-        of_kind='Application',
-        colname='AppID',
-        required=True
+    environment = Column(String(length=15), nullable=False)
+    realized = Column(
+        TIMESTAMP(),
+        nullable=False,
+        server_default=func.current_timestamp()
     )

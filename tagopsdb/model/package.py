@@ -1,68 +1,47 @@
-from elixir import Field
-from elixir import String, Integer, Enum
-from elixir import using_options, belongs_to, has_many, using_table_options
+from sqlalchemy import Enum, ForeignKey, UniqueConstraint
+from sqlalchemy.dialects.mysql import INTEGER, TIMESTAMP
+from sqlalchemy.orm import relationship
 from sqlalchemy.sql.expression import func
-from sqlalchemy import UniqueConstraint
-from sqlalchemy.dialects.mysql import TIMESTAMP
 
-from .base import Base
+from .meta import Base, Column, String
 
 
 class Package(Base):
-    using_options(tablename='packages')
-    using_table_options(
-        UniqueConstraint(
-            'pkg_name',
-            'version',
-            'revision',
-            'builder',
-            name='unique_package'
-        ),
-    )
+    __tablename__ = 'packages'
 
-    id = Field(Integer, colname='package_id', primary_key=True)
-    name = Field(String(length=255), required=True, colname='pkg_name')
-    version = Field(String(length=63), required=True)
-    revision = Field(String(length=63), required=True)
-    creator = Field(String(length=255), required=True)
-    status = Field(
+    id = Column(u'package_id', INTEGER(), primary_key=True)
+    pkg_def_id = Column(
+        INTEGER(),
+        ForeignKey('package_definitions.pkg_def_id', ondelete='cascade'),
+        nullable=False
+    )
+    pkg_name = Column(String(length=255), nullable=False)
+    version = Column(String(length=63), nullable=False)
+    revision = Column(String(length=63), nullable=False)
+    status = Column(
         Enum('completed', 'failed', 'pending', 'processing', 'removed'),
-        required=True
+        nullable=False
     )
-    created = Field(
-        TIMESTAMP,
-        required=True,
-        default=func.current_timestamp(),
-        server_default=func.current_timestamp(),
+    created = Column(
+        TIMESTAMP(),
+        nullable=False,
+        server_default=func.current_timestamp()
     )
-
-    builder = Field(
-        Enum('developer', 'hudson', 'jenkins'),
-        required=True,
-        default='developer',
+    creator = Column(String(length=255), nullable=False)
+    builder = Column(
+        Enum(u'developer', u'hudson', u'jenkins'),
+        nullable=False,
         server_default='developer'
     )
-
-    project_type = Field(
+    project_type = Column(
         Enum(u'application', u'kafka-config', u'tagconfig'),
-        required=True,
-        default='application',
+        nullable=False,
         server_default='application'
     )
+    deployments = relationship('Deployment')
 
-    has_many(
-        'names',
-        of_kind='PackageName',
-        through='definition',
-        via='package_names'
+    __table_args__ = (
+        UniqueConstraint(u'pkg_name', u'version', u'revision', u'builder',
+                         name=u'unique_package'),
+        { 'mysql_engine' : 'InnoDB', 'mysql_charset' : 'utf8', },
     )
-
-    belongs_to(
-        'definition',
-        of_kind='PackageDefinition',
-        colname='pkg_def_id',
-        required=True,
-        ondelete='cascade'
-    )
-
-    has_many('deployments', of_kind='Deployment', inverse='package')

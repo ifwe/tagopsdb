@@ -1,28 +1,33 @@
-from elixir import Field
-from elixir import Integer, String, Date
-from elixir import using_options, belongs_to
+from sqlalchemy import ForeignKey
+from sqlalchemy.dialects.mysql import DATE, INTEGER
+from sqlalchemy.orm import relationship
 
-from .base import Base
+from .meta import Base, Column, String
 
 
 class Asset(Base):
-    using_options(tablename='asset')
+    __tablename__ = 'asset'
 
-    id = Field(Integer, colname='AssetID', primary_key=True)
-    date_received = Field(Date, colname='dateReceived')
-    description = Field(String(length=20))
-    oem_serial = Field(String(length=30), colname='oemSerial', unique=True)
-    service_tag = Field(String(length=20), colname='serviceTag')
-    tagged_serial = Field(String(length=20), colname='taggedSerial')
-    invoice_number = Field(String(length=20), colname='invoiceNumber')
-    location_site = Field(String(length=20), colname='locationSite')
-    location_owner = Field(String(length=20), colname='locationOwner')
-    cost_per_item = Field(String(length=20), colname='costPerItem')
-    date_of_invoice = Field(Date, colname='dateOfInvoice')
-    warranty_start = Field(Date, colname='warrantyStart')
-    warranty_end = Field(Date, colname='warrantyEnd')
-    warranty_level = Field(String(length=20), colname='warrantyLevel')
-    warranty_id = Field(String(length=20), colname='warrantyID')
-    vendor_contact = Field(String(length=20), colname='vendorContact')
-
-    belongs_to('host', of_kind='Host', colname='HostID', required=True)
+    id = Column(u'AssetID', INTEGER(), primary_key=True)
+    host_id = Column(
+        u'HostID',
+        INTEGER(),
+        ForeignKey('hosts.HostID', ondelete='cascade'),
+        nullable=False
+    )
+    date_received = Column(u'dateReceived', DATE())
+    description = Column(String(length=20))
+    oem_serial = Column(u'oemSerial', String(length=30), unique=True)
+    service_tag = Column(u'serviceTag', String(length=20))
+    tagged_serial = Column(u'taggedSerial', String(length=20))
+    invoice_number = Column(u'invoiceNumber', String(length=20))
+    location_site = Column(u'locationSite', String(length=20))
+    location_owner = Column(u'locationOwner', String(length=20))
+    cost_per_item = Column(u'costPerItem', String(length=20))
+    date_of_invoice = Column(u'dateOfInvoice', DATE())
+    warranty_start = Column(u'warrantyStart', DATE())
+    warranty_end = Column(u'warrantyEnd', DATE())
+    warranty_level = Column(u'warrantyLevel', String(length=20))
+    warranty_id = Column(u'warrantyID', String(length=20))
+    vendor_contact = Column(u'vendorContact', String(length=20))
+    host = relationship('Host', uselist=False)

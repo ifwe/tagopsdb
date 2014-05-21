@@ -1,26 +1,24 @@
-from elixir import Field
-from elixir import using_options, belongs_to
-from sqlalchemy.dialects.mysql import TINYINT
+from sqlalchemy import ForeignKey
+from sqlalchemy.dialects.mysql import INTEGER, TINYINT
+from sqlalchemy.orm import relationship
 
-from .base import Base
+from .meta import Base, Column
 
 
 class NsWeight(Base):
-    using_options(tablename='ns_weight')
+    __tablename__ = 'ns_weight'
 
-    weight = Field(TINYINT(display_width=3, unsigned=True), nullable=False)
-
-    belongs_to(
-        'vip',
-        of_kind='NsVip',
-        colname='vipID',
-        primary_key=True,
-        ondelete='cascade',
+    vip_id = Column(
+        u'vipID',
+        INTEGER(unsigned=True),
+        ForeignKey('ns_vip.vipID', ondelete='cascade'),
+        primary_key=True
     )
-    belongs_to(
-        'host_spec',
-        of_kind='HostSpec',
-        colname='specID',
-        primary_key=True,
-        ondelete='cascade',
+    spec_id = Column(
+        u'specID',
+        INTEGER(),
+        ForeignKey('host_specs.specID', ondelete='cascade'),
+        primary_key=True
     )
+    weight = Column(TINYINT(display_width=3, unsigned=True), nullable=False)
+    host_spec = relationship('NsVip', uselist=False, backref='ns_vip_assocs')

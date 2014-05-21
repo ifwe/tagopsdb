@@ -1,33 +1,30 @@
-from elixir import Field
-from elixir import String, Integer, Enum, DateTime
-from elixir import using_options, belongs_to
+from sqlalchemy import Enum, ForeignKey
+from sqlalchemy.dialects.mysql import INTEGER, TIMESTAMP
 from sqlalchemy.sql.expression import func
 
-from .base import Base
+from .meta import Base, Column, String
 
 
 class HostDeployment(Base):
-    using_options(tablename='host_deployments')
+    __tablename__ = 'host_deployments'
 
-    id = Field(Integer, colname='HostDeploymentID', primary_key=True)
-    user = Field(String(length=32), required=True)
-    status = Field(Enum('inprogress', 'failed', 'ok'), required=True)
-    realized = Field(
-        DateTime,
-        required=True,
-        default=func.current_timestamp(),
-        server_default=func.current_timestamp(),
+    id = Column(u'HostDeploymentID', INTEGER(), primary_key=True)
+    deployment_id = Column(
+        u'DeploymentID',
+        INTEGER(),
+        ForeignKey('deployments.DeploymentID', ondelete='cascade'),
+        nullable=False
     )
-
-    belongs_to(
-        'host',
-        of_kind='Host',
-        colname='HostID',
-        required=True
+    host_id = Column(
+        u'HostID',
+        INTEGER(),
+        ForeignKey('hosts.HostID', ondelete='cascade'),
+        nullable=False
     )
-    belongs_to(
-        'deployment',
-        of_kind='Deployment',
-        colname='DeploymentID',
-        required=True
+    user = Column(String(length=32), nullable=False)
+    status = Column(Enum('inprogress', 'failed', 'ok'), nullable=False)
+    realized = Column(
+        TIMESTAMP(),
+        nullable=False,
+        server_default=func.current_timestamp()
     )

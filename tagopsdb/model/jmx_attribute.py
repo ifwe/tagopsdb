@@ -1,24 +1,12 @@
-from elixir import Field
-from elixir import Integer, String
-from elixir import using_options, has_and_belongs_to_many
+from sqlalchemy.dialects.mysql import INTEGER
 
-from .base import Base
+from .meta import Base, Column, String
 
 
 class JmxAttribute(Base):
-    using_options(tablename='jmx_attributes')
+    __tablename__ = 'jmx_attributes'
 
-    id = Field(Integer, colname='jmx_attribute_id', primary_key=True)
-    obj = Field(String(length=300), required=True)
-    attr = Field(String(length=300), required=True)
-    ganglia_group_name = Field(String(length=25), colname='GgroupName')
-
-    has_and_belongs_to_many(
-        'apps',
-        of_kind='Application',
-        inverse='apps',
-        tablename='app_jmx_attributes',
-        local_colname='jmx_attribute_id',
-        remote_colname='AppID',
-        table_kwargs=dict(extend_existing=True),
-    )
+    id = Column(u'jmx_attribute_id', INTEGER(), primary_key=True)
+    obj = Column(String(length=300), nullable=False)
+    attr = Column(String(length=300), nullable=False)
+    g_group_name = Column(u'GgroupName', String(length=25))

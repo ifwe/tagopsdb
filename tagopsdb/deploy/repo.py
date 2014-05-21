@@ -2,9 +2,9 @@ import sqlalchemy.orm.exc
 
 from sqlalchemy import func
 
-import elixir
+from tagopsdb.model import Session
 from tagopsdb.model import (
-    Application, PackageDefinition, PackageLocation, PackageName,
+    AppDefinition, PackageDefinition, PackageLocation, PackageName,
     ProjectPackage, Project
 )
 from tagopsdb.exceptions import RepoException
@@ -20,21 +20,29 @@ def add_app_location(project_type, pkg_type, pkg_name, app_name, path, arch,
     else:
         environment = False
 
-    project = PackageLocation(project_type, pkg_type, pkg_name, app_name,
-                              path, arch, build_host, environment)
-    elixir.session.add(project)
-    elixir.session.flush()   # Needed to get pkgLocationID generated
+    project = PackageLocation(
+        project_type=project_type,
+        pkg_type=pkg_type,
+        pkg_name=pkg_name,
+        app_name=app_name,
+        path=path,
+        arch=arch,
+        build_host=build_host,
+        environment=environment
+    )
+    Session.add(project)
+    Session.flush()   # Needed to get pkgLocationID generated
 
     # Transitional code to synchronize with new tables
     project_new = add_project(app_name)
     pkg_def = add_package_definition('rpm', 'matching', pkg_name,
                                      path, arch, 'jenkins', build_host,
                                      environment)
-    elixir.session.add(pkg_def)
-    elixir.session.flush()   # Needed to get pkg_def_id generated
+    Session.add(pkg_def)
+    Session.flush()   # Needed to get pkg_def_id generated
 
-    package_name = PackageName(pkg_name, pkg_def.id)
-    elixir.session.add(package_name)
+    package_name = PackageName(name=pkg_name, pkg_def_id=pkg_def.id)
+    Session.add(package_name)
     pkg_def.package_names.append(package_name)
 
     return project, project_new, pkg_def
@@ -45,8 +53,8 @@ def add_app_packages_mapping(project, project_new, pkg_def, app_types):
 
     for app_type in app_types:
         try:
-            app_def = (elixir.session.query(Application)
-                              .filter_by(name=app_type)
+            app_def = (Session.query(AppDefinition)
+                              .filter_by(app_type=app_type)
                               .one())
         except sqlalchemy.orm.exc.NoResultFound:
             raise RepoException('App type "%s" is not found in the '
@@ -59,19 +67,27 @@ def add_app_packages_mapping(project, project_new, pkg_def, app_types):
         proj_pkg.projects = project_new
         proj_pkg.package_definitions = pkg_def
         proj_pkg.app_definitions = app_def
-        elixir.session.add(proj_pkg)
+        Session.add(proj_pkg)
 
 
 def add_package_definition(deploy_type, validation_type, name, path,
                            arch, build_type, build_host, env_specific):
     """Add base definition for a package"""
 
-    pkg_def = PackageDefinition(deploy_type, validation_type, name,
-                                path, arch, build_type, build_host,
-                                env_specific, func.current_timestamp())
-    elixir.session.add(pkg_def)
+    pkg_def = PackageDefinition(
+        deploy_type=deploy_type,
+        validation_type=validation_type,
+        pkg_name=name,
+        path=path,
+        arch=arch,
+        build_type=build_type,
+        build_host=build_host,
+        env_specific=env_specific,
+        created=func.current_timestamp()
+    )
+    Session.add(pkg_def)
 
-    elixir.session.flush()   # Needed to get pkg_ef_id generated
+    Session.flush()   # Needed to get pkg_ef_id generated
 
     return pkg_def
 
@@ -79,10 +95,10 @@ def add_package_definition(deploy_type, validation_type, name, path,
 def add_project(name):
     """Add a new project to the database"""
 
-    project = Project(name)
-    elixir.session.add(project)
+    project = Project(name=name)
+    Session.add(project)
 
-    elixir.session.flush()   # Needed to get project_id generated
+    Session.flush()   # Needed to get project_id generated
 
     return project
 
@@ -96,7 +112,7 @@ def delete_app_location(app_name):
         raise RepoException('No application "%s" to remove from '
                             'PackageLocation table' % app_name)
 
-    elixir.session.delete(pkg_loc)
+    Session.delete(pkg_loc)
 
 
 def delete_app_packages_mapping(project, app_types):
@@ -104,8 +120,8 @@ def delete_app_packages_mapping(project, app_types):
 
     for app_type in app_types:
         try:
-            app_def = (elixir.session.query(Application)
-                              .filter_by(name=app_type)
+            app_def = (Session.query(AppDefinition)
+                              .filter_by(app_type=app_type)
                               .one())
         except sqlalchemy.orm.exc.NoResultFound:
             raise RepoException('App type "%s" is not found in the '
@@ -118,7 +134,7 @@ def find_app_location(app_name):
     """Find a given project"""
 
     try:
-        return (elixir.session.query(PackageLocation)
+        return (Session.query(PackageLocation)
                        .filter_by(app_name=app_name)
                        .one())
     except sqlalchemy.orm.exc.NoResultFound:
@@ -133,7 +149,7 @@ def find_app_package(project, app_id):
 
     # This is no longer valid
     # try:
-    #     return (elixir.session.query(AppPackage)
+    #     return (Session.query(AppPackage)
     #                    .filter_by(pkgLocationID=pkg_location_id)
     #                    .filter_by(AppID=app_id)
     #                    .one())
@@ -146,9 +162,9 @@ def find_app_package(project, app_id):
 def find_app_packages_mapping(app_name):
     """Find all app types related to a given package"""
 
-    app_defs = (elixir.session.query(Application)
-                       .filter(Application.package_locations.any(
-                               name=app_name))
+    app_defs = (Session.query(AppDefinition)
+                       .filter(AppDefinition.package_locations.any(
+                               pkg_name=app_name))
                        .all())
 
     if not app_defs:
@@ -162,7 +178,7 @@ def find_project(name):
     """Find a given project"""
 
     try:
-        return (elixir.session.query(Project)
+        return (Session.query(Project)
                        .filter_by(name=name)
                        .one())
     except sqlalchemy.orm.exc.NoResultFound:
@@ -174,7 +190,7 @@ def find_project_type(project):
     """Determine the project type for a given project"""
 
     try:
-        return (elixir.session.query(PackageLocation.project_type)
+        return (Session.query(PackageLocation.project_type)
                        .filter_by(app_name=project)
                        .one())
     except sqlalchemy.orm.exc.NoResultFound:
@@ -185,7 +201,7 @@ def find_project_type(project):
 def list_app_locations(app_names):
     """ """
 
-    list_query = elixir.session.query(PackageLocation)
+    list_query = Session.query(PackageLocation)
 
     if app_names is not None:
         list_query = \

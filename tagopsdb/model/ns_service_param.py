@@ -1,20 +1,17 @@
-from elixir import Field
-from elixir import String
-from elixir import using_options, belongs_to
+from sqlalchemy import ForeignKey
+from sqlalchemy.dialects.mysql import INTEGER
 
-from .base import Base
+from .meta import Base, Column, String
 
 
 class NsServiceParam(Base):
-    using_options(tablename='ns_service_params')
+    __tablename__ = 'ns_service_params'
 
-    param = Field(String(length=32), primary_key=True)
-    value = Field(String(length=128), nullable=False)
-
-    belongs_to(
-        'service',
-        of_kind='NsService',
-        colname='serviceID',
-        primary_key=True,
-        ondelete='cascade',
+    service_id = Column(
+        u'serviceID',
+        INTEGER(unsigned=True),
+        ForeignKey('ns_service.serviceID', ondelete='cascade'),
+        primary_key=True
     )
+    param = Column(String(length=32), primary_key=True)
+    value = Column(String(length=128), nullable=False)

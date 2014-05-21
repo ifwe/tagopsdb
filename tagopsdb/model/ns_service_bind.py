@@ -1,22 +1,17 @@
-from elixir import using_options, belongs_to
+from sqlalchemy import ForeignKey, Table
+from sqlalchemy.dialects.mysql import INTEGER
 
-from .base import Base
+from .meta import Base, Column
 
 
-class NsServiceBind(Base):
-    using_options(tablename='ns_service_binds')
-
-    belongs_to(
-        'ns_service',
-        of_kind='NsService',
-        colname='serviceID',
-        primary_key=True,
-        ondelete='cascade',
-    )
-    belongs_to(
-        'ns_monitor',
-        of_kind='NsMonitor',
-        colname='monitorID',
-        primary_key=True,
-        ondelete='cascade',
-    )
+ns_service_bind = Table(
+    u'ns_service_binds',
+    Base.metadata,
+    Column(u'serviceID', INTEGER(unsigned=True),
+           ForeignKey('ns_service.serviceID', ondelete='cascade'),
+           primary_key=True),
+    Column(u'monitorID', INTEGER(unsigned=True),
+           ForeignKey('ns_monitor.monitorID', ondelete='cascade'),
+           primary_key=True),
+    mysql_engine='InnoDB', mysql_charset='utf8',
+)

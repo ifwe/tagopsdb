@@ -1,24 +1,25 @@
-from elixir import Field, String, belongs_to, using_options
-from .base import Base
+from sqlalchemy import ForeignKey
+from sqlalchemy.dialects.mysql import INTEGER
+from sqlalchemy.orm import relationship
+
+from .meta import Base, Column, String
 
 
 class NagServicesArguments(Base):
-    using_options(tablename='nag_services_arguments')
+    __tablename__ = 'nag_services_arguments'
 
-    value = Field(String(length=120), required=True)
-
-    belongs_to(
-        'service',
-        of_kind='NagServices',
-        colname='service_id',
-        primary_key=True,
-        ondelete='cascade',
+    service_id = Column(
+        INTEGER(),
+        ForeignKey('nag_services.id', ondelete='cascade'),
+        primary_key=True
     )
-
-    belongs_to(
-        'command_argument',
-        of_kind='NagCommandArguments',
-        colname='command_argument_id',
-        primary_key=True,
-        ondelete='cascade',
+    command_argument_id = Column(
+        INTEGER(),
+        ForeignKey('nag_command_arguments.id', ondelete='cascade'),
+        primary_key=True
+    )
+    value = Column(String(length=120), nullable=False)
+    command_argument = relationship(
+        'NagCommandArgument',
+        backref='nag_services_assoc'
     )
