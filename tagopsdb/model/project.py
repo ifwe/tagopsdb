@@ -9,4 +9,13 @@ class Project(Base):
 
     id = Column(u'project_id', INTEGER(), primary_key=True)
     name = Column(String(length=255), nullable=False, unique=True)
-    proj_pkg = relationship('ProjectPackage')
+
+    applications = relationship(
+        'AppDefinition',
+        secondary=lambda: Base.metadata.tables['project_package'],
+    )
+
+    package_definitions = relationship(
+        'PackageDefinition',
+        secondary=lambda: Base.metadata.tables['project_package'],
+    )
