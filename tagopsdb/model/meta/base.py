@@ -57,6 +57,9 @@ class TagOpsDB(References):
                 ' '.join('%s=%r'% (key, val) for (key, val) in keyvals),
         )
 
+    def delete(self, *args, **kwargs):
+        return Session.delete(self, *args, **kwargs)
+
     @classmethod
     def query(cls):
         return Session.query(cls)
@@ -67,6 +70,8 @@ class TagOpsDB(References):
             return cls.query().filter_by(**kwds).one()
         except sqlalchemy.orm.exc.NoResultFound as e:
             return None
+
+    get = get_by
 
     @classmethod
     def all(cls, *args, **kwargs):
@@ -141,6 +146,8 @@ class TagOpsDB(References):
                 setattr(self, key, new_attr_value)
             else:
                 setattr(self, key, value)
+
+
 Session = scoped_session(sessionmaker())
 
 Base = declarative_base(cls=TagOpsDB)
