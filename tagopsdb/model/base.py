@@ -11,9 +11,6 @@ class TagOpsDBBase(EntityBase):
         table_options=dict(mysql_engine='InnoDB', mysql_charset='utf8')
     )
 
-    def commit(self):
-        return self._global_session.commit()
-
     @classmethod
     def all(cls, *args, **kwargs):
         q = cls.query
