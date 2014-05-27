@@ -37,9 +37,11 @@ class PackageDefinition(Base):
     applications = relationship(
         'AppDefinition',
         secondary=lambda: Base.metadata.tables['project_package'],
+        passive_deletes=True,
     )
 
     projects = relationship(
         'Project',
         secondary=lambda: Base.metadata.tables['project_package'],
+        passive_deletes=True,
     )
