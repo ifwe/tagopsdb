@@ -45,9 +45,6 @@ def create_ganglia():
 
 
 def create_applications():
-    prod = model.Environment.get_by(environment='production')
-    dev = model.Environment.get_by(environment='development')
-    stage = model.Environment.get_by(environment='staging')
     ganglia = model.Ganglia.first()
     for app_name in ('clamor', 'web', 'hubot'):
         model.Application.update_or_create(dict(
@@ -57,9 +54,6 @@ def create_applications():
             ganglia_group_name='%s hosts' % app_name,
             description="%s application" % app_name,
             ganglia=ganglia,
-            # production_vlan=prod.vlans[0],
-            # development_vlan=dev.vlans[0],
-            # staging_vlan=stage.vlans[0],
         ))
 
 
