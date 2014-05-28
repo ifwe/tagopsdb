@@ -1,3 +1,4 @@
+import time
 import tagopsdb
 
 
@@ -43,39 +44,58 @@ def test_model_and_direct_relationships(cls):
         print '\t'+rel.key+':', val
 
 
-def write_schema():
-    import sqlalchemy
-    import elixir
-
-    engine = None
-    f = None
-
-    with open('schema.mysql.txt', 'w') as f:
-        def executor(s, p=';'):
-            compiled = s.compile(dialect=engine.dialect)
-            f.write(unicode(compiled).encode('utf8') + p)
-
-        engine = sqlalchemy.create_engine(
-            'mysql+oursql://',
-            strategy='mock',
-            executor=executor
-        )
-        elixir.metadata.bind = engine
-        elixir.setup_all()
-        elixir.create_all()
-
-if __name__ == '__main__':
-    tagopsdb.init(
-        url=dict(
-            username='tagopsdb_reader',
-            password='removed',
-            host='opsdb.tagged.com',
-        ),
-        pool_recycle=3600
+def test():
+    proj = tagopsdb.Project(name='abuse-finder-project')
+    pkg_def = tagopsdb.PackageDefinition(
+        deploy_type='rpm',
+        validation_type='matching',
+        name='abuse-finder-name',
+        path='abuse-finder-path',
+        arch='noarch',
+        build_type='jenkins',
+        build_host='javabuild',
+        env_specific=0,
+    )
+    name = tagopsdb.PackageName(
+        name='abuse-finder-package-name',
+        package_definition=pkg_def
     )
 
-    classes = discover_models()
-    print '%d classes discovered' % len(classes)
-    for cls in classes:
-        test_model_and_direct_relationships(cls)
-        print '-' * 80
+    loc = tagopsdb.PackageLocation(
+        name=pkg_def.name,
+        path=pkg_def.path,
+        arch=pkg_def.arch,
+        pkg_type=pkg_def.build_type,
+        build_host=pkg_def.build_host,
+        environment=pkg_def.env_specific,
+        app_name='abuse-finder-app',
+        project_type='application',
+    )
+
+    proj.package_definitions.append(pkg_def)
+    proj.apps.append(tagopsdb.Application.first())
+    tagopsdb.Session.commit()
+
+
+if __name__ == '__main__':
+    try:
+        tagopsdb.init(
+            url=dict(
+                username='tds',
+                password='bleepbloop',
+                host='localhost',
+                database='tds_%s' % int(time.time()),
+            ),
+            pool_recycle=3600,
+            create=True,
+        )
+
+        create_environments()
+        create_vlans()
+        create_ganglia()
+        create_applications()
+        test()
+        # import code
+        # code.interact(local=locals())
+    finally:
+        tagopsdb.destroy()

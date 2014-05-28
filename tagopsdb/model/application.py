@@ -52,4 +52,15 @@ class AppDefinition(Base):
         primaryjoin='NagApptypesServices.app_id == AppDefinition.id'
     )
     nag_host_services = relationship('NagHostsServices')
-    proj_pkg = relationship('ProjectPackage')
+
+    package_definitions = relationship(
+        'PackageDefinition',
+        secondary=lambda: Base.metadata.tables['project_package'],
+        passive_deletes=True,
+    )
+
+    projects = relationship(
+        'Project',
+        secondary=lambda: Base.metadata.tables['project_package'],
+        passive_deletes=True,
+    )
