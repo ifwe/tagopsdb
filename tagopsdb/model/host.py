@@ -40,6 +40,13 @@ class Host(Base):
     power_port = Column(u'powerPort', String(length=10))
     power_circuit = Column(u'powerCircuit', String(length=10))
     environment = Column(String(length=15))
+    environment_id = Column(
+        u'environment_id',
+        INTEGER(),
+        ForeignKey('environments.environmentID', ondelete='cascade'),
+        server_default=None
+    )
+    environment_new = relationship('Environment')
     host_deployments = relationship('HostDeployment')
     host_interfaces = relationship('HostInterface', backref='host')
     host_spec = relationship('HostSpec', uselist=False, backref='hosts')
