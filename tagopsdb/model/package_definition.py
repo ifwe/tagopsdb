@@ -33,4 +33,15 @@ class PackageDefinition(Base):
     )
     packages = relationship('Package', backref='package_definition')
     package_names = relationship('PackageName')
-    proj_pkg = relationship('ProjectPackage')
+
+    applications = relationship(
+        'AppDefinition',
+        secondary=lambda: Base.metadata.tables['project_package'],
+        passive_deletes=True,
+    )
+
+    projects = relationship(
+        'Project',
+        secondary=lambda: Base.metadata.tables['project_package'],
+        passive_deletes=True,
+    )
