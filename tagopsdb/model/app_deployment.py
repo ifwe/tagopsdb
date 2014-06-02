@@ -1,6 +1,7 @@
 from sqlalchemy import Enum, ForeignKey
 from sqlalchemy.dialects.mysql import INTEGER, SMALLINT, TIMESTAMP
 from sqlalchemy.sql.expression import func
+from sqlalchemy.orm import relationship
 
 from .meta import Base, Column, String
 
@@ -33,8 +34,15 @@ class AppDeployment(Base):
         nullable=False
     )
     environment = Column(String(length=15), nullable=False)
+    environment_id = Column(
+        u'environment_id',
+        INTEGER(),
+        ForeignKey('environments.environmentID', ondelete='cascade'),
+        nullable=False
+    )
     realized = Column(
         TIMESTAMP(),
         nullable=False,
         server_default=func.current_timestamp()
     )
+    environment_new = relationship('Environment')
