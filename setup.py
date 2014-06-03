@@ -73,6 +73,7 @@ setup_args = dict(
     license='Apache License, Version 2.0',
     packages=[
         'tagopsdb',
+        'tagopsdb.database',
         'tagopsdb.deploy',
         'tagopsdb.model',
         'tagopsdb.model.meta',
