@@ -3,4 +3,4 @@
 # once 2.0 is in full usage
 # WARNING WARNING WARNING
 
-from ..model.meta import Session
+from ..model import Session
