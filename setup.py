@@ -73,6 +73,7 @@ setup_args = dict(
     license='MIT',
     packages=[
         'tagopsdb',
+        'tagopsdb.database',
         'tagopsdb.deploy',
         'tagopsdb.model',
         'tagopsdb.model.meta',
