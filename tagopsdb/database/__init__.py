@@ -6,7 +6,7 @@
 import yaml
 import yaml.parser
 
-from ..model.meta import init
+from ..model import init
 
 
 def load_db_config():
