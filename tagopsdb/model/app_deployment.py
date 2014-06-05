@@ -33,7 +33,6 @@ class AppDeployment(Base):
         ),
         nullable=False
     )
-    environment = Column(String(length=15), nullable=False)
     environment_id = Column(
         u'environment_id',
         INTEGER(),
@@ -45,4 +44,8 @@ class AppDeployment(Base):
         nullable=False,
         server_default=func.current_timestamp()
     )
-    environment_new = relationship('Environment')
+    environment_obj = relationship('Environment')
+
+    @property
+    def environment(self):
+        return self.environment_obj.environment
