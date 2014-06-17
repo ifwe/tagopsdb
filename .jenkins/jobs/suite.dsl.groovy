@@ -1,5 +1,5 @@
 @GrabResolver('https://artifactory.tagged.com/artifactory/libs-release-local/')
-@Grab('com.tagged.build:jenkins-dsl-common:0.1.14')
+@Grab('com.tagged.build:jenkins-dsl-common:0.1.20')
 
 import com.tagged.build.common.*
 
@@ -43,10 +43,6 @@ def pyunit = project.downstreamJob {
 def build = project.pythonFPMMatrixJob {
     name 'build'
     logRotator(-1, 50)
-
-    triggers {
-        githubPush()
-    }
 
     steps {
         publishers {
