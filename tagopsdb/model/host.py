@@ -1,8 +1,11 @@
 from sqlalchemy import Enum, ForeignKey, UniqueConstraint
 from sqlalchemy.dialects.mysql import INTEGER, SMALLINT
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship
+from sqlalchemy.sql.expression import select
 
 from .meta import Base, Column, String
+from .environment import Environment
 
 
 class Host(Base):
@@ -52,9 +55,15 @@ class Host(Base):
     ilom = relationship('Ilom', uselist=False, backref='host')
     service_events = relationship('ServiceEvent', backref='host')
 
-    @property
+    @hybrid_property
     def environment(self):
         return getattr(self.environment_obj, 'environment', None)
+
+    @environment.expression
+    def environment(cls):
+        return select([Environment.environment]).\
+                where(Environment.id == cls.environment_id).correlate(cls).\
+                label('environment')
 
     __table_args__ = (
         UniqueConstraint(u'cageLocation', u'cabLocation', u'consolePort'),
