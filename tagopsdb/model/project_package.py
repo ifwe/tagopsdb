@@ -23,3 +23,7 @@ class ProjectPackage(Base):
         ForeignKey('app_definitions.AppID', ondelete='cascade'),
         primary_key=True
     )
+
+    app_definitions = relationship('AppDefinition')
+    package_definitions = relationship('PackageDefinition')
+    projects = relationship('Project')
