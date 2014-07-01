@@ -192,8 +192,8 @@ def find_apptype_by_appid(app_id):
                               'in the app_definitions table' % app_id)
 
 
-def find_deployed_version(package_name, env, version=None, revision=None,
-                          apptypes=None, apptier=False):
+def find_deployed_version(package_name, environment, version=None,
+                          revision=None, apptypes=None, apptier=False):
     """Find a given deployed version for a given package in a given
        environment for all related app types; search for full tier
        or host only deployment specifically
@@ -211,7 +211,7 @@ def find_deployed_version(package_name, env, version=None, revision=None,
              .join(AppDeployment)
              .join(AppDefinition)
              .filter(Package.pkg_name == package_name)
-             .filter(AppDeployment.environment == env)
+             .filter(AppDeployment.environment == environment)
              .filter(AppDeployment.status != 'invalidated'))
 
         if apptypes is not None:
@@ -241,7 +241,7 @@ def find_deployed_version(package_name, env, version=None, revision=None,
                   .join(Deployment)
                   .join(Package)
                   .filter(Package.pkg_name == package_name)
-                  .filter(Host.environment == env))
+                  .filter(Host.environment == environment))
 
         if apptypes is not None:
             hostsq = hostsq.filter(AppDefinition.app_type.in_(apptypes))
@@ -383,18 +383,18 @@ def find_hipchat_rooms_for_app(project, apptypes=None):
     return [ x[0] for x in rooms_query ]
 
 
-def find_latest_deployed_version(package_name, env, apptypes=None,
+def find_latest_deployed_version(package_name, environment, apptypes=None,
                                  apptier=False):
     """Find the most recent deployed version for a given package
        in a given environment for all related app types; search
        for full tier or host only deployment specifically
     """
 
-    return find_deployed_version(package_name, env, apptypes=apptypes,
+    return find_deployed_version(package_name, environment, apptypes=apptypes,
                                  apptier=apptier)
 
 
-def find_latest_deployment(package_name, app_id, env):
+def find_latest_deployment(package_name, app_id, environment):
     """Find the most recent deployment for a given package in a given
        environment for the given application ID
     """
@@ -404,13 +404,13 @@ def find_latest_deployment(package_name, app_id, env):
                    .join(Package)
                    .filter(Package.pkg_name==package_name)
                    .filter(AppDeployment.app_id==app_id)
-                   .filter(AppDeployment.environment==env)
+                   .filter(AppDeployment.environment==environment)
                    .filter(AppDeployment.status!='invalidated')
                    .order_by(AppDeployment.realized.desc())
                    .first())
 
 
-def find_latest_validated_deployment(package_name, app_id, env):
+def find_latest_validated_deployment(package_name, app_id, environment):
     """Find the most recent deployment that was validated for a given
        package, application type and environment.
     """
@@ -419,20 +419,20 @@ def find_latest_validated_deployment(package_name, app_id, env):
                    .join(Deployment)
                    .join(Package)
                    .filter(Package.pkg_name==package_name)
-                   .filter(AppDeployment.environment==env)
+                   .filter(AppDeployment.environment==environment)
                    .filter(AppDeployment.status=='validated')
                    .order_by(AppDeployment.realized.desc())
                    .first())
 
 
-def find_previous_validated_deployment(package_name, app_id, env):
+def find_previous_validated_deployment(package_name, app_id, environment):
     """Find the previous validated deployment, ignoring if the current
        deployment is validated or not, for a given package, application
        type and environment.
     """
 
     # Get current deployment
-    app_dep, pkg = find_latest_deployment(package_name, app_id, env)
+    app_dep, pkg = find_latest_deployment(package_name, app_id, environment)
 
     return (Session.query(AppDeployment, Package.id)
                    .join(Deployment)
@@ -440,13 +440,13 @@ def find_previous_validated_deployment(package_name, app_id, env):
                    .filter(AppDeployment.id!=app_dep.id)
                    .filter(Package.pkg_name==package_name)
                    .filter(AppDeployment.app_id==app_id)
-                   .filter(AppDeployment.environment==env)
+                   .filter(AppDeployment.environment==environment)
                    .filter(AppDeployment.status=='validated')
                    .order_by(AppDeployment.realized.desc())
                    .first())
 
 
-def find_running_deployment(app_id, env, hosts=None):
+def find_running_deployment(app_id, environment, hosts=None):
     """Find a currently running tier or host deployment (or deployments)
        for a given application type and environment
     """
@@ -456,7 +456,7 @@ def find_running_deployment(app_id, env, hosts=None):
                           AppDefinition.app_type)
                    .join(AppDefinition)
                    .filter(AppDeployment.app_id==app_id)
-                   .filter(AppDeployment.environment==env)
+                   .filter(AppDeployment.environment==environment)
                    .filter(AppDeployment.status=='inprogress')
                    .order_by(AppDeployment.realized.desc())
                    .first())
@@ -467,7 +467,7 @@ def find_running_deployment(app_id, env, hosts=None):
     host = (Session.query(HostDeployment.user, HostDeployment.realized,
                           Host.hostname, Host.environment)
                    .join(Host)
-                   .filter(Host.environment==env)
+                   .filter(Host.environment==environment)
                    .filter(Host.app_id==app_id)
                    .filter(HostDeployment.status=='inprogress')
                    .all())
@@ -508,7 +508,7 @@ def find_unvalidated_versions(time_delta, environment):
                    .all())
 
 
-def list_app_deployment_info(package_name, env, name, version, revision):
+def list_app_deployment_info(package_name, environment, name, version, revision):
     """Give all deployment information for a given package and version
        deployed to a given application tier and environment
     """
@@ -521,13 +521,13 @@ def list_app_deployment_info(package_name, env, name, version, revision):
                    .filter(Package.version==version)
                    .filter(Package.revision==revision)
                    .filter(AppDefinition.app_type == name)
-                   .filter(AppDeployment.environment == env)
+                   .filter(AppDeployment.environment == environment)
                    .order_by(AppDeployment.realized.desc())
                    .first())
 
 
-def list_host_deployment_info(package_name, env, version=None, revision=None,
-                              apptypes=None):
+def list_host_deployment_info(package_name, environment, version=None,
+                              revision=None, apptypes=None):
     """Give all deployment information for a given package
        deployed to hosts for given (or all) application types
        and in given environment
@@ -550,7 +550,7 @@ def list_host_deployment_info(package_name, env, version=None, revision=None,
         dep_info = dep_info.filter(AppDefinition.app_type.in_(apptypes))
 
     return (dep_info.filter(Package.pkg_name == package_name)
-                    .filter(Host.environment == env)
+                    .filter(Host.environment == environment)
                     .order_by(Host.hostname,
                               HostDeployment.realized.asc())
                     .all())
