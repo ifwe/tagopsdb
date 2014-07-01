@@ -11,14 +11,11 @@ from tagopsdb.exceptions import RepoException
 
 
 def add_app_location(project_type, pkg_type, pkg_name, app_name, path, arch,
-                     build_host, environment):
+                     build_host, env_specific):
     """Add the location of a given application"""
 
     # Ensure the environment parameter is boolean
-    if environment:
-        environment = True
-    else:
-        environment = False
+    env_specific = bool(env_specific)
 
     project = PackageLocation(
         project_type=project_type,
@@ -28,7 +25,7 @@ def add_app_location(project_type, pkg_type, pkg_name, app_name, path, arch,
         path=path,
         arch=arch,
         build_host=build_host,
-        environment=environment
+        environment=env_specific
     )
     Session.add(project)
     Session.flush()   # Needed to get pkgLocationID generated
@@ -37,7 +34,7 @@ def add_app_location(project_type, pkg_type, pkg_name, app_name, path, arch,
     project_new = add_project(app_name)
     pkg_def = add_package_definition('rpm', 'matching', pkg_name,
                                      path, arch, 'jenkins', build_host,
-                                     environment)
+                                     env_specific)
     Session.add(pkg_def)
     Session.flush()   # Needed to get pkg_def_id generated
 
