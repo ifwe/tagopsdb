@@ -15,6 +15,13 @@ class Deployment(Base):
         ForeignKey('packages.package_id', ondelete='cascade'),
         nullable=False
     )
+
+    package = relationship(
+        "Package",
+        uselist=False,
+        back_populates='deployments'
+    )
+
     user = Column(String(length=32), nullable=False)
     dep_type = Column(Enum('deploy', 'rollback'), nullable=False)
     declared = Column(

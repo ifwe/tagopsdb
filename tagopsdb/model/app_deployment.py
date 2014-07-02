@@ -1,10 +1,11 @@
 from sqlalchemy import Enum, ForeignKey
 from sqlalchemy.dialects.mysql import INTEGER, SMALLINT, TIMESTAMP
-from sqlalchemy.sql.expression import func
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship
+from sqlalchemy.sql.expression import func, select
 
 from .meta import Base, Column, String
-
+from .environment import Environment
 
 class AppDeployment(Base):
     __tablename__ = 'app_deployments'
@@ -33,7 +34,6 @@ class AppDeployment(Base):
         ),
         nullable=False
     )
-    environment = Column(String(length=15), nullable=False)
     environment_id = Column(
         u'environment_id',
         INTEGER(),
@@ -45,4 +45,14 @@ class AppDeployment(Base):
         nullable=False,
         server_default=func.current_timestamp()
     )
-    environment_new = relationship('Environment')
+    environment_obj = relationship('Environment')
+
+    @hybrid_property
+    def environment(self):
+        return self.environment_obj.environment
+
+    @environment.expression
+    def environment(cls):
+        return select([Environment.environment]).\
+                where(Environment.id == cls.environment_id).correlate(cls).\
+                label('environment')

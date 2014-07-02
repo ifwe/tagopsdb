@@ -15,9 +15,6 @@ import sqlalchemy as sa
 from sqlalchemy.dialects.mysql import INTEGER
 
 
-connection = op.get_bind()
-
-
 def upgrade():
     op.add_column(
         'app_deployments',
