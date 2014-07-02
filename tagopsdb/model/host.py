@@ -1,8 +1,11 @@
 from sqlalchemy import Enum, ForeignKey, UniqueConstraint
 from sqlalchemy.dialects.mysql import INTEGER, SMALLINT
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship
+from sqlalchemy.sql.expression import select
 
 from .meta import Base, Column, String
+from .environment import Environment
 
 
 class Host(Base):
@@ -39,19 +42,28 @@ class Host(Base):
     console_port = Column(u'consolePort', String(length=11))
     power_port = Column(u'powerPort', String(length=10))
     power_circuit = Column(u'powerCircuit', String(length=10))
-    environment = Column(String(length=15))
     environment_id = Column(
         u'environment_id',
         INTEGER(),
         ForeignKey('environments.environmentID', ondelete='cascade'),
         server_default=None
     )
-    environment_new = relationship('Environment')
+    environment_obj = relationship('Environment')
     host_deployments = relationship('HostDeployment')
     host_interfaces = relationship('HostInterface', backref='host')
     host_spec = relationship('HostSpec', uselist=False, backref='hosts')
     ilom = relationship('Ilom', uselist=False, backref='host')
     service_events = relationship('ServiceEvent', backref='host')
+
+    @hybrid_property
+    def environment(self):
+        return getattr(self.environment_obj, 'environment', None)
+
+    @environment.expression
+    def environment(cls):
+        return select([Environment.environment]).\
+                where(Environment.id == cls.environment_id).correlate(cls).\
+                label('environment')
 
     __table_args__ = (
         UniqueConstraint(u'cageLocation', u'cabLocation', u'consolePort'),
