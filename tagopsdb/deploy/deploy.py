@@ -363,6 +363,8 @@ def find_hosts_for_app(app_id, environment):
 def find_hipchat_rooms_for_app(project, apptypes=None):
     """Find the relevent HipChat rooms (if any) for a given project"""
 
+    app_defs = repo.find_app_packages_mapping(project)
+
     if apptypes is None:
         proj_type = repo.find_project_type(project)[0]
 
@@ -372,7 +374,6 @@ def find_hipchat_rooms_for_app(project, apptypes=None):
         if proj_type != 'application':
             return []
 
-        app_defs = repo.find_app_packages_mapping(project)
         apptypes = [ x.app_type for x in app_defs ]
 
     rooms_query = (Session.query(Hipchat.room_name)
