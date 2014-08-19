@@ -55,6 +55,7 @@ from .project import Project
 from .service_event import ServiceEvent
 from .subnet import Subnet
 from .vlan import Vlan
+from .vm_info import VmInfo
 from .zone import Zone
 
 Application = AppDefinition
@@ -76,5 +77,5 @@ __all__ = [
     'NsVipBinds', 'NsWeight', 'PackageName', 'Package',
     'PackageDefinition', 'PackageLocation', 'Port',
     'ProjectPackage', 'Project', 'ServiceEvent', 'Subnet', 'Vlan',
-    'Zone'
+    'VmInfo', 'Zone'
 ]
