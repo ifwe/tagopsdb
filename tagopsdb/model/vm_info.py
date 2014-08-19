@@ -21,4 +21,4 @@ class VmInfo(Base):
     pool = Column(String(length=10), nullable=False)
     numa_mode = Column(INTEGER(), server_default=None)
 
-    host = relationship('Host', uselist=False)
+    host = relationship('Host', uselist=False, back_populates='vm')
