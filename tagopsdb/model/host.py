@@ -54,6 +54,7 @@ class Host(Base):
     host_spec = relationship('HostSpec', uselist=False, backref='hosts')
     ilom = relationship('Ilom', uselist=False, backref='host')
     service_events = relationship('ServiceEvent', backref='host')
+    vm = relationship('VmInfo', uselist=False, back_populates='host')
 
     @hybrid_property
     def environment(self):
