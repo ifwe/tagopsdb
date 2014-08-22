@@ -1,4 +1,5 @@
 from sqlalchemy import ForeignKey, UniqueConstraint
+from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.mysql import INTEGER
 
 from .meta import Base, Column, String
@@ -15,7 +16,12 @@ class PackageName(Base):
         nullable=False
     )
 
+    package_definition = relationship(
+        'PackageDefinition',
+        back_populates='package_names'
+    )
+
     __table_args__ = (
         UniqueConstraint(u'name', u'pkg_def_id', name='name_pkg_def_id'),
-        { 'mysql_engine' : 'InnoDB', 'mysql_charset' : 'utf8', },
+        {'mysql_engine': 'InnoDB', 'mysql_charset': 'utf8',},
     )

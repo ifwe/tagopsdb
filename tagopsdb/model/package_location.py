@@ -1,6 +1,6 @@
 from sqlalchemy import Enum
 from sqlalchemy.dialects.mysql import BOOLEAN, INTEGER
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, synonym
 
 from .meta import Base, Column, String
 
@@ -16,6 +16,7 @@ class PackageLocation(Base):
     )
     pkg_type = Column(String(length=255), nullable=False)
     pkg_name = Column(String(length=255), nullable=False, unique=True)
+    name = synonym('pkg_name')
     app_name = Column(String(length=255), nullable=False, unique=True)
     path = Column(String(length=255), nullable=False, unique=True)
     arch = Column(
