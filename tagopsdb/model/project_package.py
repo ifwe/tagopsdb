@@ -24,6 +24,6 @@ class ProjectPackage(Base):
         primary_key=True
     )
 
-    app_definitions = relationship('AppDefinition')
-    package_definitions = relationship('PackageDefinition')
-    projects = relationship('Project')
+    app_definition = relationship('AppDefinition', uselist=False)
+    package_definition = relationship('PackageDefinition', uselist=False)
+    project = relationship('Project', uselist=False)

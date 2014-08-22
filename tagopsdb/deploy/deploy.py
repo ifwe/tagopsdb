@@ -138,10 +138,13 @@ def find_app_deployment(pkg_id, app_ids, environment):
             .join(Deployment)
             .join(Package)
             .join(AppDefinition)
-            .filter(Package.id == pkg_id)
-            .filter(AppDeployment.app_id.in_(app_ids))
-            .filter(AppDeployment.environment == environment)
-            .order_by(AppDeployment.realized.desc())
+            .filter(Package.id == pkg_id))
+
+    if app_ids:
+        subq = subq.filter(AppDeployment.app_id.in_(app_ids))
+
+    subq = (subq.filter(AppDeployment.environment == environment)
+            .order_by(AppDeployment.realized.desc(), AppDeployment.id.desc())
             .subquery(name='t_ordered'))
 
     return (Session.query(AppDeployment, AppDefinition.app_type,
@@ -162,8 +165,7 @@ def find_app_by_apptype(apptype):
                 .filter_by(app_type=apptype)
                 .one())
     except sqlalchemy.orm.exc.NoResultFound:
-        raise DeployException('App type "%s" not found in the '
-                              'app_definitions table' % apptype)
+        return None
 
 
 def find_app_by_depid(dep_id):
@@ -223,7 +225,7 @@ def find_deployed_version(package_name, environment, version=None,
         if revision is not None:
             subq = subq.filter(Package.revision == revision)
 
-        subq = (subq.order_by(AppDeployment.realized.desc())
+        subq = (subq.order_by(AppDeployment.realized.desc(), AppDeployment.id.desc())
                     .subquery(name='t_ordered'))
 
         # The actual column name must be used in the subquery
@@ -346,18 +348,11 @@ def find_host_deployments_not_ok(pkg_id, app_id, environment):
 def find_hosts_for_app(app_id, environment):
     """Find the hosts for a given application and environment"""
 
-    hosts = (Session.query(Host)
+    return (Session.query(Host)
                     .join(AppDefinition)
                     .filter(AppDefinition.id==app_id)
                     .filter(Host.environment==environment)
                     .all())
-
-    if not hosts:
-        raise DeployException('No hosts found for AppID "%s" in '
-                              'environment "%s" in the database'
-                              % (app_id, environment))
-
-    return hosts
 
 
 def find_hipchat_rooms_for_app(project, apptypes=None):
@@ -407,7 +402,7 @@ def find_latest_deployment(package_name, app_id, environment):
                    .filter(AppDeployment.app_id==app_id)
                    .filter(AppDeployment.environment==environment)
                    .filter(AppDeployment.status!='invalidated')
-                   .order_by(AppDeployment.realized.desc())
+                   .order_by(AppDeployment.realized.desc(), AppDeployment.id.desc())
                    .first())
 
 
@@ -422,7 +417,7 @@ def find_latest_validated_deployment(package_name, app_id, environment):
                    .filter(Package.pkg_name==package_name)
                    .filter(AppDeployment.environment==environment)
                    .filter(AppDeployment.status=='validated')
-                   .order_by(AppDeployment.realized.desc())
+                   .order_by(AppDeployment.realized.desc(), AppDeployment.id.desc())
                    .first())
 
 
@@ -443,7 +438,7 @@ def find_previous_validated_deployment(package_name, app_id, environment):
                    .filter(AppDeployment.app_id==app_id)
                    .filter(AppDeployment.environment==environment)
                    .filter(AppDeployment.status=='validated')
-                   .order_by(AppDeployment.realized.desc())
+                   .order_by(AppDeployment.realized.desc(), AppDeployment.id.desc())
                    .first())
 
 
@@ -459,7 +454,7 @@ def find_running_deployment(app_id, environment, hosts=None):
                    .filter(AppDeployment.app_id==app_id)
                    .filter(AppDeployment.environment==environment)
                    .filter(AppDeployment.status=='inprogress')
-                   .order_by(AppDeployment.realized.desc())
+                   .order_by(AppDeployment.realized.desc(), AppDeployment.id.desc())
                    .first())
 
     if tier:
@@ -495,7 +490,7 @@ def find_unvalidated_versions(time_delta, environment):
                    .join(AppDefinition)
                    .filter(AppDeployment.status!='invalidated')
                    .filter(AppDeployment.environment==environment)
-                   .order_by(AppDeployment.realized.desc())
+                   .order_by(AppDeployment.realized.desc(), AppDeployment.id.desc())
                    .subquery(name='t_ordered'))
 
     return (Session.query(subq.c.pkg_name, subq.c.version, subq.c.revision,
@@ -523,7 +518,7 @@ def list_app_deployment_info(package_name, environment, name, version, revision)
                    .filter(Package.revision==revision)
                    .filter(AppDefinition.app_type == name)
                    .filter(AppDeployment.environment == environment)
-                   .order_by(AppDeployment.realized.desc())
+                   .order_by(AppDeployment.realized.desc(), AppDeployment.id.desc())
                    .first())
 
 

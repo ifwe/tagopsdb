@@ -12,6 +12,7 @@ def seed():
     create_package_names()
     create_projects()
     create_project_packages()
+    create_hipchats()
     model.Session.commit()
 
 
@@ -46,9 +47,9 @@ def create_ganglia():
 
 def create_applications():
     ganglia = model.Ganglia.first()
-    for app_name in ('clamor', 'web', 'hubot'):
+    for app_name in (model.Application.dummy, 'clamor', 'web', 'hubot'):
         model.Application.update_or_create(dict(
-            app_type=app_name,
+            name=app_name,
             host_base=app_name,
             puppet_class=app_name,
             ganglia_group_name='%s hosts' % app_name,
@@ -98,3 +99,15 @@ def create_project_packages():
             project_id=proj.id,
             pkg_def_id=pkg.id
         ), False)
+
+def create_hipchats():
+    import random, string
+    def randomword(length):
+        return ''.join(random.choice(string.lowercase) for i in range(length))
+
+    for app in model.Application.all():
+        for i in range(random.randint(1,3)):
+            hipchat = model.Hipchat.update_or_create(dict(
+                room_name=randomword(6)
+            ))
+            app.hipchats.append(hipchat)

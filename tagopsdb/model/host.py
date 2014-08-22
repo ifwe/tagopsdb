@@ -1,7 +1,7 @@
 from sqlalchemy import Enum, ForeignKey, UniqueConstraint
 from sqlalchemy.dialects.mysql import INTEGER, SMALLINT
 from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, synonym
 from sqlalchemy.sql.expression import select
 
 from .meta import Base, Column, String
@@ -25,6 +25,7 @@ class Host(Base):
         nullable=False
     )
     hostname = Column(String(length=30))
+    name = synonym('hostname')
     arch = Column(String(length=10))
     kernel_version = Column(u'kernelVersion', String(length=20))
     distribution = Column(String(length=20))
@@ -55,6 +56,7 @@ class Host(Base):
     ilom = relationship('Ilom', uselist=False, backref='host')
     service_events = relationship('ServiceEvent', backref='host')
     vm = relationship('VmInfo', uselist=False, back_populates='host')
+    application = relationship('AppDefinition')
 
     @hybrid_property
     def environment(self):
