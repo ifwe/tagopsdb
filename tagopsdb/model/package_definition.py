@@ -1,6 +1,6 @@
 from sqlalchemy import Enum
 from sqlalchemy.dialects.mysql import BOOLEAN, INTEGER, TIMESTAMP
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, synonym
 from sqlalchemy.sql.expression import func
 
 from .meta import Base, Column, String
@@ -13,6 +13,7 @@ class PackageDefinition(Base):
     deploy_type = Column(String(length=30), nullable=False)
     validation_type = Column(String(length=15), nullable=False)
     pkg_name = Column(String(length=255), nullable=False)
+    name = synonym('pkg_name')
     path = Column(String(length=255), nullable=False)
     arch = Column(
         Enum('i386', 'x86_64', 'noarch'),
@@ -26,13 +27,18 @@ class PackageDefinition(Base):
     )
     build_host = Column(String(length=255), nullable=False)
     env_specific = Column(BOOLEAN(), nullable=False, server_default='0')
+    environment_specific = synonym('env_specific')
+
     created = Column(
         TIMESTAMP(),
         nullable=False,
         server_default=func.current_timestamp()
     )
-    packages = relationship('Package', backref='package_definition')
-    package_names = relationship('PackageName')
+    packages = relationship('Package', back_populates='package_definition')
+    package_names = relationship(
+        'PackageName',
+        back_populates="package_definition"
+    )
 
     applications = relationship(
         'AppDefinition',

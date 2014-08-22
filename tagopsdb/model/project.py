@@ -14,10 +14,16 @@ class Project(Base):
         'AppDefinition',
         secondary=lambda: Base.metadata.tables['project_package'],
         passive_deletes=True,
+        lazy=False,
     )
+
 
     package_definitions = relationship(
         'PackageDefinition',
         secondary=lambda: Base.metadata.tables['project_package'],
         passive_deletes=True,
     )
+
+    @property
+    def targets(self):
+        return self.applications
