@@ -48,6 +48,20 @@ def add_app_location(project_type, pkg_type, pkg_name, app_name, path, arch,
 def add_app_packages_mapping(project, project_new, pkg_def, app_types):
     """Add the mappings of the app types for a given project"""
 
+    existing_apptypes = [x.name for x in project_new.applications]
+    if AppDefinition.dummy not in (existing_apptypes + app_types):
+        app_types.append(AppDefinition.dummy)
+
+    for app_type in list(app_types):
+        if app_type in existing_apptypes:
+            if app_type == AppDefinition.dummy:
+                app_types.remove(app_type)
+            else:
+                raise Exception(
+                    '"%s" is already a part of "%s"',
+                    app_type, project_new.name
+                )
+
     for app_type in app_types:
         try:
             app_def = (Session.query(AppDefinition)
@@ -61,9 +75,9 @@ def add_app_packages_mapping(project, project_new, pkg_def, app_types):
 
         # Transitional code to synchronize with new tables
         proj_pkg = ProjectPackage()
-        proj_pkg.projects = project_new
-        proj_pkg.package_definitions = pkg_def
-        proj_pkg.app_definitions = app_def
+        proj_pkg.project = project_new
+        proj_pkg.package_definition = pkg_def
+        proj_pkg.app_definition = app_def
         Session.add(proj_pkg)
 
 
@@ -115,6 +129,8 @@ def delete_app_location(app_name):
 def delete_app_packages_mapping(project, app_types):
     """Delete the mappings of the app types for a given project"""
 
+    project_new = Session.query(Project).filter_by(name=project.app_name).one()
+
     for app_type in app_types:
         try:
             app_def = (Session.query(AppDefinition)
@@ -124,7 +140,10 @@ def delete_app_packages_mapping(project, app_types):
             raise RepoException('App type "%s" is not found in the '
                                 'Application table' % app_type)
 
-        project.app_definitions.remove(app_def)
+
+        for rel in (project.app_definitions, project_new.applications):
+            if app_def in rel:
+                rel.remove(app_def)
 
 
 def find_app_location(app_name):
@@ -135,8 +154,7 @@ def find_app_location(app_name):
                        .filter_by(app_name=app_name)
                        .one())
     except sqlalchemy.orm.exc.NoResultFound:
-        raise RepoException('No entry found for project "%s" in '
-                            'the PackageLocation table' % app_name)
+        return None
 
 
 def find_app_package(project, app_id):
@@ -165,8 +183,7 @@ def find_app_packages_mapping(app_name):
                        .all())
 
     if not app_defs:
-        raise RepoException('No entries found for project "%s" in '
-                            'the app_packages table' % app_name)
+        return []
 
     return app_defs
 

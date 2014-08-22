@@ -51,6 +51,9 @@ def find_package(app_name, version, revision):
 
     pkg_loc = repo.find_app_location(app_name)
 
+    if pkg_loc is None:
+        return None
+
     try:
         return (Session.query(Package)
                        .filter_by(pkg_name=pkg_loc.pkg_name)
