@@ -1,6 +1,6 @@
 from sqlalchemy import Enum, ForeignKey, UniqueConstraint
 from sqlalchemy.dialects.mysql import INTEGER, TIMESTAMP
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, synonym
 from sqlalchemy.sql.expression import func
 
 from .meta import Base, Column, String
@@ -16,6 +16,7 @@ class Package(Base):
         nullable=False
     )
     pkg_name = Column(String(length=255), nullable=False)
+    name = synonym('pkg_name')
     version = Column(String(length=63), nullable=False)
     revision = Column(String(length=63), nullable=False)
     status = Column(
@@ -37,6 +38,10 @@ class Package(Base):
         Enum(u'application', u'kafka-config', u'tagconfig'),
         nullable=False,
         server_default='application'
+    )
+    package_definition = relationship(
+        'PackageDefinition',
+        back_populates='packages'
     )
     deployments = relationship('Deployment', back_populates='package')
 

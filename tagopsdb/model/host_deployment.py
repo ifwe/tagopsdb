@@ -1,6 +1,7 @@
 from sqlalchemy import Enum, ForeignKey
 from sqlalchemy.dialects.mysql import INTEGER, TIMESTAMP
 from sqlalchemy.sql.expression import func
+from sqlalchemy.orm import relationship, synonym
 
 from .meta import Base, Column, String
 
@@ -28,3 +29,4 @@ class HostDeployment(Base):
         nullable=False,
         server_default=func.current_timestamp()
     )
+    created_at = synonym('realized')

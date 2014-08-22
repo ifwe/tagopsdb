@@ -8,6 +8,9 @@ from .schema import References
 
 
 def init(**config):
+    if initialized() and not config.get('force'):
+        return
+
     url = config.pop('url', {})
     url.setdefault('drivername', 'mysql+oursql')
     url.setdefault('database', 'TagOpsDB')
@@ -27,15 +30,20 @@ def init(**config):
     if do_create:
         Base.metadata.create_all(engine)
 
+    global Session
+    if Session is None:
+        Session = scoped_session(sessionmaker())
+
     Session.configure(bind=engine)
 
 
 def destroy():
-    Session.close()
-    sqlalchemy.orm.clear_mappers()
-    Base.metadata.drop_all()
+    if initialized():
+        global Session
+        Session.close()
+        Session.remove()
+        Session = None
     Base.metadata.bind.execute('DROP DATABASE IF EXISTS %s' % Base.metadata.bind.url.database)
-    Base.metadata.clear()
 
 
 class TagOpsDB(References):
@@ -72,6 +80,13 @@ class TagOpsDB(References):
             return None
 
     get = get_by
+
+    @classmethod
+    def find(cls, **kwds):
+        try:
+            return cls.query().filter_by(**kwds).all()
+        except sqlalchemy.orm.exc.NoResultFound as e:
+            return []
 
     @classmethod
     def all(cls, *args, **kwargs):
@@ -151,6 +166,10 @@ class TagOpsDB(References):
 Session = scoped_session(sessionmaker())
 
 Base = declarative_base(cls=TagOpsDB)
+
+def initialized():
+    'Whether or not init() has been called'
+    return Session is not None and Session.bind is not None
 
 # Constraint naming convention
 #Base.metadata.naming_convention = {
