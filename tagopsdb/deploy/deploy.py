@@ -5,7 +5,7 @@ from sqlalchemy.sql import and_
 
 import tagopsdb.deploy.repo as repo
 
-from tagopsdb.model import Session
+from tagopsdb import Session
 from tagopsdb.model import AppDefinition, AppDeployment, \
     Deployment, Environment, Hipchat, HostDeployment, Host, Package
 from tagopsdb.exceptions import DeployException
