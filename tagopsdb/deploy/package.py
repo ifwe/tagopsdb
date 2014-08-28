@@ -4,7 +4,7 @@ from sqlalchemy.sql.expression import func
 
 import tagopsdb.deploy.repo as repo
 
-from tagopsdb.model import Session
+from tagopsdb import Session
 from tagopsdb.model import (
     PackageDefinition, PackageLocation, Package, ProjectPackage
 )

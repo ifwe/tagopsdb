@@ -2,7 +2,7 @@ import sqlalchemy.orm.exc
 
 from sqlalchemy import func
 
-from tagopsdb.model import Session
+from tagopsdb import Session
 from tagopsdb.model import (
     AppDefinition, PackageDefinition, PackageLocation, PackageName,
     ProjectPackage, Project

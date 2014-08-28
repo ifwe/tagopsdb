@@ -1,4 +1,4 @@
-from .meta import Base, Session, init, destroy
+from .meta import Base, init, destroy
 
 from .app_deployment import AppDeployment
 from .app_hipchat_rooms import app_hipchat_rooms
@@ -61,7 +61,7 @@ from .zone import Zone
 Application = AppDefinition
 
 __all__ = [
-    'Base', 'Session', 'init', 'destroy', 'Application',
+    'Base', 'init', 'destroy', 'Application',
     'AppDefinition', 'AppDeployment', 'app_hipchat_rooms',
     'app_jmx_attribute', 'app_package', 'Asset', 'Cname',
     'DefaultSpec', 'Deployment', 'Environment', 'Ganglia',

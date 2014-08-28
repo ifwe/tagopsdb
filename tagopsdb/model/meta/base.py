@@ -10,6 +10,8 @@ from .schema import References
 def init(**config):
     if initialized() and not config.get('force'):
         return
+    global Session, _initialized
+    _initialized = True
 
     url = config.pop('url', {})
     url.setdefault('drivername', 'mysql+oursql')
@@ -30,19 +32,17 @@ def init(**config):
     if do_create:
         Base.metadata.create_all(engine)
 
-    global Session
-    if Session is None:
-        Session = scoped_session(sessionmaker())
-
+    Session = scoped_session(sessionmaker())
     Session.configure(bind=engine)
 
 
 def destroy():
     if initialized():
-        global Session
+        global Session, _initialized
         Session.close()
         Session.remove()
         Session = None
+        _initialized = False
     Base.metadata.bind.execute('DROP DATABASE IF EXISTS %s' % Base.metadata.bind.url.database)
 
 
@@ -163,13 +163,13 @@ class TagOpsDB(References):
                 setattr(self, key, value)
 
 
-Session = scoped_session(sessionmaker())
-
+Session = None
+_initialized = False
 Base = declarative_base(cls=TagOpsDB)
 
 def initialized():
     'Whether or not init() has been called'
-    return Session is not None and Session.bind is not None
+    return Session is not None and _initialized
 
 # Constraint naming convention
 #Base.metadata.naming_convention = {
