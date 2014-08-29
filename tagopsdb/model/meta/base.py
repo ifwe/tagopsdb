@@ -1,4 +1,5 @@
 import sqlalchemy
+from collections import OrderedDict as odict
 
 from sqlalchemy.engine.url import URL
 from sqlalchemy.ext.declarative import declarative_base
@@ -53,17 +54,27 @@ class TagOpsDB(References):
         {'mysql_engine': 'InnoDB', 'mysql_charset': 'utf8'},
     )
 
-    def __repr__(self):
+    def to_dict(self):
         mapper = object_mapper(self)
-        keyvals = [(key, getattr(self, key))
-                   for key in mapper.columns.keys()]
+        return odict(
+            (key, getattr(self, key))
+            for key in mapper.columns.keys()
+        )
 
+    def __repr__(self):
         return '<%(class_name)s (%(table_name)s) %(keyvals_string)s>' % dict(
             class_name = type(self).__name__,
             table_name = self.__table__.name,
             keyvals_string =
-                ' '.join('%s=%r'% (key, val) for (key, val) in keyvals),
+                ' '.join('%s=%r'% (key, val)
+                    for (key, val) in self.to_dict().iteritems()),
         )
+
+    def __eq__(self, other):
+        if not callable(getattr(other, 'to_dict', None)):
+            return False
+
+        return self.to_dict().__eq__(other.to_dict())
 
     def delete(self, *args, **kwargs):
         return Session.delete(self, *args, **kwargs)
