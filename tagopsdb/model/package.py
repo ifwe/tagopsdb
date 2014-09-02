@@ -43,7 +43,11 @@ class Package(Base):
         'PackageDefinition',
         back_populates='packages'
     )
-    deployments = relationship('Deployment', back_populates='package')
+    deployments = relationship(
+        'Deployment',
+        back_populates='package',
+        order_by="Deployment.created_at, Deployment.id"
+    )
 
     __table_args__ = (
         UniqueConstraint(u'pkg_name', u'version', u'revision', u'builder',
