@@ -11,11 +11,10 @@ from tagopsdb.exceptions import RepoException
 
 
 def add_app_location(project_type, pkg_type, pkg_name, app_name, path, arch,
-                     build_host, env_specific):
+                     build_host):
     """Add the location of a given application"""
 
     # Ensure the environment parameter is boolean
-    env_specific = bool(env_specific)
 
     project = PackageLocation(
         project_type=project_type,
@@ -25,7 +24,7 @@ def add_app_location(project_type, pkg_type, pkg_name, app_name, path, arch,
         path=path,
         arch=arch,
         build_host=build_host,
-        environment=env_specific
+        environment=False
     )
     Session.add(project)
     Session.flush()   # Needed to get pkgLocationID generated
@@ -33,8 +32,7 @@ def add_app_location(project_type, pkg_type, pkg_name, app_name, path, arch,
     # Transitional code to synchronize with new tables
     project_new = add_project(app_name)
     pkg_def = add_package_definition('rpm', 'matching', pkg_name,
-                                     path, arch, 'jenkins', build_host,
-                                     env_specific)
+                                     path, arch, 'jenkins', build_host)
     Session.add(pkg_def)
     Session.flush()   # Needed to get pkg_def_id generated
 
@@ -82,7 +80,7 @@ def add_app_packages_mapping(project, project_new, pkg_def, app_types):
 
 
 def add_package_definition(deploy_type, validation_type, name, path,
-                           arch, build_type, build_host, env_specific):
+                           arch, build_type, build_host):
     """Add base definition for a package"""
 
     pkg_def = PackageDefinition(
@@ -93,7 +91,6 @@ def add_package_definition(deploy_type, validation_type, name, path,
         arch=arch,
         build_type=build_type,
         build_host=build_host,
-        env_specific=env_specific,
         created=func.current_timestamp()
     )
     Session.add(pkg_def)

@@ -54,7 +54,6 @@ def test():
         arch='noarch',
         build_type='jenkins',
         build_host='javabuild',
-        env_specific=0,
     )
     name = tagopsdb.PackageName(
         name='abuse-finder-package-name',
@@ -67,7 +66,7 @@ def test():
         arch=pkg_def.arch,
         pkg_type=pkg_def.build_type,
         build_host=pkg_def.build_host,
-        environment=pkg_def.env_specific,
+        environment=False,
         app_name='abuse-finder-app',
         project_type='application',
     )
