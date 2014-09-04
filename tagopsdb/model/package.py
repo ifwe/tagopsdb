@@ -43,6 +43,7 @@ class Package(Base):
         'PackageDefinition',
         back_populates='packages'
     )
+    application = synonym('package_definition')
     deployments = relationship(
         'Deployment',
         back_populates='package',
