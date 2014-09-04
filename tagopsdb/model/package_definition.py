@@ -54,6 +54,7 @@ class PackageDefinition(Base):
         secondary=lambda: Base.metadata.tables['project_package'],
         passive_deletes=True,
         back_populates='package_definitions',
+        viewonly=True,
     )
 
     projects = relationship(
@@ -61,4 +62,5 @@ class PackageDefinition(Base):
         secondary=lambda: Base.metadata.tables['project_package'],
         passive_deletes=True,
         back_populates='package_definitions',
+        viewonly=True,
     )

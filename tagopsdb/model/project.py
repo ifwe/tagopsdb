@@ -16,6 +16,7 @@ class Project(Base):
         passive_deletes=True,
         lazy=False,
         back_populates='projects',
+        viewonly=True,
     )
 
     package_definitions = relationship(
@@ -23,6 +24,7 @@ class Project(Base):
         secondary=lambda: Base.metadata.tables['project_package'],
         passive_deletes=True,
         back_populates='projects',
+        viewonly=True,
     )
 
     @property

@@ -61,6 +61,7 @@ class AppDefinition(Base):
         secondary=lambda: Base.metadata.tables['project_package'],
         passive_deletes=True,
         back_populates='applications',
+        viewonly=True,
     )
 
     projects = relationship(
@@ -68,4 +69,5 @@ class AppDefinition(Base):
         secondary=lambda: Base.metadata.tables['project_package'],
         passive_deletes=True,
         back_populates='applications',
+        viewonly=True,
     )
