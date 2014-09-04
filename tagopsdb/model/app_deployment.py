@@ -26,6 +26,7 @@ class AppDeployment(Base):
     )
 
     application = relationship("AppDefinition", uselist=False)
+    target = synonym('application')
     deployment = relationship("Deployment", uselist=False)
 
     user = Column(String(length=32), nullable=False)
