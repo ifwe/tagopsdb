@@ -15,13 +15,14 @@ class Project(Base):
         secondary=lambda: Base.metadata.tables['project_package'],
         passive_deletes=True,
         lazy=False,
+        back_populates='projects',
     )
-
 
     package_definitions = relationship(
         'PackageDefinition',
         secondary=lambda: Base.metadata.tables['project_package'],
         passive_deletes=True,
+        back_populates='projects',
     )
 
     @property
