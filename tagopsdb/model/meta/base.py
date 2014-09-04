@@ -79,6 +79,9 @@ class TagOpsDB(References):
     def delete(self, *args, **kwargs):
         return Session.delete(self, *args, **kwargs)
 
+    def refresh(self):
+        return Session.refresh(self)
+
     @classmethod
     def query(cls):
         return Session.query(cls)

@@ -16,6 +16,8 @@ class HostDeployment(Base):
         ForeignKey('deployments.DeploymentID', ondelete='cascade'),
         nullable=False
     )
+    deployment = relationship('Deployment', uselist=False)
+
     host_id = Column(
         u'HostID',
         INTEGER(),
