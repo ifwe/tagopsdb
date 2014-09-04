@@ -1,6 +1,7 @@
 from sqlalchemy import Enum
 from sqlalchemy.dialects.mysql import BOOLEAN, INTEGER, TIMESTAMP
 from sqlalchemy.orm import relationship, synonym
+from sqlalchemy.sql import and_
 from sqlalchemy.sql.expression import func
 
 from .meta import Base, Column, String
@@ -34,7 +35,15 @@ class PackageDefinition(Base):
         nullable=False,
         server_default=func.current_timestamp()
     )
-    packages = relationship('Package', back_populates='package_definition')
+
+    packages = relationship('Package',
+        primaryjoin=(
+            "(Package.pkg_def_id == PackageDefinition.id)"
+            " & (Package.status != 'removed')"
+        )
+    )
+
+    all_packages = relationship('Package', back_populates='package_definition')
     package_names = relationship(
         'PackageName',
         back_populates="package_definition"
