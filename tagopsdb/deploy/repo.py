@@ -43,7 +43,7 @@ def add_app_location(project_type, pkg_type, pkg_name, app_name, path, arch,
     return project, project_new, pkg_def
 
 
-def add_app_packages_mapping(project, project_new, pkg_def, app_types):
+def add_app_packages_mapping(project_new, pkg_def, app_types):
     """Add the mappings of the app types for a given project"""
 
     existing_apptypes = [x.name for x in project_new.applications]
@@ -69,7 +69,9 @@ def add_app_packages_mapping(project, project_new, pkg_def, app_types):
             raise RepoException('App type "%s" is not found in the '
                                 'Application table' % app_type)
 
-        project.app_definitions.append(app_def)
+        package_loc = PackageLocation.get(app_name=pkg_def.name)
+        if package_loc is not None:
+            package_loc.app_definitions.append(app_def)
 
         # Transitional code to synchronize with new tables
         proj_pkg = ProjectPackage()
