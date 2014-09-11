@@ -46,7 +46,8 @@ class PackageDefinition(Base):
     all_packages = relationship('Package', back_populates='package_definition')
     package_names = relationship(
         'PackageName',
-        back_populates="package_definition"
+        back_populates="package_definition",
+        passive_deletes=True,
     )
 
     applications = relationship(
