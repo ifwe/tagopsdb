@@ -593,6 +593,9 @@ def find_previous_app_deployment(package_name, environment, apptype):
     # Get current deployment
     app_dep = find_current_app_deployment(package_name, environment, apptype)
 
+    if app_dep is None:
+        return None
+
     return (
         Session.query(AppDeployment)
             .join(Deployment)
