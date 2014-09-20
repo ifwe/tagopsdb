@@ -97,11 +97,6 @@ class TagOpsDB(References):
         return q.all(*args, **kwargs)
 
     @classmethod
-    def filter(cls, *args, **kwargs):
-        q = cls.query()
-        return q.filter(*args, **kwargs)
-
-    @classmethod
     def update_or_create(cls, data, surrogate=True):
         pk_props = [x for x in cls.__table__.columns if x.primary_key]
 
