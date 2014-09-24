@@ -139,10 +139,9 @@ def delete_app_packages_mapping(project, app_types):
             raise RepoException('App type "%s" is not found in the '
                                 'Application table' % app_type)
 
-
         for rel in (project.app_definitions, project_new.applications):
             if app_def in rel:
-                rel.remove(app_def)
+                Session.delete(app_def)
 
 
 def find_app_location(app_name):
