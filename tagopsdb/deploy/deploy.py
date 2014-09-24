@@ -7,7 +7,8 @@ import tagopsdb.deploy.repo as repo
 
 from tagopsdb import Session
 from tagopsdb.model import AppDefinition, AppDeployment, \
-    Deployment, Environment, Hipchat, HostDeployment, Host, Package
+    Deployment, Environment, Hipchat, HostDeployment, Host, Package, \
+    PackageDefinition
 from tagopsdb.exceptions import DeployException
 
 
@@ -550,3 +551,91 @@ def list_host_deployment_info(package_name, environment, version=None,
                     .order_by(Host.hostname,
                               HostDeployment.realized.asc())
                     .all())
+
+
+def find_specific_app_deployment(package_name, environment, apptype,
+                                 version=None):
+    """Temporary workaround method for 'show' command to find a specific
+       deployment on a given tier.
+    """
+
+    app_dep = (
+        Session.query(AppDeployment)
+            .join(Deployment)
+            .join(Package)
+            .join(PackageDefinition)
+            .filter(PackageDefinition.name == package_name)
+            .filter(AppDeployment.environment == environment)
+            .filter(AppDeployment.status != 'invalidated')
+            .filter(AppDeployment.app_id == apptype.id)
+    )
+
+    if version is not None:
+        app_dep = app_dep.filter(Package.version == version)
+
+    return app_dep.order_by(AppDeployment.id.desc()).first()
+
+
+def find_current_app_deployment(package_name, environment, apptype):
+    """Temporary workaround method for 'show' command to find the current
+       deployment on a given tier.
+    """
+
+    return find_specific_app_deployment(package_name, environment, apptype)
+
+
+def find_previous_app_deployment(package_name, environment, apptype):
+    """Temporary workaround method for 'show' command to find the previous
+       validated deployment on a given tier (ignoring the current deployment,
+       validated or not).
+    """
+
+    # Get current deployment
+    app_dep = find_current_app_deployment(package_name, environment, apptype)
+
+    if app_dep is None:
+        return None
+
+    return (
+        Session.query(AppDeployment)
+            .join(Deployment)
+            .join(Package)
+            .join(PackageDefinition)
+            .filter(PackageDefinition.name == package_name)
+            .filter(AppDeployment.environment == environment)
+            .filter(AppDeployment.status == 'validated')
+            .filter(AppDeployment.app_id == apptype.id)
+            .filter(AppDeployment.id != app_dep.id)
+            .order_by(AppDeployment.id.desc())
+            .first()
+    )
+
+
+def find_current_host_deployments(package_name, environment, apptype,
+                                  version=None):
+    """Temporary workaround method for 'show' command to find the current
+       host deployments for a given tier.
+    """
+
+    # NOTE: unable to easily join PackageDefinition in here,
+    # so the filtering on the package name will fail once
+    # some upcoming DB schema changes are made; this will
+    # need to be fixed or replaced
+    host_deps = (
+        Session.query(HostDeployment)
+            .join(Deployment)
+            .join(Package)
+            .join(HostDeployment)
+            .join(Host)
+            .join(AppDefinition)
+            .filter(Package.pkg_name == package_name)
+            .filter(Host.environment == environment)
+            .filter(AppDefinition.id == apptype.id)
+    )
+
+    if version is not None:
+        host_deps = host_deps.filter(Package.version == version)
+
+    return (
+        host_deps.order_by(Host.hostname, HostDeployment.realized.asc()).all()
+    )
