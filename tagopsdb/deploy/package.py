@@ -6,7 +6,7 @@ import tagopsdb.deploy.repo as repo
 
 from tagopsdb import Session
 from tagopsdb.model import (
-    PackageDefinition, PackageLocation, Package, ProjectPackage
+    PackageDefinition, Package, ProjectPackage
 )
 from tagopsdb.exceptions import PackageException
 
@@ -14,9 +14,7 @@ from tagopsdb.exceptions import PackageException
 def add_package(app_name, version, revision, user):
     """Add the requested version for the package of a given application"""
 
-    pkg_loc = repo.find_app_location(app_name)
-    project = repo.find_project(app_name)
-    pkg_def = find_package_definition(project.id)
+    pkg_def = find_package_definition(app_name)
 
     if find_package(app_name, version, revision):
         raise PackageException('Current version of application "%s" '
@@ -24,14 +22,14 @@ def add_package(app_name, version, revision, user):
 
     pkg = Package(
         pkg_def_id=pkg_def.id,
-        pkg_name=pkg_loc.pkg_name,
+        pkg_name=app_name,
         version=version,
         revision=revision,
         status='pending',
         created=func.current_timestamp(),
         creator=user,
-        builder=pkg_loc.pkg_type,
-        project_type=pkg_loc.project_type
+        builder=pkg_def.build_type,
+        project_type='application'
     )
     Session.add(pkg)
 
@@ -49,14 +47,14 @@ def find_package(app_name, version, revision):
     # column in the 'packages' table) to filter; this may need to be
     # re-added at some point.
 
-    pkg_loc = repo.find_app_location(app_name)
+    pkg_def = find_package_definition(app_name)
 
-    if pkg_loc is None:
+    if pkg_def is None:
         return None
 
     try:
         return (Session.query(Package)
-                       .filter_by(pkg_name=pkg_loc.pkg_name)
+                       .filter_by(pkg_name=pkg_def.pkg_name)
                        .filter_by(version=version)
                        .filter_by(revision=revision)
                        .one())
@@ -64,22 +62,18 @@ def find_package(app_name, version, revision):
         return None
 
 
-def find_package_definition(project_id):
-    """Find package definition for a given package
-
-       Note that in this transitional state, we are actually checking
-       against the project and that there will be only one entry in
-       the ProjectPackage table for a given project.  THIS WILL CHANGE.
-    """
+def find_package_definition(app_name):
+    """Find package definition for a given package"""
 
     try:
+        # Note: can there be multiple package definitions
+        # with the same pkg_name?
         pkg_def = (Session.query(PackageDefinition)
-                          .join(ProjectPackage)
-                          .filter(ProjectPackage.project_id == project_id)
+                          .filter_by(pkg_name=app_name)
                           .first())
     except sqlalchemy.orm.exc.NoResultFound:
-        raise PackageException('Entry for project ID "%s" not found in '
-                               'ProjectPackage table' % project_id)
+        raise PackageException('Entry for application "%s" not found in '
+                               'PackageDefinition table' % app_name)
 
     return pkg_def
 
@@ -87,14 +81,12 @@ def find_package_definition(project_id):
 def list_packages(app_names):
     """Return all available packages in the repository"""
 
-    list_query = Session.query(Package)
+    if app_names is None:
+        return None
 
-    if app_names is not None:
-        list_query = \
-            (list_query.join(PackageLocation,
-                             PackageLocation.pkg_name == Package.pkg_name)
-                       .filter(PackageLocation.app_name.in_(app_names)))
-
-    return (list_query.order_by(Package.pkg_name, Package.version,
-                                Package.revision)
-                      .all())
+    return (Session.query(Package)
+                   .join(PackageDefinition)
+                   .filter(PackageDefinition.pkg_name == Package.pkg_name)
+                   .order_by(Package.pkg_name, Package.version,
+                             Package.revision)
+                   .all())

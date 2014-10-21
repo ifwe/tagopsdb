@@ -113,46 +113,23 @@ def add_project(name):
     return project
 
 
-def delete_app_location(app_name):
-    """Delete the location of a given application"""
-
-    try:
-        pkg_loc = find_app_location(app_name)
-    except sqlalchemy.orm.exc.NoResultFound:
-        raise RepoException('No application "%s" to remove from '
-                            'PackageLocation table' % app_name)
-
-    Session.delete(pkg_loc)
-
-
-def delete_app_packages_mapping(project, app_types):
-    """Delete the mappings of the app types for a given project"""
-
-    project_new = Session.query(Project).filter_by(name=project.app_name).one()
+def delete_project_packages_mapping(project, application, app_types):
+    """Delete the mappings of the app types for a given project
+       and application pair
+    """
 
     for app_type in app_types:
         try:
             app_def = (Session.query(AppDefinition)
-                              .filter_by(app_type=app_type)
+                              .filter_by(app_type=app_type.name)
                               .one())
         except sqlalchemy.orm.exc.NoResultFound:
             raise RepoException('App type "%s" is not found in the '
-                                'Application table' % app_type)
+                                'Application table' % app_type.name)
 
-        for rel in (project.app_definitions, project_new.applications):
+        for rel in project.applications:
             if app_def in rel:
-                Session.delete(app_def)
-
-
-def find_app_location(app_name):
-    """Find a given project"""
-
-    try:
-        return (Session.query(PackageLocation)
-                       .filter_by(app_name=app_name)
-                       .one())
-    except sqlalchemy.orm.exc.NoResultFound:
-        return None
+                rel.remove(app_def)
 
 
 def find_app_package(project, app_id):
