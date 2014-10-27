@@ -81,6 +81,23 @@ def add_app_packages_mapping(project_new, pkg_def, app_types):
         Session.add(proj_pkg)
 
 
+def add_project_package_mapping(project, application, app_types):
+    """Add the mappings for a given project, application and one or more
+       app types
+    """
+
+    # Note: eventually an 'application' may have multiple
+    # package definitions related to it; to be decided at
+    # a later date
+    for app_type in app_types:
+        proj_pkg = ProjectPackage(
+            project_id=project.id,
+            pkg_def_id=application.id,
+            app_id=app_type.id
+        )
+        Session.add(proj_pkg)
+
+
 def add_package_definition(deploy_type, validation_type, name, path,
                            arch, build_type, build_host):
     """Add base definition for a package"""
