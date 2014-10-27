@@ -180,6 +180,8 @@ class TagOpsDB(References):
 Session = None
 _initialized = False
 Base = declarative_base(cls=TagOpsDB)
+class HasDummy(object): dummy = '__dummy__'
+
 
 def initialized():
     'Whether or not init() has been called'

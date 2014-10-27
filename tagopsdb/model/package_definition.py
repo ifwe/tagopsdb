@@ -4,10 +4,10 @@ from sqlalchemy.orm import relationship, synonym
 from sqlalchemy.sql import and_
 from sqlalchemy.sql.expression import func
 
-from .meta import Base, Column, String
+from .meta import Base, Column, HasDummy, String
 
 
-class PackageDefinition(Base):
+class PackageDefinition(Base, HasDummy):
     __tablename__ = 'package_definitions'
 
     id = Column(u'pkg_def_id', INTEGER(), primary_key=True)
