@@ -1,3 +1,4 @@
+from sqlalchemy import ForeignKey
 from sqlalchemy.dialects.mysql import INTEGER
 from sqlalchemy.orm import relationship
 
@@ -12,4 +13,5 @@ class Environment(Base):
     env = Column(String(length=12), nullable=False, unique=True)
     domain = Column(String(length=32), nullable=False, unique=True)
     prefix = Column(String(length=1), nullable=False)
-    host_specs = relationship('DefaultSpec')
+    zone_id = Column(INTEGER(), ForeignKey('zones.ZoneID'), nullable=False)
+    zone = relationship('Zone', uselist=False)
