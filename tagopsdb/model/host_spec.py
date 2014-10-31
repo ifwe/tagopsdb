@@ -16,7 +16,7 @@ class HostSpec(Base):
     disk_size = Column(u'diskSize', INTEGER(display_width=6))
     vendor = Column(String(length=20))
     model = Column(String(length=20))
-    control = Column(Enum(u'digi', u'ipmi', u'libvirt', u'vmware'))
+    control = Column(Enum(u'digi', u'ipmi', u'libvirt', u'rlm', u'vmware'))
     virtual = Column(BOOLEAN(), nullable=False, server_default='0')
     expansions = Column(MEDIUMTEXT())
     services = relationship('NsServiceMax')
