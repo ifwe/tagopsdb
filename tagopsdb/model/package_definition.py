@@ -36,14 +36,21 @@ class PackageDefinition(Base, HasDummy):
         server_default=func.current_timestamp()
     )
 
-    packages = relationship('Package',
+    packages = relationship(
+        'Package',
         primaryjoin=(
             "(Package.pkg_def_id == PackageDefinition.id)"
             " & (Package.status != 'removed')"
-        )
+        ),
+        passive_deletes=True,
     )
 
-    all_packages = relationship('Package', back_populates='package_definition')
+    all_packages = relationship(
+        'Package',
+        back_populates='package_definition',
+        passive_deletes=True,
+    )
+
     package_names = relationship(
         'PackageName',
         back_populates="package_definition",
