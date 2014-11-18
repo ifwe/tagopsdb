@@ -56,8 +56,8 @@ class Host(Base):
     ilom = relationship('Ilom', uselist=False, backref='host')
     service_events = relationship('ServiceEvent', backref='host')
     vm = relationship('VmInfo', uselist=False, back_populates='host')
-    applications = relationship('AppDefinition', uselist=True)
-    targets = synonym('applications')
+    application = relationship('AppDefinition', uselist=False)
+    target = synonym('application')
 
     @hybrid_property
     def environment(self):
