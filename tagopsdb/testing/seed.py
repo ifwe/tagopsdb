@@ -4,6 +4,7 @@ from .. import model as model
 
 
 def seed():
+    create_zones()
     create_environments()
     # create_vlans()
     create_ganglia()
@@ -16,17 +17,25 @@ def seed():
     model.Session.commit()
 
 
+def create_zones():
+    for zone in ('example-development.com', 'example-staging.com',
+                 'example-production.com'):
+        model.Zone.update_or_create(dict(zone_name=zone))
+
+
 def create_environments():
     for long in ('development', 'staging', 'production'):
         prefix = long[0]
         short = long[:4]
         domain = 'example-%s.org' % short
+        zone_id = model.Zone.get(zone_name=domain)
 
         model.Environment.update_or_create(dict(
             environment=long,
             env=short,
             domain=domain,
-            prefix=prefix
+            prefix=prefix,
+            zone_id=zone_id,
         ))
 
 

@@ -44,7 +44,11 @@ def destroy():
         Session.remove()
         Session = None
         _initialized = False
-    Base.metadata.bind.execute('DROP DATABASE IF EXISTS %s' % Base.metadata.bind.url.database)
+
+    if Base.metadata.bind is not None:
+        Base.metadata.bind.execute('DROP DATABASE IF EXISTS %s' % Base.metadata.bind.url.database)
+        Base.metadata.bind.dispose()
+        Base.metadata.bind = None
 
 
 class TagOpsDB(References):
@@ -180,6 +184,8 @@ class TagOpsDB(References):
 Session = None
 _initialized = False
 Base = declarative_base(cls=TagOpsDB)
+class HasDummy(object): dummy = '__dummy__'
+
 
 def initialized():
     'Whether or not init() has been called'
