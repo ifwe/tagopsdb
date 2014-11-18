@@ -3,7 +3,6 @@ from sqlalchemy.dialects.mysql import INTEGER, SMALLINT, TIMESTAMP
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship, synonym
 from sqlalchemy.sql.expression import func, select
-from sqlalchemy.ext.hybrid import hybrid_property
 
 from .meta import Base, Column, String
 from .environment import Environment
