@@ -4,10 +4,10 @@ from sqlalchemy.orm import relationship, synonym
 from sqlalchemy.sql import and_
 from sqlalchemy.sql.expression import func
 
-from .meta import Base, Column, String
+from .meta import Base, Column, HasDummy, String
 
 
-class PackageDefinition(Base):
+class PackageDefinition(Base, HasDummy):
     __tablename__ = 'package_definitions'
 
     id = Column(u'pkg_def_id', INTEGER(), primary_key=True)
@@ -36,14 +36,21 @@ class PackageDefinition(Base):
         server_default=func.current_timestamp()
     )
 
-    packages = relationship('Package',
+    packages = relationship(
+        'Package',
         primaryjoin=(
             "(Package.pkg_def_id == PackageDefinition.id)"
             " & (Package.status != 'removed')"
-        )
+        ),
+        passive_deletes=True,
     )
 
-    all_packages = relationship('Package', back_populates='package_definition')
+    all_packages = relationship(
+        'Package',
+        back_populates='package_definition',
+        passive_deletes=True,
+    )
+
     package_names = relationship(
         'PackageName',
         back_populates="package_definition",

@@ -2,19 +2,18 @@ from sqlalchemy import Enum, ForeignKey
 from sqlalchemy.dialects.mysql import INTEGER, SMALLINT
 from sqlalchemy.orm import relationship, synonym
 
-from .meta import Base, Column, String
+from .meta import Base, Column, HasDummy, String
 
 
-class AppDefinition(Base):
+class AppDefinition(Base, HasDummy):
     __tablename__ = 'app_definitions'
-
-    dummy = '__dummy__'
 
     id = Column(u'AppID', SMALLINT(display_width=2), primary_key=True)
     distribution = Column(
         Enum(
             u'centos5.4', u'centos6.2', u'centos6.4', u'centos6.5',
             u'rhel5.3', u'rhel6.2', u'rhel6.3', u'rhel6.4', u'rhel6.5',
+            u'ontap',
         ),
         nullable=False,
         server_default='centos6.4'
