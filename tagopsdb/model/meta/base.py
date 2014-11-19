@@ -1,4 +1,5 @@
 import sqlalchemy
+
 from collections import OrderedDict as odict
 
 from sqlalchemy.engine.url import URL
@@ -99,18 +100,42 @@ class TagOpsDB(References):
 
     get = get_by
 
+    @staticmethod
+    def limit(query, kwds):
+        limit_arg = kwds.pop('limit', None)
+        if limit_arg is not None:
+            query = query.limit(limit_arg)
+
+        return query
+
+    @staticmethod
+    def order_by(query, kwds):
+        order_by_arg = kwds.pop('order_by', None)
+        if order_by_arg is not None:
+            desc_arg = kwds.pop('desc', None)
+            if desc_arg is not None:
+                query = query.order_by(sqlalchemy.desc(order_by_arg))
+            else:
+                query = query.order_by(order_by_arg)
+
+        return query
+
     @classmethod
     def find(cls, **kwds):
         try:
-            return cls.query().filter_by(**kwds).all()
+            q = cls.query()
+            q = cls.order_by(q, kwds)
+            q = cls.limit(q, kwds)
+
+            return q.filter_by(**kwds).all()
         except sqlalchemy.orm.exc.NoResultFound as e:
             return []
 
     @classmethod
     def all(cls, *args, **kwargs):
         q = cls.query()
-        if 'limit' in kwargs:
-            q = q.limit(kwargs.pop('limit'))
+        q = cls.order_by(q, kwargs)
+        q = cls.limit(q, kwargs)
 
         return q.all(*args, **kwargs)
 
