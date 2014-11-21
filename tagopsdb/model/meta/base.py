@@ -6,6 +6,8 @@ from sqlalchemy.engine.url import URL
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import object_mapper, scoped_session, sessionmaker
 
+import tagopsdb.exceptions
+
 from .schema import References
 
 
@@ -95,6 +97,8 @@ class TagOpsDB(References):
     def get_by(cls, **kwds):
         try:
             return cls.query().filter_by(**kwds).one()
+        except sqlalchemy.orm.exc.MultipleResultsFound as e:
+            raise tagopsdb.exceptions.MultipleInstancesException(e)
         except sqlalchemy.orm.exc.NoResultFound as e:
             return None
 
