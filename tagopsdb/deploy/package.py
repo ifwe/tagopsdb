@@ -87,6 +87,7 @@ def list_packages(app_names):
     return (Session.query(Package)
                    .join(PackageDefinition)
                    .filter(PackageDefinition.pkg_name == Package.pkg_name)
+                   .filter(PackageDefinition.pkg_name.in_(app_names))
                    .order_by(Package.pkg_name, Package.version,
                              Package.revision)
                    .all())
