@@ -88,6 +88,7 @@ def list_packages(app_names):
                    .join(PackageDefinition)
                    .filter(PackageDefinition.pkg_name == Package.pkg_name)
                    .filter(PackageDefinition.pkg_name.in_(app_names))
+                   .filter(Package.status == 'completed')
                    .order_by(Package.pkg_name, Package.version,
                              Package.revision)
                    .all())
