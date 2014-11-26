@@ -136,12 +136,12 @@ class TagOpsDB(References):
     def find(cls, **kwds):
         filter_kwds = cls.find_filter(kwds.copy())
 
-        try:
-            q = cls.query()
-            q = q.filter_by(**filter_kwds)
-            q = cls.order_by(q, kwds)
-            q = cls.limit(q, kwds)
+        q = cls.query()
+        q = q.filter_by(**filter_kwds)
+        q = cls.order_by(q, kwds)
+        q = cls.limit(q, kwds)
 
+        try:
             return q.all()
         except sqlalchemy.orm.exc.NoResultFound as e:
             return []
