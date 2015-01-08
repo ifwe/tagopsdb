@@ -1,14 +1,14 @@
 @GrabResolver('https://artifactory.tagged.com/artifactory/libs-release-local/')
-@Grab('com.tagged.build:jenkins-dsl-common:0.1.22')
+@Grab('com.tagged.build:jenkins-dsl-common:[0.1.0,)')
 @Grab('com.tagged.build:tagged-fpm-scriptlet:0.0.4')
 
+import com.tagged.build.scm.*
 import com.tagged.build.common.*
 
 def project = new PythonFPMMatrixProject(
     jobFactory,
     [
-        githubOwner: 'siteops',
-        githubProject: 'tagopsdb',
+        scm: new StashSCM(project: "tagopsdb", name: "tagopsdb"),
         hipchatRoom: '/dev/null',
         notifyEmail: 'siteops@tagged.com',
         interpreters:['python26', 'python27'],
