@@ -15,7 +15,7 @@ def init(**config):
     if initialized(**config) and not config.get('force'):
         return
 
-    attrs = _module_attrs(config.get('module', None))
+    attrs = _module_attrs(config.pop('module', None))
 
     attrs['_initialized'] = True
 
@@ -225,6 +225,9 @@ class TagOpsDB(References):
 
 Base = declarative_base(cls=TagOpsDB)
 class HasDummy(object): dummy = '__dummy__'
+
+Session = None
+_initialized = False
 
 
 def initialized(module=None, **_kwds):
