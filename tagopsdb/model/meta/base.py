@@ -12,10 +12,12 @@ from .schema import References
 
 
 def init(**config):
-    if initialized() and not config.get('force'):
+    if initialized(**config) and not config.get('force'):
         return
-    global Session, _initialized
-    _initialized = True
+
+    attrs = _module_attrs(config.pop('module', None))
+
+    attrs['_initialized'] = True
 
     url = config.pop('url', {})
     url.setdefault('drivername', 'mysql+oursql')
@@ -31,27 +33,28 @@ def init(**config):
     engine = sqlalchemy.create_engine(
         URL(**url), **config
     )
-    Base.metadata.bind = engine
+    attrs['Base'].metadata.bind = engine
 
     if do_create:
-        Base.metadata.create_all(engine)
+        attrs['Base'].metadata.create_all(engine)
 
-    Session = scoped_session(sessionmaker())
-    Session.configure(bind=engine)
+    attrs['Base'].Session = attrs['Session'] = scoped_session(sessionmaker())
+    attrs['Session'].configure(bind=engine)
 
 
-def destroy():
-    if initialized():
-        global Session, _initialized
-        Session.close()
-        Session.remove()
-        Session = None
-        _initialized = False
+def destroy(module=None):
+    if initialized(module=module):
+        attrs = _module_attrs(module)
+        attrs['Session'].close()
+        attrs['Session'].remove()
+        attrs['Base'].Session = attrs['Session'] = None
 
-    if Base.metadata.bind is not None:
-        Base.metadata.bind.execute('DROP DATABASE IF EXISTS %s' % Base.metadata.bind.url.database)
-        Base.metadata.bind.dispose()
-        Base.metadata.bind = None
+        attrs['_initialized'] = False
+
+    if attrs['Base'].metadata.bind is not None:
+        attrs['Base'].metadata.bind.execute('DROP DATABASE IF EXISTS %s' % attrs['Base'].metadata.bind.url.database)
+        attrs['Base'].metadata.bind.dispose()
+        attrs['Base'].metadata.bind = None
 
 
 class TagOpsDB(References):
@@ -84,14 +87,14 @@ class TagOpsDB(References):
         return self.to_dict().__eq__(other.to_dict())
 
     def delete(self, *args, **kwargs):
-        return Session.delete(self, *args, **kwargs)
+        return self.Session.delete(self, *args, **kwargs)
 
     def refresh(self):
-        return Session.refresh(self)
+        return self.Session.refresh(self)
 
     @classmethod
     def query(cls):
-        return Session.query(cls)
+        return cls.Session.query(cls)
 
     @classmethod
     def get_by(cls, **kwds):
@@ -221,15 +224,26 @@ class TagOpsDB(References):
                 setattr(self, key, value)
 
 
-Session = None
-_initialized = False
 Base = declarative_base(cls=TagOpsDB)
 class HasDummy(object): dummy = '__dummy__'
 
+Session = None
+_initialized = False
 
-def initialized():
+
+def initialized(module=None, **_kwds):
     'Whether or not init() has been called'
-    return Session is not None and _initialized
+
+    attrs = _module_attrs(module)
+    return attrs.get('Session', None) is not None and attrs.get('_initialized', False)
+
+
+def _module_attrs(module):
+    if module is None:
+        return globals()
+    else:
+        return vars(module)
+
 
 # Constraint naming convention
 #Base.metadata.naming_convention = {
