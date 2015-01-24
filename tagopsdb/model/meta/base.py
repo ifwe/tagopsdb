@@ -38,7 +38,7 @@ def init(**config):
     if do_create:
         attrs['Base'].metadata.create_all(engine)
 
-    attrs['Session'] = scoped_session(sessionmaker())
+    attrs['Base'].Session = attrs['Session'] = scoped_session(sessionmaker())
     attrs['Session'].configure(bind=engine)
 
 
@@ -47,7 +47,8 @@ def destroy(module=None):
         attrs = _module_attrs(module)
         attrs['Session'].close()
         attrs['Session'].remove()
-        attrs['Session'] = None
+        attrs['Base'].Session = attrs['Session'] = None
+
         attrs['_initialized'] = False
 
     if attrs['Base'].metadata.bind is not None:
@@ -86,14 +87,14 @@ class TagOpsDB(References):
         return self.to_dict().__eq__(other.to_dict())
 
     def delete(self, *args, **kwargs):
-        return Session.delete(self, *args, **kwargs)
+        return self.Session.delete(self, *args, **kwargs)
 
     def refresh(self):
-        return Session.refresh(self)
+        return self.Session.refresh(self)
 
     @classmethod
     def query(cls):
-        return Session.query(cls)
+        return cls.Session.query(cls)
 
     @classmethod
     def get_by(cls, **kwds):

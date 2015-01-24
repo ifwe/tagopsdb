@@ -36,7 +36,7 @@ def initialized(module=None, **config):
 Base = declarative_base(cls=TagOpsDB)
 
 
-class SSHHostKeys(Base):
+class SSHHostKey(Base):
     __tablename__ = 'ssh_host_keys'
 
     hostname = Column(String(30), nullable=False, primary_key=True)
