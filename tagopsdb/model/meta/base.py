@@ -161,7 +161,7 @@ class TagOpsDB(References):
     def update_or_create(cls, data, surrogate=True):
         pk_props = [x for x in cls.__table__.columns if x.primary_key]
 
-        pk_vals = [data.get(p.key, None) is None for p in pk_props]
+        pk_vals = [data.get(p.key, None) for p in pk_props]
         # if any pk are missing or None
         if any(x is None for x in pk_vals):
             if surrogate:
