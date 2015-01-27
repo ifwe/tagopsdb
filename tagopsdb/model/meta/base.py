@@ -161,20 +161,21 @@ class TagOpsDB(References):
     def update_or_create(cls, data, surrogate=True):
         pk_props = [x for x in cls.__table__.columns if x.primary_key]
 
-        # if all pk are present and not None
-        if not [1 for p in pk_props if data.get(p.key) is None]:
-            pk_tuple = tuple([data[prop.key] for prop in pk_props])
-            record = cls.query().get(pk_tuple)
-            if record is None:
-                if surrogate:
-                    raise Exception("Cannot create surrogate with pk")
-                else:
-                    record = cls()
-        else:
+        pk_vals = [data.get(p.key, None) is None for p in pk_props]
+        # if any pk are missing or None
+        if any(x is None for x in pk_vals):
             if surrogate:
                 record = cls()
             else:
                 raise Exception("Cannot create non surrogate without pk")
+        else:
+            record = cls.query().get(tuple(pk_vals))
+            if record is None:
+                if not surrogate:
+                    record = cls()
+                else:
+                    raise Exception("Cannot create surrogate with pk")
+
         record.from_dict(data)
         Session.add(record)
         return record
