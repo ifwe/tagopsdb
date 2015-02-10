@@ -9,7 +9,11 @@ class Vlan(Base):
     __tablename__ = 'vlans'
 
     id = Column(u'VlanID', INTEGER(), primary_key=True)
-    name = Column(String(length=20))
+    name = Column(
+        String(length=20),
+        nullable=False,
+        unique=True
+    )
     environment_id = Column(
         u'environmentID',
         INTEGER(),
