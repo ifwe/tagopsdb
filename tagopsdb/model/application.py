@@ -12,11 +12,11 @@ class AppDefinition(Base, HasDummy):
     distribution = Column(
         Enum(
             u'centos5.4', u'centos6.2', u'centos6.4', u'centos6.5',
-            u'rhel5.3', u'rhel6.2', u'rhel6.3', u'rhel6.4', u'rhel6.5',
-            u'ontap',
+            u'centos7.0', u'centos7.1', u'fedora18', u'rhel5.3', u'rhel6.2',
+            u'rhel6.3', u'rhel6.4', u'rhel6.5', u'ontap',
         ),
         nullable=False,
-        server_default='centos6.4'
+        server_default='centos6.5'
     )
     app_type = Column(u'appType', String(length=100), nullable=False)
     name = synonym('app_type')
