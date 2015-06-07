@@ -46,15 +46,33 @@ def build = project.pythonFPMMatrixJob {
     logRotator(-1, 50)
 
     steps {
-        publishers {
-            archiveArtifacts('*.rpm')
+        shell '.jenkins/scripts/docker-build.sh'
+    }
+    publishers {
+        archiveArtifacts('*.rpm')
+    }
+    configure { p ->
+        p / publishers / 'hudson.tasks.ArtifactArchiver' << {
+            fingerprint true
         }
+    }
+}
+
+// Build CentOS 6.5 & 7.1 RPMs.
+def docker = project.downstreamJob {
+    name 'docker-build'
+    label 'docker'
+    steps {
+        shell '.jenkins/scripts/docker-build.sh'
+    }
+    publishers {
+        archiveArtifacts('*.rpm')
     }
 }
 
 def gauntlet = project.gauntlet([
     ['Gauntlet', [pylint, pyunit]],
-    ['Build', [build]],
+    ['Build', [build, docker]],
 ])
 
 def (tagopsdb, branches) = project.branchBuilders(gauntlet.name)

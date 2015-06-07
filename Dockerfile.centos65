@@ -1,0 +1,34 @@
+FROM dockerregistry.tagged.com/siteops/centos:6.5
+MAINTAINER Ken Lareau <klareau@ifwe.co>
+
+RUN /usr/bin/yum-config-manager --add-repo http://serverbuild.tagged.com/deploy
+RUN /usr/bin/yum-config-manager --add-repo http://serverbuild.tagged.com/tagrepo/CentOS/6
+RUN /usr/bin/yum-config-manager --add-repo http://serverbuild.tagged.com/tagged-updates/CentOS/6.5
+RUN /usr/bin/yum-config-manager --add-repo http://serverbuild.tagged.com/CentOS6.5/epel/x86_64
+RUN /usr/bin/yum-config-manager --add-repo http://serverbuild.tagged.com/CentOS6.5/updates/x86_64
+RUN /usr/bin/yum-config-manager --add-repo http://serverbuild.tagged.com/CentOS6.5/os/x86_64
+RUN /usr/bin/yum-config-manager --add-repo http://serverbuild.tagged.com/CentOS6.2/ius/x86_64
+RUN /usr/bin/yum makecache
+
+RUN yum -y --nogpgcheck update
+RUN yum -y --nogpgcheck install sudo
+RUN yum -y --nogpgcheck install gcc
+RUN yum -y --nogpgcheck install git
+RUN yum -y --nogpgcheck install python27
+RUN yum -y --nogpgcheck install python-devel
+RUN yum -y --nogpgcheck install python-pip
+RUN yum -y --nogpgcheck install python27-setuptools
+RUN yum -y --nogpgcheck install expat-devel
+RUN yum -y --nogpgcheck install openssl-devel
+RUN yum -y --nogpgcheck install rubygems
+RUN yum -y --nogpgcheck install rubygem-fpm
+RUN yum -y --nogpgcheck install rpm-build
+
+RUN mkdir -p /opt/tagopsdb
+COPY . /opt/tagopsdb
+WORKDIR /opt/tagopsdb
+
+ENV interpreter python27
+ENV GEM_HOME /usr/lib/ruby/gems/1.8/gems
+ENV os centos65
+ENV FPM_COMMAND_PATH /usr/bin

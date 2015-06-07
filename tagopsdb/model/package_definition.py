@@ -13,7 +13,7 @@ class PackageDefinition(Base, HasDummy):
     id = Column(u'pkg_def_id', INTEGER(), primary_key=True)
     deploy_type = Column(String(length=30), nullable=False)
     validation_type = Column(String(length=15), nullable=False)
-    pkg_name = Column(String(length=255), nullable=False, unique=True)
+    pkg_name = Column(String(length=255), nullable=False)
     name = synonym('pkg_name')
     path = Column(String(length=255), nullable=False)
     arch = Column(

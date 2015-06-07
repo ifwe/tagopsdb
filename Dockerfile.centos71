@@ -1,0 +1,32 @@
+FROM dockerregistry.tagged.com/siteops/centos:7.1
+MAINTAINER Ken Lareau <klarea@ifwe.co>
+
+RUN /usr/bin/yum-config-manager --add-repo http://serverbuild.tagged.com/deploy
+RUN /usr/bin/yum-config-manager --add-repo http://serverbuild.tagged.com/tagrepo/CentOS/7
+RUN /usr/bin/yum-config-manager --add-repo http://serverbuild.tagged.com/tagged-updates/CentOS/7.1
+RUN /usr/bin/yum-config-manager --add-repo http://serverbuild.tagged.com/CentOS7.1/epel/x86_64
+RUN /usr/bin/yum-config-manager --add-repo http://serverbuild.tagged.com/CentOS7.1/updates/x86_64
+RUN /usr/bin/yum-config-manager --add-repo http://serverbuild.tagged.com/CentOS7.1/os/x86_64
+RUN /usr/bin/yum makecache
+
+RUN yum -y --nogpgcheck update
+RUN yum -y --nogpgcheck install sudo
+RUN yum -y --nogpgcheck install gcc
+RUN yum -y --nogpgcheck install git
+RUN yum -y --nogpgcheck install python-devel
+RUN yum -y --nogpgcheck install python-pip
+RUN yum -y --nogpgcheck install python-setuptools
+RUN yum -y --nogpgcheck install expat-devel
+RUN yum -y --nogpgcheck install openssl-devel
+RUN yum -y --nogpgcheck install rubygems
+RUN yum -y --nogpgcheck install rubygem-fpm
+RUN yum -y --nogpgcheck install rpm-build
+
+RUN mkdir -p /opt/tagopsdb
+COPY . /opt/tagopsdb
+WORKDIR /opt/tagopsdb
+
+ENV interpreter python
+ENV GEM_HOME /usr/local/share/gems/gems
+ENV os centos71
+ENV FPM_COMMAND_PATH /usr/local/share/gems/gems/bin
