@@ -1,5 +1,6 @@
 from .meta import Base, init, destroy
 
+from .apptype_access import ApptypeAccess
 from .app_deployment import AppDeployment
 from .app_hipchat_rooms import app_hipchat_rooms
 from .app_jmx_attribute import app_jmx_attribute
@@ -19,6 +20,7 @@ from .host import Host
 from .application import AppDefinition
 from .iloms import Ilom
 from .jmx_attribute import JmxAttribute
+from .ldap_group import LdapGroup
 from .lock import lock
 from .nag_apptypes_services import NagApptypesServices
 from .nag_check_commands import NagCheckCommand
@@ -61,12 +63,12 @@ from .zone import Zone
 Application = AppDefinition
 
 __all__ = [
-    'Base', 'init', 'destroy', 'Application',
+    'Base', 'init', 'destroy', 'ApptypeAccess', 'Application',
     'AppDefinition', 'AppDeployment', 'app_hipchat_rooms',
     'app_jmx_attribute', 'app_package', 'Asset', 'Cname',
     'DefaultSpec', 'Deployment', 'Environment', 'Ganglia',
     'Hipchat', 'HostDeployment', 'HostInterface', 'HostIp',
-    'HostSpec', 'Host', 'Ilom', 'JmxAttribute', 'lock',
+    'HostSpec', 'Host', 'Ilom', 'JmxAttribute', 'LdapGroup', 'lock',
     'NagApptypesServices', 'NagCheckCommand', 'NagCommandArgument',
     'NagContactGroup', 'NagContact', 'nag_contact_groups_members',
     'NagHostsServices', 'nag_services_contact_groups', 'NagService',
