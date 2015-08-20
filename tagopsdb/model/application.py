@@ -16,7 +16,7 @@ class AppDefinition(Base, HasDummy):
             u'rhel6.3', u'rhel6.4', u'rhel6.5', u'ontap',
         ),
         nullable=False,
-        server_default='centos6.5'
+        server_default='centos6.5',
     )
     app_type = Column(u'appType', String(length=100), nullable=False)
     name = synonym('app_type')
@@ -25,33 +25,37 @@ class AppDefinition(Base, HasDummy):
         u'puppetClass',
         String(length=100),
         nullable=False,
-        server_default='baseclass'
+        server_default='baseclass',
     )
     ganglia_id = Column(
         u'GangliaID',
         INTEGER(),
         ForeignKey('ganglia.GangliaID'),
         nullable=False,
-        server_default='1'
+        server_default='1',
     )
     ganglia_group_name = Column(u'GgroupName', String(length=25))
     description = Column(String(length=100))
     status = Column(
         Enum('active', 'inactive'),
         nullable=False,
-        server_default='active'
+        server_default='active',
     )
-    app_deployments = relationship('AppDeployment', order_by="AppDeployment.created_at, AppDeployment.id")
+    app_deployments = relationship(
+        'AppDeployment',
+        order_by='desc(AppDeployment.created_at), AppDeployment.id',
+        lazy='dynamic',
+    )
     hipchats = relationship(
         'Hipchat',
         secondary='app_hipchat_rooms',
-        back_populates='app_definitions'
+        back_populates='app_definitions',
     )
     hosts = relationship('Host')
     host_specs = relationship('DefaultSpec')
     nag_app_services = relationship(
         'NagApptypesServices',
-        primaryjoin='NagApptypesServices.app_id == AppDefinition.id'
+        primaryjoin='NagApptypesServices.app_id == AppDefinition.id',
     )
     nag_host_services = relationship('NagHostsServices')
 
