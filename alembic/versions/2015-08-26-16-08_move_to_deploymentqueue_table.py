@@ -31,6 +31,7 @@ def upgrade():
             ),
             server_default='queued',
             nullable=False,
+            info={'after': 'user'},
         ),
     )
     op.execute('update deployments set status="complete"')
