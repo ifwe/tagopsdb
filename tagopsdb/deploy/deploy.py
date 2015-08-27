@@ -20,13 +20,12 @@ def _calculate_environment_id(environment):
                    .one())[0]
 
 
-def add_deployment(pkg_id, user, dep_type):
+def add_deployment(pkg_id, user):
     """Add deployment for a given package ID"""
 
     dep = Deployment(
         package_id=pkg_id,
         user=user,
-        dep_type=dep_type,
         declared=func.current_timestamp()
     )
 
@@ -135,7 +134,7 @@ def find_app_deployment(pkg_id, app_ids, environment):
     """
 
     subq = (Session.query(AppDeployment.app_id, AppDefinition.app_type,
-            AppDeployment.id, Deployment.dep_type)
+            AppDeployment.id)
             .join(Deployment)
             .join(Package)
             .join(AppDefinition)
@@ -149,7 +148,7 @@ def find_app_deployment(pkg_id, app_ids, environment):
             .subquery(name='t_ordered'))
 
     return (Session.query(AppDeployment, AppDefinition.app_type,
-            Deployment.dep_type, Package)
+            Package)
             .join(AppDefinition)
             .join(Deployment)
             .join(Package)
@@ -306,14 +305,13 @@ def find_host_deployments_by_pkgid(pkg_id, dep_hosts):
        set of hosts
     """
 
-    return (Session.query(HostDeployment, Host.hostname, Host.app_id,
-                          Deployment.dep_type)
-                   .join(Host)
-                   .join(Deployment)
-                   .join(Package)
-                   .filter(Package.id==pkg_id)
-                   .filter(Host.hostname.in_(dep_hosts))
-                   .all())
+    return (Session.query(HostDeployment, Host.hostname, Host.app_id)
+                .join(Host)
+                .join(Deployment)
+                .join(Package)
+                .filter(Package.id==pkg_id)
+                .filter(Host.hostname.in_(dep_hosts))
+                .all())
 
 
 def find_host_deployments_by_package_name(package_name, dep_hosts):
