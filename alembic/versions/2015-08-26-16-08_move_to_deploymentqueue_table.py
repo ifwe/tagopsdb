@@ -15,10 +15,6 @@ import sqlalchemy as sa
 
 
 def upgrade():
-    op.drop_constraint(
-        'uq_deployments_package_id', 'deployments', type_='foreignkey'
-    )
-
     op.drop_column('deployments', 'dep_type')
 
     op.add_column(
@@ -45,7 +41,3 @@ def downgrade():
     op.execute('update deployments set dep_type="deploy"')
 
     op.drop_column('deployments', 'status')
-
-    op.create_unique_constraint(
-        'uq_deployments_package_id', 'deployments', ['package_id']
-    )
