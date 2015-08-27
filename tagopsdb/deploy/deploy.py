@@ -26,6 +26,9 @@ def add_deployment(pkg_id, user):
     dep = Deployment(
         package_id=pkg_id,
         user=user,
+        # THIS NEEDS TO BE REMOVED ONCE THE NEW DEPLOY CODE
+        # IS IN PLACE - KEL 20150827
+        status='complete',
         declared=func.current_timestamp()
     )
 
