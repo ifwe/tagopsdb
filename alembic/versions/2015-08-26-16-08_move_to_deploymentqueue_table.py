@@ -15,34 +15,22 @@ import sqlalchemy as sa
 
 
 def upgrade():
-    op.create_table(
-        'deployment_requests',
-        sa.Column('deployment_request_id', sa.Integer, primary_key=True),
-        sa.Column('user', sa.String(32), nullable=False),
-        sa.Column(
-            'status',
-            sa.Enum('queued', 'inprogress', 'complete', 'incomplete'),
-            server_default='queued',
-        ),
-        sa.Column('created_at', sa.DateTime, server_default=sa.func.now()),
+    op.drop_constraint(
+        'uq_deployments_package_id', 'deployments', type_='foreignkey'
     )
 
-    op.drop_column('deployments', 'user')
-    op.drop_column('deployments', 'created_at')
     op.drop_column('deployments', 'dep_type')
 
     op.add_column(
-        'app_deployments',
+        'deployments',
         sa.Column(
-            'deployment_request_id', sa.INTEGER,
-            sa.ForeignKey('deployment_requests.deployment_request_id')
-        ),
-    )
-    op.add_column(
-        'host_deployments',
-        sa.Column(
-            'deployment_request_id', sa.INTEGER,
-            sa.ForeignKey('deployment_requests.deployment_request_id')
+            'status',
+            sa.Enum(
+                'queued', 'inprogress', 'complete', 'failed', 'canceled',
+                'stopped',
+            ),
+            server_default='queued',
+            nullable=False,
         ),
     )
 
@@ -50,18 +38,12 @@ def upgrade():
 def downgrade():
     op.add_column(
         'deployments',
-        sa.Column('user', sa.String(32), nullable=False)
-    )
-    op.add_column(
-        'deployments',
-        sa.Column('declared', sa.DateTime, server_default=sa.func.now()),
-    )
-    op.add_column(
-        'deployments',
-        sa.Column('dep_type', sa.Enum('deploy', 'rollback')),
+        sa.Column('dep_type', sa.Enum('deploy', 'rollback'), nullable=False),
     )
 
-    op.drop_column('app_deployments', 'deployment_request_id')
-    op.drop_column('host_deployments', 'deployment_request_id')
+    op.drop_column('deployments', 'status')
 
-    op.drop_table('deployment_requests')
+    op.create_unique_constraint(
+        'uq_deployments_package_id', 'deployments', ['package_id']
+    )
+    op.alter_column('deployments', 'package_id', unique=True)
