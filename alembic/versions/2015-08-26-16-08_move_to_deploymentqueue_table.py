@@ -36,7 +36,12 @@ def upgrade():
 def downgrade():
     op.add_column(
         'deployments',
-        sa.Column('dep_type', sa.Enum('deploy', 'rollback'), nullable=False),
+        sa.Column(
+            'dep_type',
+            sa.Enum('deploy', 'rollback'),
+            nullable=False,
+            info={'after': 'user'},
+        ),
     )
     op.execute('update deployments set dep_type="deploy"')
 
