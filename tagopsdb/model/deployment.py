@@ -29,7 +29,6 @@ class Deployment(Base):
         server_default='queued',
         nullable=False,
     )
-    type = synonym('dep_type')
     declared = Column(
         TIMESTAMP(),
         nullable=False,
