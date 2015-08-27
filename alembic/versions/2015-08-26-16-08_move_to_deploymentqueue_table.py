@@ -33,6 +33,7 @@ def upgrade():
             nullable=False,
         ),
     )
+    op.execute('update deployments set status="complete"')
 
 
 def downgrade():
@@ -40,10 +41,10 @@ def downgrade():
         'deployments',
         sa.Column('dep_type', sa.Enum('deploy', 'rollback'), nullable=False),
     )
+    op.execute('update deployments set dep_type="deploy"')
 
     op.drop_column('deployments', 'status')
 
     op.create_unique_constraint(
         'uq_deployments_package_id', 'deployments', ['package_id']
     )
-    op.alter_column('deployments', 'package_id', unique=True)
