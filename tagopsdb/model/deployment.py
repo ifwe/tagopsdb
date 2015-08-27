@@ -23,13 +23,21 @@ class Deployment(Base):
     )
 
     user = Column(String(length=32), nullable=False)
-    dep_type = Column(Enum('deploy', 'rollback'), nullable=False)
-    type = synonym('dep_type')
+    status = Column(
+        Enum('queued', 'inprogress', 'complete', 'failed', 'canceled',
+             'stopped'),
+        server_default='queued',
+        nullable=False,
+    )
     declared = Column(
         TIMESTAMP(),
         nullable=False,
         server_default=func.current_timestamp()
     )
     created_at = synonym('declared')
-    app_deployments = relationship('AppDeployment', order_by="AppDeployment.created_at, AppDeployment.id")
-    host_deployments = relationship('HostDeployment', order_by="HostDeployment.created_at, HostDeployment.id")
+    app_deployments = relationship(
+        'AppDeployment', order_by="AppDeployment.created_at, AppDeployment.id"
+    )
+    host_deployments = relationship(
+        'HostDeployment', order_by="HostDeployment.created_at, HostDeployment.id"
+    )
