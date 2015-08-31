@@ -22,10 +22,10 @@ def upgrade():
         sa.Column(
             'status',
             sa.Enum(
-                'queued', 'inprogress', 'complete', 'failed', 'canceled',
-                'stopped',
+                'pending', 'queued', 'inprogress', 'complete', 'failed',
+                'canceled', 'stopped',
             ),
-            server_default='queued',
+            server_default='pending',
             nullable=False,
             info={'after': 'user'},
         ),
