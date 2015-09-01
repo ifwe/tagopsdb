@@ -24,9 +24,9 @@ class Deployment(Base):
 
     user = Column(String(length=32), nullable=False)
     status = Column(
-        Enum('queued', 'inprogress', 'complete', 'failed', 'canceled',
-             'stopped'),
-        server_default='queued',
+        Enum('pending', 'queued', 'inprogress', 'complete', 'failed',
+             'canceled', 'stopped'),
+        server_default='pending',
         nullable=False,
     )
     declared = Column(
