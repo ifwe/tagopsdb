@@ -28,7 +28,15 @@ class HostDeployment(Base):
     host = relationship("Host", uselist=False)
 
     user = Column(String(length=32), nullable=False)
-    status = Column(Enum('inprogress', 'failed', 'ok'), nullable=False)
+    status = Column(
+        Enum(
+            'failed',
+            'inprogress',
+            'ok',
+            'pending',
+        ),
+        nullable=False
+    )
     realized = Column(
         TIMESTAMP(),
         nullable=False,
