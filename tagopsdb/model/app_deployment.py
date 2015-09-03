@@ -7,6 +7,7 @@ from sqlalchemy.sql.expression import func, select
 from .meta import Base, Column, String
 from .environment import Environment
 
+
 class AppDeployment(Base):
     __tablename__ = 'app_deployments'
 
@@ -35,6 +36,7 @@ class AppDeployment(Base):
             'incomplete',
             'inprogress',
             'invalidated',
+            'pending',
             'validated',
         ),
         nullable=False
@@ -61,10 +63,12 @@ class AppDeployment(Base):
     @environment.expression
     def environment(cls):
         return select([Environment.environment]).\
-                where(Environment.id == cls.environment_id).correlate(cls).\
-                label('environment')
+            where(Environment.id == cls.environment_id).correlate(cls).\
+            label('environment')
 
     @hybrid_property
     def needs_validation(self):
-        'Complete and incomplete deployments require validation'
+        """
+        Complete and incomplete deployments require validation
+        """
         return self.status in ('complete', 'incomplete')
