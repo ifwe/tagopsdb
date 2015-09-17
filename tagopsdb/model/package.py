@@ -19,6 +19,7 @@ class Package(Base):
     name = synonym('pkg_name')
     version = Column(String(length=63), nullable=False)
     revision = Column(String(length=63), nullable=False)
+    job = Column(String(length=255, nullable=True))
     status = Column(
         Enum('completed', 'failed', 'pending', 'processing', 'removed'),
         nullable=False
