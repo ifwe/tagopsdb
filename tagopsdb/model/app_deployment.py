@@ -72,3 +72,7 @@ class AppDeployment(Base):
         Complete and incomplete deployments require validation
         """
         return self.status in ('complete', 'incomplete')
+
+    @needs_validation.expression
+    def needs_validation(cls):
+        return cls.status.in_(['complete', 'incomplete'])
