@@ -45,11 +45,6 @@ class Package(Base):
         back_populates='packages'
     )
     application = synonym('package_definition')
-    deployments = relationship(
-        'Deployment',
-        back_populates='package',
-        order_by="Deployment.created_at, Deployment.id"
-    )
     app_deployments = relationship(
         'AppDeployment',
         back_populates='package',
