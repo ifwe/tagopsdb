@@ -50,6 +50,16 @@ class Package(Base):
         back_populates='package',
         order_by="Deployment.created_at, Deployment.id"
     )
+    app_deployments = relationship(
+        'AppDeployment',
+        back_populates='package',
+        order_by="AppDeployment.created_at, AppDeployment.id"
+    )
+    host_deployments = relationship(
+        'HostDeployment',
+        back_populates='package',
+        order_by="HostDeployment.created_at, HostDeployment.id"
+    )
 
     __table_args__ = (
         UniqueConstraint(u'pkg_name', u'version', u'revision', u'builder',

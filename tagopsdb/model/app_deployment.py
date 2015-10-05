@@ -18,16 +18,27 @@ class AppDeployment(Base):
         ForeignKey('deployments.DeploymentID', ondelete='cascade'),
         nullable=False
     )
+    deployment = relationship("Deployment", uselist=False)
+
     app_id = Column(
         u'AppID',
         SMALLINT(display_width=6),
         ForeignKey('app_definitions.AppID', ondelete='cascade'),
         nullable=False
     )
-
     application = relationship("AppDefinition", uselist=False)
     target = synonym('application')
-    deployment = relationship("Deployment", uselist=False)
+
+    package_id = Column(
+        INTEGER(),
+        ForeignKey('packages.package_id', ondelete='cascade'),
+        nullable=False
+    )
+    package = relationship(
+        "Package",
+        uselist=False,
+        back_populates="app_deployments",
+    )
 
     user = Column(String(length=32), nullable=False)
     status = Column(
