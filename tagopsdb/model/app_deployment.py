@@ -68,6 +68,16 @@ class AppDeployment(Base):
     environment_obj = relationship('Environment')
 
     @hybrid_property
+    def env(self):
+        return self.environment_obj.env
+
+    @env.expression
+    def env(cls):
+        return select([Environment.env]).\
+            where(Environment.id == cls.environment_id).correlate(cls).\
+            label('env')
+
+    @hybrid_property
     def environment(self):
         return self.environment_obj.environment
 
