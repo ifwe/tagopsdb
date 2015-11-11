@@ -21,11 +21,8 @@ def upgrade():
             'delay',
             sa.Integer,
             info={'after': 'status'},
+            server_default=0,
         )
-    )
-
-    op.execute(
-        'update deployments set deployments.delay = 0'
     )
 
 

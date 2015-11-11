@@ -30,4 +30,4 @@ class Deployment(Base):
     host_deployments = relationship(
         'HostDeployment', order_by="HostDeployment.created_at, HostDeployment.id"
     )
-    delay = Column(u'delay', INTEGER())
+    delay = Column(u'delay', INTEGER(), server_default=0)
