@@ -21,7 +21,7 @@ def upgrade():
             'delay',
             sa.Integer,
             info={'after': 'status'},
-            server_default=0,
+            server_default='0',
         )
     )
 

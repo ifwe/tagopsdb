@@ -18,6 +18,7 @@ class Deployment(Base):
         server_default='pending',
         nullable=False,
     )
+    delay = Column(u'delay', INTEGER(), server_default='0')
     declared = Column(
         TIMESTAMP(),
         nullable=False,
@@ -30,4 +31,3 @@ class Deployment(Base):
     host_deployments = relationship(
         'HostDeployment', order_by="HostDeployment.created_at, HostDeployment.id"
     )
-    delay = Column(u'delay', INTEGER(), server_default=0)
