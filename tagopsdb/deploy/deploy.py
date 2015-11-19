@@ -518,8 +518,9 @@ def find_unvalidated_deployments(environment):
                    .join(Deployment)
                    .join(AppDeployment)
                    .join(AppDefinition)
-                   .filter(AppDeployment.status!='invalidated')
-                   .filter(AppDeployment.environment==environment)
+                   .filter(AppDefinition.status == 'active')
+                   .filter(AppDeployment.status != 'invalidated')
+                   .filter(AppDeployment.environment == environment)
                    .order_by(AppDeployment.realized.desc(),
                              AppDeployment.id.desc())
                    .subquery(name='t_ordered'))
