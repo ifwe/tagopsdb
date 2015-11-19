@@ -34,7 +34,7 @@ class Host(Base):
         u'AppID',
         SMALLINT(display_width=6),
         ForeignKey('app_definitions.AppID'),
-        nullable=False
+        server_default=None
     )
     cage_location = Column(u'cageLocation', INTEGER())
     cab_location = Column(u'cabLocation', String(length=10))
