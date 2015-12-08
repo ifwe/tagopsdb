@@ -14,10 +14,7 @@ class ServiceEvent(Base):
         INTEGER(),
         ForeignKey('hosts.HostID', ondelete='cascade')
     )
-    user = Column(String(length=20))
     service_status = Column(u'serviceStatus', String(length=100))
-    power_status = Column(u'powerStatus', String(length=10))
-    vendor_ticket = Column(u'vendorTicket', String(length=20))
     comments = Column(TEXT())
     service_date = Column(
         u'serviceDate',
