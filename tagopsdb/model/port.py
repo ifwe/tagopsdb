@@ -15,9 +15,7 @@ class Port(Base):
         ForeignKey('networkDevice.NetworkID', ondelete='cascade')
     )
     port_number = Column(u'portNumber', String(length=20))
-    description = Column(String(length=50))
-    speed = Column(String(length=20))
-    duplex = Column(String(length=20))
+
     network_interface = relationship('HostInterface', uselist=False)
 
     __table_args__ = (
