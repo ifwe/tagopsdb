@@ -20,11 +20,10 @@ def _calculate_environment_id(environment):
                    .one())[0]
 
 
-def add_deployment(pkg_id, user):
+def add_deployment(user):
     """Add deployment for a given package ID"""
 
     dep = Deployment(
-        package_id=pkg_id,
         user=user,
         # THIS NEEDS TO BE REMOVED ONCE THE NEW DEPLOY CODE
         # IS IN PLACE - KEL 20150827
@@ -41,7 +40,7 @@ def add_deployment(pkg_id, user):
     return dep
 
 
-def add_app_deployment(dep_id, app_id, user, status, environment):
+def add_app_deployment(dep_id, app_id, user, status, environment, package_id):
     """Add a tier deployment for a given deployment ID"""
 
     environment_id = _calculate_environment_id(environment)
@@ -52,7 +51,8 @@ def add_app_deployment(dep_id, app_id, user, status, environment):
         user=user,
         status=status,
         environment_id=environment_id,
-        realized=func.current_timestamp()
+        realized=func.current_timestamp(),
+        package_id=package_id,
     )
 
     # Commit to DB immediately
@@ -62,7 +62,7 @@ def add_app_deployment(dep_id, app_id, user, status, environment):
     return app_dep
 
 
-def add_host_deployment(dep_id, host_id, user, status):
+def add_host_deployment(dep_id, host_id, user, status, package_id):
     """Add host deployment for a given host and deployment"""
 
     host_dep = HostDeployment(
@@ -70,7 +70,8 @@ def add_host_deployment(dep_id, host_id, user, status):
         host_id=host_id,
         user=user,
         status=status,
-        realized=func.current_timestamp()
+        realized=func.current_timestamp(),
+        package_id=package_id,
     )
 
     # Commit to DB immediately
@@ -246,15 +247,6 @@ def find_deployment_by_id(dep_id):
     except sqlalchemy.orm.exc.NoResultFound:
         raise DeployException('No deployment with deploy ID "%s" found '
                               'in the deployments table' % dep_id)
-
-
-def find_deployment_by_pkgid(pkg_id):
-    """Find deployment(s) for a given package ID"""
-
-    return (Session.query(Deployment)
-                   .filter_by(package_id=pkg_id)
-                   .order_by(Deployment.declared.desc())
-                   .all())
 
 
 def find_host_by_hostname(hostname):
