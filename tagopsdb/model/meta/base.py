@@ -108,6 +108,14 @@ class TagOpsDB(References):
     get = get_by
 
     @staticmethod
+    def group_by(query, kwds):
+        group_by_arg = kwds.pop('group_by', None)
+        if group_by_arg is not None:
+            query = query.group_by(group_by_arg)
+
+        return query
+
+    @staticmethod
     def limit(query, kwds):
         limit_arg = kwds.pop('limit', None)
         if limit_arg is not None:
@@ -141,6 +149,7 @@ class TagOpsDB(References):
 
         q = cls.query()
         q = q.filter_by(**filter_kwds)
+        q = cls.group_by(q, kwds)
         q = cls.order_by(q, kwds)
         q = cls.limit(q, kwds)
 

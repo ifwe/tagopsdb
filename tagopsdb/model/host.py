@@ -26,28 +26,24 @@ class Host(Base):
     )
     hostname = Column(String(length=30))
     name = synonym('hostname')
-    arch = Column(String(length=10))
-    kernel_version = Column(u'kernelVersion', String(length=20))
     distribution = Column(String(length=20))
-    timezone = Column(String(length=10))
     app_id = Column(
         u'AppID',
         SMALLINT(display_width=6),
         ForeignKey('app_definitions.AppID'),
-        nullable=False
+        server_default=None
     )
     cage_location = Column(u'cageLocation', INTEGER())
     cab_location = Column(u'cabLocation', String(length=10))
     rack_location = Column(u'rackLocation', INTEGER())
     console_port = Column(u'consolePort', String(length=11))
-    power_port = Column(u'powerPort', String(length=10))
-    power_circuit = Column(u'powerCircuit', String(length=10))
     environment_id = Column(
         u'environment_id',
         INTEGER(),
         ForeignKey('environments.environmentID', ondelete='cascade'),
         server_default=None
     )
+
     environment_obj = relationship('Environment')
     host_deployments = relationship('HostDeployment')
     host_interfaces = relationship('HostInterface', backref='host')

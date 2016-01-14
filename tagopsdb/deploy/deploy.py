@@ -1,6 +1,7 @@
 import sqlalchemy.orm.exc
 
 from sqlalchemy import func
+from sqlalchemy.orm import aliased
 from sqlalchemy.sql import and_
 
 import tagopsdb.deploy.repo as repo
@@ -468,6 +469,33 @@ def find_unvalidated_versions(time_delta, environment):
                    .having(and_(subq.c.status.like('%complete'),
                                 func.unix_timestamp(subq.c.realized) <
                                 func.unix_timestamp(func.now()) - time_delta))
+                   .all())
+
+
+def find_unvalidated_deployments(environment):
+    """Find the latest deployments that are not validated in a given
+       environment (simplified version of find_unvalidated_versions)
+    """
+
+    subq = (Session.query(Package.pkg_name, AppDefinition.app_type,
+                          AppDeployment.environment, AppDeployment.status,
+                          AppDeployment)
+                   .join(Deployment)
+                   .join(AppDeployment)
+                   .join(AppDefinition)
+                   .filter(AppDefinition.status == 'active')
+                   .filter(AppDeployment.status != 'invalidated')
+                   .filter(AppDeployment.environment == environment)
+                   .order_by(AppDeployment.realized.desc(),
+                             AppDeployment.id.desc())
+                   .subquery(name='t_ordered'))
+
+    appdep_alias = aliased(AppDeployment, subq)
+
+    return (Session.query(appdep_alias)
+                   .group_by(subq.c.appType, subq.c.environment,
+                             subq.c.pkg_name)
+                   .having(subq.c.status.like('%complete'))
                    .all())
 
 
