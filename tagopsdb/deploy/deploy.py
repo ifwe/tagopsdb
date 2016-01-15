@@ -480,7 +480,6 @@ def find_unvalidated_deployments(environment):
     subq = (Session.query(Package.pkg_name, AppDefinition.app_type,
                           AppDeployment.environment, AppDeployment.status,
                           AppDeployment)
-                   .join(Deployment)
                    .join(AppDeployment)
                    .join(AppDefinition)
                    .filter(AppDefinition.status == 'active')
