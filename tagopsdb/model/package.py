@@ -19,6 +19,7 @@ class Package(Base):
     name = synonym('pkg_name')
     version = Column(String(length=63), nullable=False)
     revision = Column(String(length=63), nullable=False)
+    job = Column(String(length=255), nullable=True)
     status = Column(
         Enum('completed', 'failed', 'pending', 'processing', 'removed'),
         nullable=False
@@ -44,10 +45,15 @@ class Package(Base):
         back_populates='packages'
     )
     application = synonym('package_definition')
-    deployments = relationship(
-        'Deployment',
+    app_deployments = relationship(
+        'AppDeployment',
         back_populates='package',
-        order_by="Deployment.created_at, Deployment.id"
+        order_by="AppDeployment.created_at, AppDeployment.id"
+    )
+    host_deployments = relationship(
+        'HostDeployment',
+        back_populates='package',
+        order_by="HostDeployment.created_at, HostDeployment.id"
     )
 
     __table_args__ = (

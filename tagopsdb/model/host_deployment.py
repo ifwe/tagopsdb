@@ -16,7 +16,6 @@ class HostDeployment(Base):
         ForeignKey('deployments.DeploymentID', ondelete='cascade'),
         nullable=False
     )
-
     deployment = relationship("Deployment", uselist=False)
 
     host_id = Column(
@@ -26,6 +25,17 @@ class HostDeployment(Base):
         nullable=False
     )
     host = relationship("Host", uselist=False)
+
+    package_id = Column(
+        INTEGER(),
+        ForeignKey('packages.package_id', ondelete='cascade'),
+        nullable=False
+    )
+    package = relationship(
+        "Package",
+        uselist=False,
+        back_populates='host_deployments',
+    )
 
     user = Column(String(length=32), nullable=False)
     status = Column(
