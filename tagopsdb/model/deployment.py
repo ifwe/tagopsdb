@@ -10,17 +10,6 @@ class Deployment(Base):
     __tablename__ = 'deployments'
 
     id = Column(u'DeploymentID', INTEGER(), primary_key=True)
-    package_id = Column(
-        INTEGER(),
-        ForeignKey('packages.package_id', ondelete='cascade'),
-        nullable=False
-    )
-
-    package = relationship(
-        "Package",
-        uselist=False,
-        back_populates='deployments'
-    )
 
     user = Column(String(length=32), nullable=False)
     status = Column(
@@ -29,6 +18,7 @@ class Deployment(Base):
         server_default='pending',
         nullable=False,
     )
+    delay = Column(u'delay', INTEGER(), server_default='0')
     declared = Column(
         TIMESTAMP(),
         nullable=False,
