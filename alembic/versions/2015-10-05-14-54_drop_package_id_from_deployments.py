@@ -15,6 +15,11 @@ import sqlalchemy as sa
 
 
 def upgrade():
+    op.drop_constraint(
+            'deployments_ibfk_1',
+            'deployments',
+            type_='foreignkey'
+    )
     op.drop_column('deployments', 'package_id')
 
 
@@ -25,7 +30,7 @@ def downgrade():
             'package_id',
             sa.Integer,
             sa.ForeignKey('packages.package_id', ondelete='cascade'),
-            nullable=False,
+            nullable=True,
             info={'after': 'DeploymentID'},
         )
     )
@@ -40,4 +45,11 @@ def downgrade():
         'update deployments join app_deployments on '
         'deployments.DeploymentID = app_deployments.DeploymentID '
         'set deployments.package_id = app_deployments.package_id'
+    )
+
+    op.alter_column(
+        'deployments',
+        'package_id',
+        nullable=False,
+        existing_type=sa.Integer,
     )

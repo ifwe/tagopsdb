@@ -21,8 +21,8 @@ def upgrade():
             'package_id',
             sa.Integer,
             sa.ForeignKey('packages.package_id', ondelete='cascade'),
-            nullable=False,
-            info={'after': 'host_id'},
+            nullable=True,
+            info={'after': 'HostID'},
         ),
     )
 
@@ -32,14 +32,21 @@ def upgrade():
         'set host_deployments.package_id = deployments.package_id'
     )
 
+    op.alter_column(
+        'host_deployments',
+        'package_id',
+        nullable=False,
+        existing_type=sa.Integer,
+    )
+
     op.add_column(
         'app_deployments',
         sa.Column(
             'package_id',
             sa.Integer,
             sa.ForeignKey('packages.package_id', ondelete='cascade'),
-            nullable=False,
-            info={'after': 'app_id'},
+            nullable=True,
+            info={'after': 'AppID'},
         ),
     )
 
@@ -47,6 +54,13 @@ def upgrade():
         'update app_deployments join deployments on '
         'app_deployments.DeploymentID = deployments.DeploymentID '
         'set app_deployments.package_id = deployments.package_id'
+    )
+
+    op.alter_column(
+        'app_deployments',
+        'package_id',
+        nullable=False,
+        existing_type=sa.Integer,
     )
 
 
