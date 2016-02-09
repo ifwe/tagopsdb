@@ -14,4 +14,3 @@ class JmxAttribute(Base):
         nullable=False,
         server_default='9004'
     )
-    g_group_name = Column(u'GgroupName', String(length=25))
