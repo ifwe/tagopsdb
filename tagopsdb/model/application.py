@@ -26,7 +26,6 @@ class AppDefinition(Base, HasDummy):
         nullable=False,
         server_default='1',
     )
-    ganglia_group_name = Column(u'GgroupName', String(length=25))
     description = Column(String(length=100))
     status = Column(
         Enum('active', 'inactive'),
