@@ -33,6 +33,11 @@ class Host(Base):
         ForeignKey('app_definitions.AppID'),
         server_default=None
     )
+    dc_id = Column(
+        INTEGER(),
+        ForeignKey('datacenters.dc_id', ondelete='cascade'),
+        server_default='1'
+    )
     cage_location = Column(u'cageLocation', INTEGER())
     cab_location = Column(u'cabLocation', String(length=10))
     rack_location = Column(u'rackLocation', INTEGER())
@@ -53,6 +58,7 @@ class Host(Base):
     vm = relationship('VmInfo', uselist=False, back_populates='host')
     application = relationship('AppDefinition', uselist=False)
     target = synonym('application')
+    datacenter = relationship('Datacenter', uselist=False)
 
     @hybrid_property
     def environment(self):
