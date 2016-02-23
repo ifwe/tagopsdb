@@ -8,6 +8,11 @@ class NetDefaultMap(Base):
     __tablename__ = 'net_default_maps'
 
     id = Column(u'net_default_id', INTEGER(unsigned=True), primary_key=True)
+    dc_id = Column(
+        INTEGER(),
+        ForeignKey('datacenters.dc_id', ondelete='cascade'),
+        server_default='1'
+    )
     environment_id = Column(
         INTEGER(),
         ForeignKey('environments.environmentID', ondelete='cascade'),
