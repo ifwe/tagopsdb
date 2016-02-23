@@ -66,6 +66,7 @@ def upgrade():
         'dc_id',
         nullable=False,
         existing_type=sa.Integer,
+        existing_server_default=dc_id,
     )
 
     op.add_column(
@@ -95,6 +96,7 @@ def upgrade():
         'dc_id',
         nullable=False,
         existing_type=sa.Integer,
+        existing_server_default=dc_id,
     )
 
 
