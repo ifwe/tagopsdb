@@ -7,6 +7,7 @@ from .app_jmx_attribute import app_jmx_attribute
 from .app_packages import app_package
 from .asset import Asset
 from .cname import Cname
+from .datacenter import Datacenter
 from .default_spec import DefaultSpec
 from .deployment import Deployment
 from .environment import Environment
@@ -65,7 +66,7 @@ Application = AppDefinition
 __all__ = [
     'Base', 'init', 'destroy', 'ApptypeAccess', 'Application',
     'AppDefinition', 'AppDeployment', 'app_hipchat_rooms',
-    'app_jmx_attribute', 'app_package', 'Asset', 'Cname',
+    'app_jmx_attribute', 'app_package', 'Asset', 'Cname', 'Datacenter',
     'DefaultSpec', 'Deployment', 'Environment', 'Ganglia',
     'Hipchat', 'HostDeployment', 'HostInterface', 'HostIp',
     'HostSpec', 'Host', 'Ilom', 'JmxAttribute', 'LdapGroup', 'lock',
