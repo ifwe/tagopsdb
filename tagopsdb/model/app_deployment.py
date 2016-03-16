@@ -1,5 +1,5 @@
 from sqlalchemy import Enum, ForeignKey
-from sqlalchemy.dialects.mysql import BOOLEAN, INTEGER, SMALLINT, TIMESTAMP
+from sqlalchemy.dialects.mysql import BOOLEAN, INTEGER, SMALLINT, TIMESTAMP, FLOAT
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship, synonym
 from sqlalchemy.sql.expression import func, select
@@ -64,6 +64,7 @@ class AppDeployment(Base):
         server_default=func.current_timestamp()
     )
     created_at = synonym('realized')
+    duration = Column(FLOAT(), nullable=False, server_default="0")
     skewed = Column(BOOLEAN(), nullable=False, server_default='0')
 
     environment_obj = relationship('Environment')
