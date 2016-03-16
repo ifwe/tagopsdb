@@ -1,5 +1,5 @@
 from sqlalchemy import Enum, ForeignKey
-from sqlalchemy.dialects.mysql import INTEGER, TIMESTAMP
+from sqlalchemy.dialects.mysql import INTEGER, TIMESTAMP, FLOAT
 from sqlalchemy.sql.expression import func
 from sqlalchemy.orm import relationship, synonym
 
@@ -53,3 +53,4 @@ class HostDeployment(Base):
         server_default=func.current_timestamp()
     )
     created_at = synonym('realized')
+    duration = Column(FLOAT(), nullable=False, server_default="0")
