@@ -1,5 +1,5 @@
 from sqlalchemy import Enum, ForeignKey
-from sqlalchemy.dialects.mysql import INTEGER, TIMESTAMP
+from sqlalchemy.dialects.mysql import INTEGER, TIMESTAMP, FLOAT
 from sqlalchemy.orm import relationship, synonym
 from sqlalchemy.sql.expression import func
 
@@ -25,6 +25,7 @@ class Deployment(Base):
         server_default=func.current_timestamp()
     )
     created_at = synonym('declared')
+    duration = Column(FLOAT(), nullable=False, server_default="0")
     app_deployments = relationship(
         'AppDeployment', order_by="AppDeployment.created_at, AppDeployment.id"
     )
