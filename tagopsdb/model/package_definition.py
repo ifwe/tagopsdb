@@ -16,6 +16,7 @@ class PackageDefinition(Base, HasDummy):
     pkg_name = Column(String(length=255), nullable=False)
     name = synonym('pkg_name')
     path = Column(String(length=255), nullable=False)
+    repository = Column(String(length=255), nullable=True)
     arch = Column(
         Enum('i386', 'x86_64', 'noarch'),
         nullable=False,
