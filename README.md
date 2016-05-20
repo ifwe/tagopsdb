@@ -1,6 +1,6 @@
 # tagopsdb - Site Operations Database Library
 
-## Author
+## Authors
 Kenneth Lareau, Karandeep Nagra
 
 ## Description
