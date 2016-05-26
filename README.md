@@ -7,6 +7,13 @@ Kenneth Lareau, Karandeep Nagra
 tagopsdb is a library to interface with a Site Operations database
 used at if(we) to manage various infrastructure information.
 
+**\*\*WARNING\*\***: Consider this code **EXPERIMENTAL**.  It has
+not been fully prepared for use outside If(we) though we will be
+working on this.  In particular, the schemas themselves are still
+being cleaned up in preparation to move from MySQL to PostgreSQL.
+If you have any questions or suggestions, please email
+<tagopsdb@ifwe.co>
+
 ## License
 <a href="http://www.apache.org/licenses/LICENSE-2.0">Apache License, Version 2.0</a>
 
