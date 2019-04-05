@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from sqlalchemy import ForeignKey, UniqueConstraint
+from sqlalchemy import Enum, ForeignKey, UniqueConstraint
 from sqlalchemy.dialects.mysql import INTEGER
 from sqlalchemy.orm import relationship
 
@@ -36,6 +36,11 @@ class HostInterface(Base):
         index = True
     )
     interface_name = Column(u'interfaceName', String(length=10))
+    interface_type = Column(
+        Enum('ethernet', 'power', 'fc', 'mgmt'),
+        nullable=False,
+        server_default='ethernet',
+    )
     mac_address = Column(u'macAddress', String(length=18), unique=True)
     port_id = Column(
         u'PortID',
