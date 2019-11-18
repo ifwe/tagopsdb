@@ -32,16 +32,24 @@ if [ -n "$VIRTUAL_ENV" ] ; then
     deactivate
 fi
 
+if python2.7 --version &>/dev/null ; then
+    PYTHON=python2.7
+    VENV=virtualenv-2.7
+else
+    PYTHON=python
+    VENV=virtualenv
+fi
+
 if ! [[ -d "$SITEOPS_VIRTUALENV" && -f "$SITEOPS_VIRTUALENV/bin/activate" ]] ; then
-    if ! command -v virtualenv ; then
+    if ! command -v "$VENV" ; then
         wget http://pypi.python.org/packages/source/v/virtualenv/virtualenv-1.9.1.tar.gz
         tar -xzf virtualenv-1.9.1.tar.gz
         rm virtualenv-1.9.1.tar.gz
         pushd virtualenv-1.9.1
-        python virtualenv.py "$SITEOPS_VIRTUALENV"
+        "$PYTHON" virtualenv.py "$SITEOPS_VIRTUALENV"
         popd
     else
-        virtualenv "$SITEOPS_VIRTUALENV"
+        "$VENV" "$SITEOPS_VIRTUALENV"
     fi
 
     if [ -d virtualenv-1.9.1 ] ; then
