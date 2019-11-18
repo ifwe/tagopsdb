@@ -14,10 +14,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+set -e
+
 scripts=$( dirname "${BASH_SOURCE-$0}" )
-source $scripts/python-setup.sh
+# shellcheck source=.jenkins/scripts/python-setup.sh
+source "$scripts/python-setup.sh"
 
 for d in tagopsdb tests ; do
-    pylint --rcfile=.pylintrc -f parseable -r n $d >> reports/pylint.log || :
-    flake8 --max-complexity 8 $d >> reports/pyflakes.log || :
+    pylint --rcfile=.pylintrc -f parseable -r n "$d" >> reports/pylint.log || :
+    flake8 --max-complexity 8 "$d" >> reports/pyflakes.log || :
 done

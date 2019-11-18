@@ -14,12 +14,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-scripts=$( dirname "${BASH_SOURCE-$0}" )
-source $scripts/python-setup.sh
+set -e
 
-$WORKSPACE/run_tests.py \
+scripts=$( dirname "${BASH_SOURCE-$0}" )
+# shellcheck source=.jenkins/scripts/python-setup.sh
+source "$scripts/python-setup.sh"
+
+"$WORKSPACE/run_tests.py" \
     -v \
     --junitxml=reports/pyunit.xml \
     --cov-report=xml \
     --cov=tagopsdb \
-    --ignore=$VIRTUAL_ENV ||:
+    --ignore="$VIRTUAL_ENV" ||:
