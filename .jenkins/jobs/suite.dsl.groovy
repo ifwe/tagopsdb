@@ -12,10 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-@GrabResolver('https://artifactory.tagged.com/artifactory/libs-release-local/')
-@Grab('com.tagged.build:jenkins-dsl-common:[0.1.0,)')
-@Grab('com.tagged.build:tagged-fpm-scriptlet:0.0.4')
-
 import com.tagged.build.scm.*
 import com.tagged.build.common.*
 
