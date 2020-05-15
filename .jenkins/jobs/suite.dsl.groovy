@@ -21,7 +21,7 @@ def project = new PythonFPMMatrixProject(
         scm: new StashSCM(project: "tagopsdb", name: "tagopsdb"),
         hipchatRoom: '/dev/null',
         notifyEmail: 'siteops@tagged.com',
-        interpreters:['python26', 'python27'],
+        interpreters:['python27'],
     ]
 )
 
