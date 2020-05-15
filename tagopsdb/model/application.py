@@ -41,6 +41,7 @@ class AppDefinition(Base, HasDummy):
         server_default='1',
     )
     description = Column(String(length=100))
+    doc_url = Column(String(length=512))
     status = Column(
         Enum('active', 'inactive'),
         nullable=False,
