@@ -31,6 +31,7 @@ from .host_deployment import HostDeployment
 from .host_interface import HostInterface
 from .host_ip import HostIp
 from .host_spec import HostSpec
+from .hw_chassis import HwChassis
 from .host import Host
 from .application import AppDefinition
 from .iloms import Ilom

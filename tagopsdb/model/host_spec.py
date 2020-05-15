@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from sqlalchemy import Enum
-from sqlalchemy.dialects.mysql import BOOLEAN, INTEGER, MEDIUMTEXT, SMALLINT
+from sqlalchemy import ForeignKey
+from sqlalchemy.dialects.mysql import INTEGER, MEDIUMTEXT, SMALLINT
 from sqlalchemy.orm import relationship
 
 from .meta import Base, Column, String
@@ -23,14 +23,14 @@ class HostSpec(Base):
     __tablename__ = 'host_specs'
 
     id = Column(u'specID', INTEGER(), primary_key=True)
+    chassis_id = Column(
+        u'chassis_id', INTEGER(), ForeignKey('hw_chassis.chassis_id'),
+    )
     gen = Column(String(length=4))
     memory_size = Column(u'memorySize', INTEGER(display_width=4))
     cores = Column(SMALLINT(display_width=2), nullable=False)
     cpu_speed = Column(u'cpuSpeed', INTEGER(display_width=6))
     disk_size = Column(u'diskSize', INTEGER(display_width=6))
-    vendor = Column(String(length=20))
-    model = Column(String(length=20))
-    control = Column(Enum(u'digi', u'ipmi', u'libvirt', u'rlm', u'vmware'))
-    virtual = Column(BOOLEAN(), nullable=False, server_default='0')
     expansions = Column(MEDIUMTEXT())
     services = relationship('NsServiceMax')
+    hw_chassis = relationship('HwChassis', uselist=False, backref='host_spec')
