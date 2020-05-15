@@ -56,6 +56,7 @@ class Host(Base):
     cab_location = Column(u'cabLocation', String(length=10))
     rack_location = Column(u'rackLocation', INTEGER())
     console_port = Column(u'consolePort', String(length=11))
+    elevation = Column(u'elevation', INTEGER())
     environment_id = Column(
         u'environment_id',
         INTEGER(),
@@ -85,7 +86,6 @@ class Host(Base):
                 label('environment')
 
     __table_args__ = (
-        UniqueConstraint(u'cageLocation', u'cabLocation', u'consolePort'),
-        UniqueConstraint(u'cageLocation', u'cabLocation', u'rackLocation'),
+        UniqueConstraint(u'cageLocation', u'cabLocation', u'elevation'),
         { 'mysql_engine' : 'InnoDB', 'mysql_charset' : 'utf8', },
     )
