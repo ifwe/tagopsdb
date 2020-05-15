@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from sqlalchemy import Enum, ForeignKey
+from sqlalchemy import Enum, ForeignKey, UniqueConstraint
 from sqlalchemy.dialects.mysql import BOOLEAN, INTEGER, SMALLINT, TIMESTAMP, FLOAT
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship, synonym
@@ -82,6 +82,12 @@ class AppDeployment(Base):
     skewed = Column(BOOLEAN(), nullable=False, server_default='0')
 
     environment_obj = relationship('Environment')
+
+    __table_args__ = (
+        UniqueConstraint(
+            u'package_id', u'AppID', u'environment_id', u'realized'
+        ),
+    )
 
     @hybrid_property
     def env(self):

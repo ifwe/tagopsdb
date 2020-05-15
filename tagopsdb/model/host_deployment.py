@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from sqlalchemy import Enum, ForeignKey
+from sqlalchemy import Enum, ForeignKey, UniqueConstraint
 from sqlalchemy.dialects.mysql import INTEGER, TIMESTAMP, FLOAT, TEXT
 from sqlalchemy.sql.expression import func
 from sqlalchemy.orm import relationship, synonym
@@ -69,3 +69,7 @@ class HostDeployment(Base):
     created_at = synonym('realized')
     duration = Column(FLOAT(), nullable=False, server_default="0")
     deploy_result = Column(TEXT())
+
+    __table_args__ = (
+        UniqueConstraint(u'package_id', u'HostID', u'realized'),
+    )
