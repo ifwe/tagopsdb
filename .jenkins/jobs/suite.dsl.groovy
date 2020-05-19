@@ -15,15 +15,15 @@
 import com.tagged.build.scm.*
 import com.tagged.build.common.*
 
-def project = new PythonFPMMatrixProject(
+def project = new Project(
     jobFactory,
     [
         scm: new StashSCM(project: "tagopsdb", name: "tagopsdb"),
-        hipchatRoom: '/dev/null',
         notifyEmail: 'siteops@tagged.com',
-        interpreters:['python27'],
     ]
 )
+
+// TODO: convert these test jobs to docker and centos 7.
 
 // Report pylint warnings and go 'unstable' when over the threshold
 def pylint = project.downstreamJob {
@@ -51,13 +51,22 @@ def pyunit = project.downstreamJob {
 }
 
 // Build RPMs
-def build = project.pythonFPMMatrixJob {
+def build = project.downstreamJob {
     name 'build'
-    logRotator(-1, 50)
+    label 'docker'
+
+    configure { j ->
+        resetScmTriggers(j)
+    }
+
+    triggers {
+        scm('H/5 * * * *')
+    }
 
     steps {
+        shell 'docker_build/run.sh -- --iteration "$BUILD_NUMBER"'
         publishers {
-            archiveArtifacts('*.rpm')
+            archiveArtifacts('docker_build/pkgs/*.rpm')
         }
     }
 }
