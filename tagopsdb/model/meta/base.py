@@ -34,7 +34,7 @@ def init(**config):
     attrs['_initialized'] = True
 
     url = config.pop('url', {})
-    url.setdefault('drivername', 'mysql+oursql')
+    url.setdefault('drivername', 'mysql+mysqldb')
     url.setdefault('database', 'TagOpsDB')
     do_create = config.pop('create', False)
 

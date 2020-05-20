@@ -18,7 +18,7 @@ import unittest2
 class TestConnections(unittest2.TestCase):
 
     def setUp(self):
-        self.protocol = 'mysql+oursql'
+        self.protocol = 'mysql+mysqldb'
         self.db_user = 'testuser'
         self.db_password = 'testpw'
         self.hostname = 'opsdb.tagged.com'
