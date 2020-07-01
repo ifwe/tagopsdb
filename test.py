@@ -99,7 +99,6 @@ if __name__ == '__main__':
                 host='localhost',
                 database='tds_%s' % int(time.time()),
             ),
-            pool_recycle=3600,
             create=True,
         )
 

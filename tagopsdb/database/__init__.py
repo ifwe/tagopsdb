@@ -60,5 +60,4 @@ def init_session(db_user, db_password, **kwargs):
             host=kwargs['hostname'],
             database=kwargs['db_name'],
         ),
-        pool_recycle=3600
     )
