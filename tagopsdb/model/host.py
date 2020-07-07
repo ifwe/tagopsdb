@@ -54,8 +54,6 @@ class Host(Base):
     )
     cage_location = Column(u'cageLocation', INTEGER())
     cab_location = Column(u'cabLocation', String(length=10))
-    rack_location = Column(u'rackLocation', INTEGER())
-    console_port = Column(u'consolePort', String(length=11))
     elevation = Column(u'elevation', INTEGER())
     environment_id = Column(
         u'environment_id',
