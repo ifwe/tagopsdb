@@ -34,7 +34,7 @@ $ pip install -r requirements.txt
 ```
 
 ### Other required packages
-* MySQLdb (possibly called MySQL-python)
+* PyMySQL
 
 ## Testing
 First, install development requirements
