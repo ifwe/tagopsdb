@@ -458,37 +458,9 @@ def find_running_deployment(app_id, environment, hosts=None):
     return None
 
 
-def find_unvalidated_versions(time_delta, environment):
-    """Find the latest deployments that are not validated in a given
-       environment for a given amount of time
-    """
-
-    subq = (Session.query(Package.pkg_name, Package.version,
-                          Package.revision, AppDefinition.app_type,
-                          AppDeployment.environment,
-                          AppDeployment.realized, AppDeployment.user,
-                          AppDeployment.status)
-                   .join(AppDeployment)
-                   .join(AppDefinition)
-                   .filter(AppDeployment.status!='invalidated')
-                   .filter(AppDeployment.environment==environment)
-                   .order_by(AppDeployment.realized.desc(), AppDeployment.id.desc())
-                   .subquery(name='t_ordered'))
-
-    return (Session.query(subq.c.pkg_name, subq.c.version, subq.c.revision,
-                          subq.c.appType, subq.c.environment,
-                          subq.c.realized, subq.c.user, subq.c.status)
-                   .group_by(subq.c.appType, subq.c.environment,
-                             subq.c.pkg_name)
-                   .having(and_(subq.c.status.like('%complete'),
-                                func.unix_timestamp(subq.c.realized) <
-                                func.unix_timestamp(func.now()) - time_delta))
-                   .all())
-
-
 def find_unvalidated_deployments(environment):
     """Find the latest deployments that are not validated in a given
-       environment (simplified version of find_unvalidated_versions)
+       environment
     """
 
     subq = (Session.query(Package.pkg_name, AppDefinition.app_type,
