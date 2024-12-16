@@ -15,7 +15,6 @@
 import sqlalchemy.orm.exc
 
 from sqlalchemy import func
-from sqlalchemy.orm import aliased
 from sqlalchemy.sql import and_
 
 import tagopsdb.deploy.repo as repo
@@ -459,29 +458,64 @@ def find_running_deployment(app_id, environment, hosts=None):
 
 
 def find_unvalidated_deployments(environment):
-    """Find the latest deployments that are not validated in a given
-       environment
+    """ Within the given environment, find deployments that are the latest and
+        need to be validated.
     """
+    # Make a subquery to find the latest non-invalidated deployments of every
+    # package on every appType in the specified environment, as long as there
+    # is a host of that appType in the specified environment.
+    latest = Session.query(
+        AppDeployment.app_id.label('app_id'),
+        Environment.id.label('environment_id'),
+        Package.pkg_def_id.label('pkg_def_id'),
+        func.max(AppDeployment.realized).label('realized'),
+    ).join(
+        Environment,
+    ).join(
+        Package,
+    ).join(
+        Host,
+        and_(
+            Environment.id == Host.environment_id,
+            AppDeployment.app_id == Host.app_id,
+        ),
+    ).filter(
+        Environment.environment == environment,
+        AppDeployment.status != 'invalidated',
+    ).group_by(
+        AppDeployment.app_id,
+        Environment.id,
+        Package.pkg_def_id,
+    ).subquery(
+        name='t_latest',
+    )
 
-    subq = (Session.query(Package.pkg_name, AppDefinition.app_type,
-                          AppDeployment.environment, AppDeployment.status,
-                          AppDeployment)
-                   .join(AppDeployment)
-                   .join(AppDefinition)
-                   .filter(AppDefinition.status == 'active')
-                   .filter(AppDeployment.status != 'invalidated')
-                   .filter(AppDeployment.environment == environment)
-                   .order_by(AppDeployment.realized.desc(),
-                             AppDeployment.id.desc())
-                   .subquery(name='t_ordered'))
+    # Return information about the deployments found in the subquery.
+    non_validated = Session.query(
+        AppDeployment,
+    ).join(
+        Environment,
+    ).join(
+        Package,
+    ).join(
+        AppDefinition,
+    ).join(
+        latest,
+        and_(
+            # Join on every item of uniqueness from the subquery.
+            # AppDeployment.realized is a unique key and the rest are primary
+            # keys.
+            latest.c.app_id == AppDeployment.app_id,
+            latest.c.realized == AppDeployment.realized,
+            latest.c.environment_id == AppDeployment.environment_id,
+            latest.c.pkg_def_id == Package.pkg_def_id,
+        ),
+    ).filter(
+        Environment.environment == environment,
+        AppDeployment.status.like('%complete'),
+    )
 
-    appdep_alias = aliased(AppDeployment, subq)
-
-    return (Session.query(appdep_alias)
-                   .group_by(subq.c.appType, subq.c.environment,
-                             subq.c.pkg_name)
-                   .having(subq.c.status.like('%complete'))
-                   .all())
+    return non_validated.all()
 
 
 def list_app_deployment_info(package_name, environment, name, version, revision):
