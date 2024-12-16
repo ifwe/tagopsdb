@@ -13,4 +13,4 @@
 # limitations under the License.
 
 # Update this file for version changes
-__version__ = '0.11.0'
+__version__ = '0.11.1'
