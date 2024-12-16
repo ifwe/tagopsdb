@@ -143,33 +143,6 @@ def find_all_app_deployments_by_apptype(package_name, apptype, environment):
             .all())
 
 
-def find_app_deployment(pkg_id, app_ids, environment):
-    """Find specific tier deployment(s) based on package ID and
-       application ID(s)
-    """
-
-    subq = (Session.query(AppDeployment.app_id, AppDefinition.app_type,
-            AppDeployment.id)
-            .join(Package)
-            .join(AppDefinition)
-            .filter(Package.id == pkg_id))
-
-    if app_ids:
-        subq = subq.filter(AppDeployment.app_id.in_(app_ids))
-
-    subq = (subq.filter(AppDeployment.environment == environment)
-            .order_by(AppDeployment.realized.desc(), AppDeployment.id.desc())
-            .subquery(name='t_ordered'))
-
-    return (Session.query(AppDeployment, AppDefinition.app_type,
-            Package)
-            .join(AppDefinition)
-            .join(Package)
-            .join(subq, AppDeployment.id == subq.c.AppDeploymentID)
-            .group_by(subq.c.AppID)
-            .all())
-
-
 def find_app_by_apptype(apptype):
     """Find a given application by app type"""
 
@@ -192,63 +165,6 @@ def find_apptype_by_appid(app_id):
     except sqlalchemy.orm.exc.NoResultFound:
         raise DeployException('No app type with AppID "%s" was found '
                               'in the app_definitions table' % app_id)
-
-
-def find_deployed_version(package_name, environment, version=None,
-                          revision=None, apptypes=None, apptier=False):
-    """Find a given deployed version for a given package in a given
-       environment for all related app types; search for full tier
-       or host only deployment specifically
-    """
-
-    if apptier:
-        subq = (
-            Session.query(
-                Package.pkg_name,
-                Package.version,
-                Package.revision,
-                AppDefinition.app_type,
-                AppDeployment.environment
-            ).join(AppDeployment)
-             .join(AppDefinition)
-             .filter(Package.pkg_name == package_name)
-             .filter(AppDeployment.environment == environment)
-             .filter(AppDeployment.status != 'invalidated'))
-
-        if apptypes is not None:
-            subq = subq.filter(AppDefinition.app_type.in_(apptypes))
-
-        if version is not None:
-            subq = subq.filter(Package.version == version)
-
-        if revision is not None:
-            subq = subq.filter(Package.revision == revision)
-
-        subq = (subq.order_by(AppDeployment.realized.desc(), AppDeployment.id.desc())
-                    .subquery(name='t_ordered'))
-
-        # The actual column name must be used in the subquery
-        # usage below; DB itself should be corrected
-        versions = (Session.query(subq.c.appType,
-                    subq.c.version,
-                    subq.c.revision)
-                    .group_by(subq.c.appType, subq.c.environment)
-                    .all())
-    else:
-        hostsq = (Session.query(Host.hostname, Host.app_id,
-                  Package.version, Package.revision)
-                  .join(AppDefinition)
-                  .join(HostDeployment)
-                  .join(Package)
-                  .filter(Package.pkg_name == package_name)
-                  .filter(Host.environment == environment))
-
-        if apptypes is not None:
-            hostsq = hostsq.filter(AppDefinition.app_type.in_(apptypes))
-
-        versions = (hostsq.all())
-
-    return versions
 
 
 def find_deployment_by_id(dep_id):
@@ -362,17 +278,6 @@ def find_hipchat_rooms_for_app(project, apptypes=None):
                           .all())
 
     return [ x[0] for x in rooms_query ]
-
-
-def find_latest_deployed_version(package_name, environment, apptypes=None,
-                                 apptier=False):
-    """Find the most recent deployed version for a given package
-       in a given environment for all related app types; search
-       for full tier or host only deployment specifically
-    """
-
-    return find_deployed_version(package_name, environment, apptypes=apptypes,
-                                 apptier=apptier)
 
 
 def find_latest_deployment(package_name, app_id, environment):
