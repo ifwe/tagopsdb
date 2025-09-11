@@ -10,7 +10,7 @@ MarkupSafe==0.23
 mccabe==0.2.1
 mock==1.0.1
 pep8==1.4.6
-py==1.4.19
+py==1.10.0
 pyflakes==0.7.3
 pylint==0.28.0
 pyntch==20091028
